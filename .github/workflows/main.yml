@@ -12,6 +12,6 @@ jobs:
       - uses: actions/checkout@v3
       - name: Build the Docker image
         run: |
-          docker login -u goblinmaster -p ${{ secrets.DOCKER_HUB_PASSWORD }}
+          docker login -u Goblinmaster -p ${{ secrets.DOCKER_HUB_PASSWORD }}
           docker buildx create --use
-          docker buildx build .   --push --tag goblinmaster/island:front
+          docker buildx build .   --push --tag Goblinmaster/island:front
