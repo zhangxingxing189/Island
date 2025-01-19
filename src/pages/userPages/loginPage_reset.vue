@@ -105,7 +105,7 @@ async function loginPassword() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-image: url("D:\deep_learning\Items\github\Island\src\assets\16x9_木头码头_蓝色的大海_几只海鸥_站在码头面向大海_像素画风 (3).png");
+  background-image: url("../../assets/background.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
