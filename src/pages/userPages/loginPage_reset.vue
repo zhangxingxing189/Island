@@ -68,7 +68,7 @@ let phoneObj = reactive<phoneType>({
   phone: "",
   code: "",
 });
-const usepassword = ref(false);
+const usepassword = ref(true);
 const hasCode = ref(false);
 let user = ref<usertype>();
 function wait60Seconds() {
