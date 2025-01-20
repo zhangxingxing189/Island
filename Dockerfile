@@ -11,8 +11,8 @@ RUN npm run build
 # production 阶段
 FROM nginx:stable as production-stage
 
-COPY --from=build-stage /app/dist /usr/share/nginx/html
-COPY --from=build-stage /app/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build-stage /app/dist /etc/nginx/html
+COPY --from=build-stage /app/nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80
 
