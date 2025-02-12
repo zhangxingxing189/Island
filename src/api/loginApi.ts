@@ -24,3 +24,7 @@ export function check_security_code(data: {
 }): Promise<usertype> {
   return useAxios.post("/api/check_security_code", data);
 }
+
+export function get_qqlogin_url() {
+  return useAxios.get("/api/login/qq_url");
+}

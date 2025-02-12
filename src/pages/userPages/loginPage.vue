@@ -8,13 +8,15 @@
         v-model:value="passwordObj.username"
       ></a-input>
       <a-input-password
-        class="input"
+        class="input password"
         placeholder="请输入密码"
         v-model:value="passwordObj.password"
       ></a-input-password>
-      <a-button @click="usepassword = !usepassword">切换登录方式</a-button>
+      <a-button @click="usepassword = !usepassword" class="changeWay"
+      >切换登录方式</a-button
+      >
       <a-button class="login" type="primary" @click="loginPassword"
-        >登录</a-button
+      >登录</a-button
       >
     </div>
     <div class="center" v-else>
@@ -32,9 +34,11 @@
         ></a-input-password>
         <a-button class="getphoneButton" type="primary">获取验证码</a-button>
       </div>
-      <a-button @click="usepassword = !usepassword">切换登录方式</a-button>
+      <a-button @click="usepassword = !usepassword" class="changeWay"
+      >切换登录方式</a-button
+      >
       <a-button class="login" type="primary" @click="loginPassword"
-        >登录</a-button
+      >登录</a-button
       >
     </div>
   </div>
@@ -64,7 +68,7 @@ let phoneObj = reactive<phoneType>({
   phone: "",
   code: "",
 });
-const usepassword = ref(false);
+const usepassword = ref(true);
 const hasCode = ref(false);
 let user = ref<usertype>();
 function wait60Seconds() {
@@ -110,49 +114,42 @@ async function loginPassword() {
 }
 .center {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.32);
+  position: relative;
+  background: rgba(255, 255, 255, 0.42);
   border: rgba(38, 234, 234, 0.44) 3px solid;
-  width: 30vw;
-  height: 50vh;
-  padding: 20px;
-  .input {
-    position: relative;
-    margin-top: 15px;
-    height: 6vh;
-    width: 30vw;
-    margin-left: 10px;
-    margin-right: 10px;
-    max-width: 30vw;
-    min-width: 30vw;
+  border-radius: 15px;
+  width: 400px;
+  height: 300px;
+  .title {
+    position: absolute;
+    font-size: 2em;
+    top: 30px;
   }
-  .login {
-    position: relative;
-    margin-top: 10px;
-    height: 6vh;
-    width: 10vw;
-    min-width: 10vw;
-    max-width: 10vw;
+  .input {
+    width: 80%;
   }
   .phonecheckDiv {
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    .phonecheck {
-      position: relative;
-      width: 25vw;
-      height: 6vh;
-      margin-top: 15px;
-    }
-    .getphoneButton {
-      position: relative;
-      height: 6vh;
-      width: 5vw;
-      margin-top: 15px;
-    }
+    width: 80%;
+    margin-top: 10px;
+  }
+  .login {
+    position: absolute;
+    bottom: 0;
+    margin-bottom: 30px;
+  }
+  .changeWay {
+    position: absolute;
+    bottom: 0;
+    margin-bottom: 80px;
+    background: rgba(255, 255, 255, 0);
+    border: 0;
+  }
+  .password {
+    margin-top: 10px;
   }
 }
 </style>

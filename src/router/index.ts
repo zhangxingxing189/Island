@@ -5,6 +5,12 @@ const routes: Array<RouteRecordRaw> = [
     path: "/",
     name: "homePage",
     component: () => import("../pages/home/homePage.vue"),
+    // redirect: "/login",
+  },
+  {
+    path: "/login",
+    name: "login",
+    component: () => import("../pages/userPages/loginPage_reset.vue"),
   },
 ];
 
