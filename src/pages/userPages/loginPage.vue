@@ -13,10 +13,10 @@
         v-model:value="passwordObj.password"
       ></a-input-password>
       <a-button @click="usepassword = !usepassword" class="changeWay"
-      >切换登录方式</a-button
+        >切换登录方式</a-button
       >
       <a-button class="login" type="primary" @click="loginPassword"
-      >登录</a-button
+        >登录</a-button
       >
     </div>
     <div class="center" v-else>
@@ -35,10 +35,10 @@
         <a-button class="getphoneButton" type="primary">获取验证码</a-button>
       </div>
       <a-button @click="usepassword = !usepassword" class="changeWay"
-      >切换登录方式</a-button
+        >切换登录方式</a-button
       >
       <a-button class="login" type="primary" @click="loginPassword"
-      >登录</a-button
+        >登录</a-button
       >
     </div>
   </div>

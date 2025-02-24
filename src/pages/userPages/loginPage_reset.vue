@@ -1,7 +1,12 @@
 <template>
   <div id="login-page">
     <div class="center">
-      <img src="@/assets/QQ.png" alt="QQ登录" @click="QQLogin" class="image" />
+      <img
+        src="../../assets/logo.png"
+        alt="QQ登录"
+        @click="QQLogin"
+        class="image"
+      />
     </div>
   </div>
 </template>
