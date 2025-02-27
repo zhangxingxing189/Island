@@ -10,13 +10,13 @@ export interface Island {
   y: number;
 }
 export interface Point {
-  id: string;
+  id: number;
   x: number;
   y: number;
 }
 export interface IslandType {
   islandPosition: Point[];
-  islandMsg: Record<string, Island>;
+  islandMsg: Record<number, Island>;
 }
 export interface Response {
   /**
@@ -37,16 +37,16 @@ export interface List {
   yPoint: number;
 }
 export async function getIslandMessages() {
-  const res = await axios.get("/api/island"); // 指定响应类型为 Response
+  let res = await axios.get("/api/island"); // 指定响应类型为 Response
+  // console.log(res.data.data.list);
   const islands: IslandType = {
     islandPosition: [],
     islandMsg: {},
   };
-
   // 遍历 list 数据
-  res.data.list.forEach((item) => {
+  res.data.data.list.forEach((item) => {
     // 1. 转换每个 list 项为 Island 并存入 islandMsg
-    const islandKey = item.name; // 假设 name 是唯一键
+    const islandKey = item.id; // 假设 name 是唯一键
     islands.islandMsg[islandKey] = {
       imageUrl: item.path, // 对应 list.path -> Island.imageUrl
       islandName: item.name, // 对应 list.name -> Island.islandName
@@ -58,7 +58,7 @@ export async function getIslandMessages() {
 
     // 2. 收集坐标到 islandPosition
     islands.islandPosition.push({
-      id: item.id.toString(), // 确保 id 是字符串
+      id: item.id, // 确保 id 是字符串
       x: item.xPoint,
       y: item.yPoint,
     });

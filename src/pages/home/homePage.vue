@@ -8,9 +8,13 @@ import { IslandType } from "@/api/islandApi";
 import { getIslandMessages } from "@/api/islandApi";
 import { message } from "ant-design-vue";
 import router from "@/router";
-import { onUnmounted } from "vue";
+import { onMounted, onUnmounted } from "vue";
 let module;
-let res;
+import { useParentStore } from "@/stores/getIslands";
+
+let res = useParentStore();
+// console.log(resData.resData.islandMsg[342284004096]); // 直接访问数据
+
 function intoIsland(islandName: string) {
   router.push({
     name: "island",
@@ -19,12 +23,10 @@ function intoIsland(islandName: string) {
     },
   });
 }
-res = await getIslandMessages();
-
 class Scene extends Phaser.Scene {
   tiles = [0, 1];
-  mapHeight = 2; // 每个地图块的高度（以瓦片为单位）
-  mapWidth = 2; // 每个地图块的宽度（以瓦片为单位）
+  mapHeight = 4; // 每个地图块的高度（以瓦片为单位）
+  mapWidth = 4; // 每个地图块的宽度（以瓦片为单位）
   tileWidth = 400;
   tileHeight = 400;
   maps = []; // 存储所有生成的地图块
@@ -59,12 +61,15 @@ class Scene extends Phaser.Scene {
       frameHeight: 96, // 单帧高度
     });
     this.load.atlas("ui", "/images/ui.png", "/images/ui.json");
-    //岛屿初始化
-    try {
+
+    // 岛屿初始化
+    if (res.resData) {
+      this.Islands = res.resData;
+    } else {
       this.Islands = {
-        islandPosition: [{ id: "0", x: -0.212, y: -0.232 }],
+        islandPosition: [{ id: 0, x: -0.212, y: -0.232 }],
         islandMsg: {
-          "0": {
+          0: {
             imageUrl: "/images/island1.png",
             x: -0.212,
             y: -0.232,
@@ -74,32 +79,27 @@ class Scene extends Phaser.Scene {
           },
         },
       };
-      for (let key in this.Islands.islandMsg) {
-        console.log(key);
-        this.load.image(
-          this.Islands.islandMsg[key].islandName,
-          this.Islands.islandMsg[key].imageUrl
-        );
-        console.log("yes");
-      }
-      this.IslandsPoint = this.Islands.islandPosition.map((island) => {
-        let x, y;
-        if (island.y < 0) {
-          y = -Math.ceil(-island.y);
-        } else {
-          y = Math.ceil(island.y);
-        }
-        if (island.x < 0) {
-          x = -Math.ceil(-island.x);
-        } else {
-          x = Math.ceil(island.x);
-        }
-        return { id: island.id, x: x, y: y };
-      });
-    } catch (e) {
-      message.error("加载失败");
     }
-    this.load.start();
+    for (let key in this.Islands.islandMsg) {
+      this.load.image(
+        this.Islands.islandMsg[key].islandName,
+        this.Islands.islandMsg[key].imageUrl
+      );
+    }
+    this.IslandsPoint = this.Islands.islandPosition.map((island) => {
+      let x, y;
+      if (island.y < 0) {
+        y = -Math.ceil(-island.y);
+      } else {
+        y = Math.ceil(island.y);
+      }
+      if (island.x < 0) {
+        x = -Math.ceil(-island.x);
+      } else {
+        x = Math.ceil(island.x);
+      }
+      return { id: island.id, x: x, y: y };
+    });
   }
 
   create() {
@@ -138,28 +138,16 @@ class Scene extends Phaser.Scene {
     this.PlayerMove();
     // 检查是否需要生成新地图
     this.checkAndGenerateMaps();
-    // console.log(this.NowPoint);
     this.NowPoint = {
       X: this.cameras.main.scrollX,
       Y: this.cameras.main.scrollY,
     };
-    // this.updateCameraBounds();
-    console.log(
-      "x:",
-      this.NowPoint.x,
-      "y:",
-      this.NowPoint.y,
-      "width:",
-      window.innerWidth,
-      "height:",
-      window.innerHeight
-    );
+    this.updateCameraBounds();
   }
   generateMap(offsetX, offsetY) {
     if (this.isMapLoaded(offsetX, offsetY)) {
       return;
     }
-    console.log(offsetX, offsetY);
     const mapData = [];
     for (let y = 0; y < this.mapHeight; y++) {
       const row = [];
@@ -184,20 +172,15 @@ class Scene extends Phaser.Scene {
     layer.setVisible(true);
     this.maps.push({ map, layer, offsetX, offsetY });
     this.markMapAsLoaded(offsetX, offsetY);
-    let ID;
-    for (let islandsPointElement of this.IslandsPoint) {
-      if (
-        islandsPointElement.x === offsetX &&
-        islandsPointElement.y === offsetY
-      ) {
-        ID = islandsPointElement.id;
-        console.log(ID);
-        break;
+    let ID: number;
+    // console.log(typeof this.IslandsPoint);
+    this.IslandsPoint.forEach((item) => {
+      if (item.x === offsetX && item.y === offsetY) {
+        ID = item.id;
       }
-    }
+    });
     if (ID != null) {
       let islandMsg = this.Islands.islandMsg[ID];
-      // console.log(islandMsg.imageUrl);
       let image = this.add.image(
         islandMsg.x,
         islandMsg.y,
@@ -234,7 +217,7 @@ class Scene extends Phaser.Scene {
       top: minY,
       bottom: maxY,
     };
-    console.log(this.cameraBounds.left, this.cameraBounds.top);
+    // console.log(this.cameraBounds.left, this.cameraBounds.top);
     this.cameras.main.setBounds(
       this.cameraBounds.left,
       this.cameraBounds.top,
