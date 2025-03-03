@@ -11,7 +11,7 @@
       </div>
       <div class="stats">
         <button class="like-btn" @click.stop="handleLike">
-          <i class="icon-like"></i>点赞(图标) {{ data.likes }}
+          <i class="icon-like"></i>点赞 <i class="iconfont icon-dianzan"></i> {{ data.likes }}
         </button>
         <span class="comments">
           <i class="icon-comment"></i> 观看数{{ data.comments }}
