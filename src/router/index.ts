@@ -38,6 +38,11 @@ const routes: Array<RouteRecordRaw> = [
     name: "create",
     component: () => import("../pages/blogPages/SaltAuthorRecommend.vue"),
   },
+  {
+    path:"/publish",
+    name:"publish",
+    component:()=>import("../pages/blogPages/SaltAuthorRecommend.vue")
+  }
 ];
 
 const router = createRouter({

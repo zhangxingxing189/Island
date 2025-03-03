@@ -15,6 +15,11 @@
         />
         <button class="icon-search-btn iconfont icon-sousuo"></button>
       </div>
+      <!-- 新增发布按钮 -->
+      <div class="publish-btn" @click="handlePublishClick">
+        <i class="iconfont icon-jurassic_edit-user"></i>
+        <p>发布</p>
+      </div>
       <div class="user-info">
         <a-avatar
             :src="currentUser.avatar"
@@ -71,11 +76,6 @@
         </section>
       </div>
 
-      <!-- 右侧创作中心 -->
-      <div class="right-sidebar">
-        <creation-center @create="handleCreate" />
-        <salt-author-recommend :authors="saltAuthors" />
-      </div>
     </div>
   </div>
 </template>
@@ -171,7 +171,10 @@ const currentUser = computed(() => userStore.currentUser);
 const handleLike = (item: ContentItem) => {
   console.log("Like item:", item.id);
 };
-
+//发布跳转
+const handlePublishClick = () => {
+  router.push('/publish');
+};
 // 创作中心操作
 const handleCreate = (type: CreateType) => {
   router.push(`/creation/${type}`);
@@ -215,7 +218,7 @@ onMounted(async () => {
 
 .nav-bar {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr auto auto;
   align-items: center;
   gap: 24px;
   height: 64px;
@@ -273,6 +276,36 @@ onMounted(async () => {
   box-shadow: 0 0 0 1px var(--primary-color);
 }
 
+.publish-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  cursor: pointer;
+  transition: all 0.3s;
+
+  &:hover {
+    color: var(--primary-color);
+
+    i {
+      transform: scale(1.1);
+    }
+  }
+
+  i {
+    font-size: 22px;
+    margin-bottom: 1px;
+    transition: transform 0.3s;
+  }
+
+  p {
+    font-size: 10px;
+    line-height: 1;
+    transform: translateY(-1px);
+    margin: 0;
+  }
+}
 
 
 
