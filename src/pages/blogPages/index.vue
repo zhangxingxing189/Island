@@ -7,20 +7,19 @@
       </div>
       <div class="search-box">
         <input
-          type="text"
-          placeholder="请输入搜索内容"
-          v-model="searchText"
-          @input="handleSearch"
+            type="text"
+            placeholder="请输入搜索内容"
+            v-model="searchText"
+            @input="handleSearch"
+            class="search-input"
         />
-        <button class="search-btn">
-          <i class="icon-search">搜索</i>
-        </button>
+        <button class="icon-search-btn iconfont icon-sousuo"></button>
       </div>
       <div class="user-info">
         <a-avatar
-          :src="currentUser.avatar"
-          :user="currentUser"
-          @click="navigateToPersonalCenter"
+            :src="currentUser.avatar"
+            :user="currentUser"
+            @click="navigateToPersonalCenter"
         />
       </div>
     </header>
@@ -31,10 +30,10 @@
         <!-- 选项卡导航 -->
         <div class="tab-nav">
           <button
-            v-for="tab in tabs"
-            :key="tab.id"
-            :class="['tab-item', { active: activeTab === tab.id }]"
-            @click="activeTab = tab.id"
+              v-for="tab in tabs"
+              :key="tab.id"
+              :class="['tab-item', { active: activeTab === tab.id }]"
+              @click="activeTab = tab.id"
           >
             {{ tab.title }}
           </button>
@@ -46,10 +45,10 @@
           <template v-if="activeTab === 'follow'">
             <h3 class="section-title">关注动态</h3>
             <content-card
-              v-for="item in followList"
-              :key="item.id"
-              :data="item"
-              @like="handleLike"
+                v-for="item in followList"
+                :key="item.id"
+                :data="item"
+                @like="handleLike"
             />
           </template>
 
@@ -57,10 +56,10 @@
           <template v-if="activeTab === 'recommend'">
             <h3 class="section-title">热门推荐</h3>
             <content-card
-              v-for="item in recommendList"
-              :key="item.id"
-              :data="item"
-              @like="handleLike"
+                v-for="item in recommendList"
+                :key="item.id"
+                :data="item"
+                @like="handleLike"
             />
           </template>
 
@@ -93,6 +92,7 @@ import CreationCenter from "./CreationCenter.vue";
 import SaltAuthorRecommend from "./SaltAuthorRecommend.vue";
 import { HotItem, ContentItem, CreateType } from "./blogInterface";
 import { login } from "@/pages/home/UIFunction";
+import '@/assets/font/iconfont.css';
 const router = useRouter();
 const route = useRoute();
 
@@ -237,40 +237,45 @@ onMounted(async () => {
 }
 
 .search-box {
+  position: relative;
   max-width: 720px;
   margin: 0 auto;
   display: flex;
-  align-items: center;
 }
 
-.search-box input {
+.search-input {
   flex: 1;
   height: 40px;
-  padding: 0 20px;
+  padding: 0 40px 0 20px;
   border: none;
   background: #f6f6f6;
-  border-radius: 24px 0 0 24px;
+  border-radius: 24px;
   font-size: 14px;
-  transition: all 0.3s ease;
+}
+.icon-search-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #8590a6;
+  font-size: 20px;
+  padding: 0 12px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+.icon-search-btn:hover {
+  color: var(--primary-color);
 }
 
 .search-box input:focus {
   box-shadow: 0 0 0 1px var(--primary-color);
 }
 
-.search-box .search-btn {
-  width: 48px;
-  height: 40px;
-  background: var(--primary-color);
-  border: none;
-  border-radius: 0 24px 24px 0;
-  cursor: pointer;
-  transition: background 0.3s;
-}
 
-.search-box .search-btn:hover {
-  background: #006acc; /* 手动计算的较深蓝色 */
-}
+
+
 
 .main-content {
   display: grid;
