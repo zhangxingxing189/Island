@@ -1,4 +1,4 @@
-<template>
+0<template>
   <div id="image-upload">
     <input
       class="input-image"

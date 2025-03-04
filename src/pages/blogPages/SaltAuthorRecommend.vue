@@ -5,13 +5,52 @@
       <div class="form-group">
         <label for="title">标题：</label>
         <input
-          type="text"
-          id="title"
-          v-model="formData.title"
-          placeholder="请输入文章标题"
-          required
+            type="text"
+            id="title"
+            v-model="formData.title"
+            placeholder="请输入文章标题"
+            required
         />
       </div>
+
+      <div class="form-group">
+        <label for="island">所属岛屿：</label>
+        <select
+            id="island"
+            v-model="formData.island"
+            required
+            class="island-select"
+        >
+          <option
+              v-for="island in islandList"
+              :key="island.id"
+              :value="island.name"
+          >
+            {{ island.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>封面图片：</label>
+        <input
+            type="file"
+            accept="image/*"
+            @change="handleCoverUpload"
+            class="cover-upload"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="abstract">摘要：</label>
+        <textarea
+            id="abstract"
+            v-model="formData.abstract"
+            placeholder="请输入文章摘要（可选）"
+            rows="3"
+        ></textarea>
+      </div>
+
 
       <div class="form-group">
         <label for="content">正文：</label>
@@ -30,34 +69,109 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import { useAxios } from "@/api";
+import { getIslandMessages } from "@/api/islandApi";
 
 interface ArticleFormData {
   title: string;
   content: string;
+  abstract?: string;
+  cover?: string;
+  island: string;
 }
 
 const formData = ref<ArticleFormData>({
   title: "",
   content: "",
+  abstract: "",
+  cover: "",
+  island: ""
 });
 
-const handleSubmit = () => {
-  if (!formData.value.title.trim() || !formData.value.content.trim()) {
-    alert("请填写完整内容");
-    return;
+const islandList = ref<any[]>([]);
+
+// 获取岛屿列表
+onMounted(async () => {
+  try {
+    const data = await getIslandMessages();
+    islandList.value = Object.values(data.islandMsg);
+  } catch (error) {
+    console.error("获取岛屿列表失败:", error);
   }
+});
 
-  // 这里可以添加提交到后端的逻辑
-  console.log("提交内容：", formData.value);
-  alert("文章提交成功！");
+// 封面图片上传处理
+const handleCoverUpload = async (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
 
-  // 清空表单
-  formData.value = { title: "", content: "" };
+  if (file) {
+    try {
+      const uploadFormData = new FormData(); // 重命名避免命名冲突
+      uploadFormData.append("file", file);
+
+      const response = await useAxios.post<{
+        data: { url: string } // 添加响应类型定义
+      }>("/api/common/images", uploadFormData, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
+
+      formData.value.cover = response.data.data.url;
+    } catch (error) {
+      console.error("封面上传失败:", error);
+      alert("封面上传失败，请重试");
+    }
+  }
+};
+
+
+// 提交文章
+const handleSubmit = async () => {
+  try {
+    const payload = {
+      ...formData.value,
+      abstract: formData.value.abstract || undefined // 处理可选字段
+    };
+
+    const response = await useAxios.post("/api/article", payload);
+
+    if (response.data.code === 200) {
+      alert("文章提交成功！");
+      // 重置表单
+      formData.value = {
+        title: "",
+        content: "",
+        abstract: "",
+        cover: "",
+        island: ""
+      };
+    } else {
+      throw new Error(response.data.message);
+    }
+  } catch (error) {
+    console.error("提交失败:", error);
+    alert(`提交失败: ${error.message}`);
+  }
 };
 </script>
 
 <style scoped>
+.island-select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+}
+
+.cover-upload {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px dashed #ccc;
+  border-radius: 4px;
+}
 .article-editor {
   max-width: 800px;
   margin: 2rem auto;
