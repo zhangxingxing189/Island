@@ -13,6 +13,7 @@
     "core-js": "^3.8.3",
     "element-plus": "^2.3.8",
     "js-cookie": "^3.0.5",
+    "mavon-editor": "^3.0.1",
     "phaser": "^3.87.0",
     "pinia": "^2.3.0",
     "vue": "^3.2.13",
