@@ -13,7 +13,7 @@ interface Message {
 const STORAGE_KEY = "chat_history_v1";
 const API_URL = "http://10.61.28.40:8080/api/ai/chat";
 
-const isfold = ref(false);
+const isFold = ref(false);
 const value = ref("");
 const history = ref<Message[]>([]);
 const sseEventSource = ref<EventSource | null>(null);
@@ -104,7 +104,7 @@ const handleStreamResponse = (question: string) => {
 
 // 提交处理（修改后）
 const handleSubmit = async () => {
-  if (!value.value.trim() || history.value.some((m) => m.streaming)) return;
+  if (!value.value.trim() || history.value.some((m) => m.streaming)) return; //非空和非忙
 
   // 添加用户消息
   const userMsg: Message = {
@@ -146,7 +146,7 @@ const scrollToBottom = () => {
 
 // 关闭聊天
 const closeChat = () => {
-  isfold.value = false;
+  isFold.value = false;
   saveHistory();
 };
 
@@ -158,10 +158,10 @@ onUnmounted(() => {
 
 <template>
   <div
-    :class="['fold', { unfold: isfold }]"
-    @click="!isfold && (isfold = true)"
+    :class="['fold', { unfold: isFold }]"
+    @click="!isFold && (isFold = true)"
   >
-    <div v-if="isfold" class="close-chat" @click.stop="closeChat">
+    <div v-if="isFold" class="close-chat" @click.stop="closeChat">
       <CloseOutlined />
     </div>
 
@@ -190,7 +190,7 @@ onUnmounted(() => {
       </transition-group>
     </div>
 
-    <div v-if="isfold" class="input-container">
+    <div v-if="isFold" class="input-container">
       <a-textarea
         v-model:value="value"
         class="input"

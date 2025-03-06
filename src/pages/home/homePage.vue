@@ -13,13 +13,12 @@ let module;
 import { useParentStore } from "@/stores/getIslands";
 
 let res = useParentStore();
-// console.log(resData.resData.islandMsg[342284004096]); // 直接访问数据
-
 function intoIsland(islandName: string) {
   router.push({
     name: "island",
     query: {
       islandName: islandName,
+      form: "home",
     },
   });
 }
@@ -41,7 +40,7 @@ class Scene extends Phaser.Scene {
   NowPoint;
   uiLayer;
   uiPadding = { x: 20, y: 20 };
-  uiList = ["login", "map"];
+  uiList = ["login", "map"]; //uiList
   VectorX = 0;
   VectorY = 0;
   VectorXLast = 0;
@@ -67,9 +66,9 @@ class Scene extends Phaser.Scene {
       this.Islands = res.resData;
     } else {
       this.Islands = {
-        islandPosition: [{ id: 0, x: -0.212, y: -0.232 }],
+        islandPosition: [{ id: "0", x: -0.212, y: -0.232 }],
         islandMsg: {
-          0: {
+          "0": {
             imageUrl: "/images/island1.png",
             x: -0.212,
             y: -0.232,
@@ -130,7 +129,7 @@ class Scene extends Phaser.Scene {
     this.PlayerAnim();
 
     // 添加鼠标滚轮缩放功能
-    this.cameraZoom(); //待修复
+    // this.cameraZoom(); //待修复
     // this.add.image(0, 0, "logo");
   }
 
@@ -172,25 +171,27 @@ class Scene extends Phaser.Scene {
     layer.setVisible(true);
     this.maps.push({ map, layer, offsetX, offsetY });
     this.markMapAsLoaded(offsetX, offsetY);
-    let ID: number;
+    let ID = [];
     // console.log(typeof this.IslandsPoint);
     this.IslandsPoint.forEach((item) => {
       if (item.x === offsetX && item.y === offsetY) {
-        ID = item.id;
+        ID.push(item.id);
       }
     });
-    if (ID != null) {
-      let islandMsg = this.Islands.islandMsg[ID];
-      let image = this.add.image(
-        islandMsg.x,
-        islandMsg.y,
-        islandMsg.islandName
-      );
-      image.setInteractive();
-      image.setDepth(10);
-      image.on("pointerdown", () => {
-        intoIsland(islandMsg.islandName);
-      });
+    if (ID.length > 0) {
+      for (let i = 0; i < ID.length; i++) {
+        let islandMsg = this.Islands.islandMsg[ID[i]];
+        let image = this.add.image(
+          islandMsg.x,
+          islandMsg.y,
+          islandMsg.islandName
+        );
+        image.setInteractive();
+        image.setDepth(10);
+        image.on("pointerdown", () => {
+          intoIsland(islandMsg.islandName);
+        });
+      }
     }
   }
 

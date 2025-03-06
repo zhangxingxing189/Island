@@ -10,13 +10,13 @@ export interface Island {
   y: number;
 }
 export interface Point {
-  id: number;
+  id: string;
   x: number;
   y: number;
 }
 export interface IslandType {
   islandPosition: Point[];
-  islandMsg: Record<number, Island>;
+  islandMsg: Record<string, Island>;
 }
 export interface Response {
   /**
@@ -27,7 +27,7 @@ export interface Response {
 }
 
 export interface List {
-  id: number;
+  id: string;
   name: string;
   path: string;
   userid: number;

@@ -8,12 +8,12 @@ const routes: Array<RouteRecordRaw> = [
     // redirect: "/",
   },
   {
-    path: "/login",
+    path: "/",
     name: "login",
     component: () => import("../pages/userPages/loginPage_reset.vue"),
   },
   {
-    path: "/", //计算机分岛
+    path: "/island", //计算机分岛
     name: "island",
     component: () => import("../pages/blogPages/index.vue"),
     // props: true,
@@ -39,10 +39,15 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("../pages/blogPages/SaltAuthorRecommend.vue"),
   },
   {
-    path:"/publish",
-    name:"publish",
-    component:()=>import("../pages/blogPages/SaltAuthorRecommend.vue")
-  }
+    path: "/publish",
+    name: "publish",
+    component: () => import("../pages/blogPages/SaltAuthorRecommend.vue"),
+  },
+  {
+    path: "/Blog",
+    name: "Blog",
+    component: () => import("../pages/testVue.vue"),
+  },
 ];
 
 const router = createRouter({
