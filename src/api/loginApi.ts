@@ -25,6 +25,13 @@ export function check_security_code(data: {
   return useAxios.post("/api/check_security_code", data);
 }
 
-export function get_qqlogin_url() {
-  return useAxios.get("/api/login/qq_url");
+export function post_QQCode(code: string) {
+  return useAxios.get("/api/login/qq", {
+    params: {
+      code: code,
+    },
+  });
+}
+export function post_QQtoken(token: string) {
+  return useAxios.post("/api/login/qqtoken", token);
 }
