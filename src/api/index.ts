@@ -2,7 +2,7 @@ import axios from "axios";
 // import {useStore} from "@/stores";
 import { message } from "ant-design-vue";
 export const useAxios = axios.create({
-  baseURL: "http://10.61.28.40:8080",
+  baseURL: "http://118.31.119.216:8080",
 });
 
 export interface baseResponse<T> {

@@ -1,5 +1,10 @@
 <template>
   <div class="article-editor">
+    <!-- 退出按钮 -->
+    <button class="back-btn" @click="handleBack">
+      <img src="@/assets/images/退出.png" alt="退出" class="exit-icon">
+    </button>
+
     <h1 class="editor-title">文章编辑</h1>
     <!-- 标题输入框 -->
     <label>标题</label>
@@ -104,6 +109,13 @@ const handleSubmit = async () => {
     alert(`提交失败: ${error.message}`);
   }
 };
+
+import { useRouter } from "vue-router";
+const router = useRouter();
+
+const handleBack = () => {
+  router.go(-1); // 返回上一页
+};
 </script>
 
 <style scoped>
@@ -132,7 +144,7 @@ const handleSubmit = async () => {
   font-size: 0.9em;
 }
 
-optional-field textarea {
+.optional-field textarea {
   resize: vertical;
   min-height: 80px;
 }
@@ -183,4 +195,30 @@ optional-field textarea {
   background-color: #3182ce;
 }
 
+.back-btn {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+  color: #666;
+  padding: 5px;
+}
+
+.back-btn:hover {
+  color: #333;
+}
+
+.exit-icon {
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
+  transition: opacity 0.3s;
+}
+
+.back-btn:hover .exit-icon {
+  opacity: 0.8;
+}
 </style>
