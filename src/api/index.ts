@@ -1,6 +1,7 @@
 import axios from "axios";
 // import {useStore} from "@/stores";
 import { message } from "ant-design-vue";
+import { useUserStore } from "@/stores/user";
 export const useAxios = axios.create({
   baseURL: "http://118.31.119.216:8080",
 });
@@ -12,7 +13,12 @@ export interface baseResponse<T> {
 }
 
 useAxios.interceptors.request.use((config) => {
-  // const stores = useStore();////////////////////////////////
+  const userStores = useUserStore();
+  if (!userStores.currentUser) {
+    return config;
+  }
+  // 添加 Authorization 请求头
+  config.headers.Authorization = userStores.currentUser.atoken;
   return config;
 });
 

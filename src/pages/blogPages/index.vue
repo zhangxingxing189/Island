@@ -3,15 +3,15 @@
     <!-- 顶部导航栏 -->
     <header class="nav-bar">
       <div class="logo">
-        <img src="@/assets/logo.png" alt="知乎" @click="login()" />
+        <img src="@/assets/logo.png" alt="知乎" @click="login" />
       </div>
       <div class="search-box">
         <input
-            type="text"
-            placeholder="请输入搜索内容"
-            v-model="searchText"
-            @input="handleSearch"
-            class="search-input"
+          type="text"
+          placeholder="请输入搜索内容"
+          v-model="searchText"
+          @input="handleSearch"
+          class="search-input"
         />
         <button class="icon-search-btn iconfont icon-sousuo"></button>
       </div>
@@ -27,9 +27,9 @@
       </div>
       <div class="user-info">
         <a-avatar
-            :src="currentUser.avatar"
-            :user="currentUser"
-            @click="navigateToPersonalCenter"
+          :src="currentUser.avatar"
+          :user="currentUser"
+          @click="navigateToPersonalCenter"
         />
       </div>
     </header>
@@ -40,10 +40,10 @@
         <!-- 选项卡导航 -->
         <div class="tab-nav">
           <button
-              v-for="tab in tabs"
-              :key="tab.id"
-              :class="['tab-item', { active: activeTab === tab.id }]"
-              @click="activeTab = tab.id"
+            v-for="tab in tabs"
+            :key="tab.id"
+            :class="['tab-item', { active: activeTab === tab.id }]"
+            @click="activeTab = tab.id"
           >
             {{ tab.title }}
           </button>
@@ -55,10 +55,10 @@
           <template v-if="activeTab === 'follow'">
             <h3 class="section-title">关注动态</h3>
             <content-card
-                v-for="item in followList"
-                :key="item.id"
-                :data="item"
-                @like="handleLike"
+              v-for="item in followList"
+              :key="item.id"
+              :data="item"
+              @like="handleLike"
             />
           </template>
 
@@ -66,10 +66,10 @@
           <template v-if="activeTab === 'recommend'">
             <h3 class="section-title">热门推荐</h3>
             <content-card
-                v-for="item in recommendList"
-                :key="item.id"
-                :data="item"
-                @like="handleLike"
+              v-for="item in recommendList"
+              :key="item.id"
+              :data="item"
+              @like="handleLike"
             />
           </template>
 
@@ -80,7 +80,6 @@
           </template>
         </section>
       </div>
-
     </div>
   </div>
 </template>
@@ -95,7 +94,7 @@ import ContentCard from "./ContentCard.vue";
 import HotList from "./HotList.vue";
 import { HotItem, ContentItem, CreateType } from "./blogInterface";
 import { login } from "@/pages/home/UIFunction";
-import '@/assets/font/iconfont.css';
+import "@/assets/font/iconfont.css";
 const router = useRouter();
 const route = useRoute();
 
@@ -108,6 +107,7 @@ if (!islandName) {
 const followList = reactive<ContentItem[]>([]);
 const recommendList = reactive<ContentItem[]>([]);
 const hotList = reactive<HotItem[]>([]);
+
 async function fetchData() {
   // 模拟异步数据获取,等后端写好调api获取数据
   followList.push(...mockFollowData);
@@ -118,7 +118,7 @@ async function fetchData() {
 // 模拟数据（使用用户提供的图片链接）
 const mockFollowData: ContentItem[] = [
   {
-    id: 1,
+    id: 2,
     title: "如何评价2023年人工智能发展趋势？",
     cover: "https://api.yimian.xyz/img",
     clickCount: 256,
@@ -131,14 +131,14 @@ const mockFollowData: ContentItem[] = [
 
 const mockRecommendData: ContentItem[] = [
   {
-    id: 2,
-    title: "有哪些值得推荐的编程学习路线？",
+    id: 12,
+    title: "如何评价2023年人工智能发展趋势？",
     cover: "https://api.yimian.xyz/img",
-    clickCount: 189,
-    likes: 980,
-    author: "技术大牛",
+    clickCount: 256,
+    likes: 1500,
+    author: "AI研究员",
     authorID: 1,
-    timestamp: "4小时前",
+    timestamp: "2小时前",
   },
 ];
 
@@ -176,7 +176,7 @@ const handleLike = (item: ContentItem) => {
 };
 //发布跳转
 const handlePublishClick = () => {
-  router.push('/publish');
+  router.push("/publish");
 };
 
 
@@ -312,9 +312,6 @@ onMounted(async () => {
     margin: 0;
   }
 }
-
-
-
 
 .main-content {
   display: grid;

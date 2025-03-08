@@ -8,12 +8,12 @@ const routes: Array<RouteRecordRaw> = [
     // redirect: "/",
   },
   {
-    path: "/",
+    path: "/login",
     name: "login",
     component: () => import("../pages/userPages/loginPage_reset.vue"),
   },
   {
-    path: "/island", //计算机分岛
+    path: "/", //计算机分岛
     name: "island",
     component: () => import("../pages/blogPages/index.vue"),
     // props: true,
