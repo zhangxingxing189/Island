@@ -62,6 +62,11 @@ const routes: Array<RouteRecordRaw> = [
     path:"/quiz/exercise",
     name:"exercise",
     component:()=>import("../pages//quiz/exercise.vue")
+  },
+  {
+    path:"/quiz/question-bank",
+    name : "question-bank",
+    component:()=>import("../pages//quiz/question_bank.vue")
   }
 ];
 
