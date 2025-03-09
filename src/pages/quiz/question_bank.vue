@@ -1,8 +1,30 @@
 <template>
   <div class="min-h-screen bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <div
+        class="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-50 flex items-center px-6"
+    >
+      <div class="flex items-center gap-2">
+        <i class="fas fa-code text-2xl text-blue-600"></i>
+        <span class="text-xl font-bold text-gray-900">CodeMaster</span>
+      </div>
+      <div class="flex-1 text-center text-lg font-medium text-gray-700">
+        算法题库
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="text-sm text-gray-600">张晓明</span>
+        <div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+          <img
+              src="https://public.readdy.ai/ai/img_res/361ec56ddbfdd1c27c213da70ae3088d.jpg"
+              alt="用户头像"
+              class="w-full h-full object-cover"
+          />
+        </div>
+      </div>
+    </div>
     <!-- 左侧固定面板 -->
     <div
-        class="fixed left-0 top-0 w-[400px] h-screen bg-white border-r border-gray-200 p-4 overflow-hidden flex flex-col"
+        class="fixed left-0 top-16 w-[400px] h-[calc(100vh-64px)] bg-white border-r border-gray-200 p-4 overflow-hidden flex flex-col"
     >
       <!-- 搜索区域 -->
       <div class="relative mb-4">
@@ -16,7 +38,6 @@
             class="w-full pl-10 pr-4 py-2 rounded-lg border-none bg-gray-100 focus:ring-2 focus:ring-blue-500 text-sm"
         />
       </div>
-
       <!-- 搜索历史 -->
       <div v-if="searchHistory.length > 0" class="mb-4">
         <div class="text-sm text-gray-500 mb-2">搜索历史</div>
@@ -31,7 +52,6 @@
           </span>
         </div>
       </div>
-
       <!-- PK匹配按钮 -->
       <button
           @click="startPKMatch"
@@ -40,7 +60,6 @@
         <i class="fas fa-gamepad"></i>
         <span>开始 PK 匹配</span>
       </button>
-
       <!-- 题目列表 -->
       <div class="flex-1 overflow-y-auto custom-scrollbar">
         <div
@@ -71,9 +90,8 @@
         </div>
       </div>
     </div>
-
     <!-- 右侧内容区 -->
-    <div class="ml-[400px] p-8">
+    <div class="ml-[400px] pt-24 px-8 pb-8">
       <div v-if="selectedProblem" class="max-w-4xl mx-auto">
         <!-- 题目头部 -->
         <div class="mb-8">
@@ -91,7 +109,6 @@
             <span>通过率：{{ selectedProblem.passRate }}</span>
           </div>
         </div>
-
         <!-- 题目内容 -->
         <div class="bg-white rounded-lg p-6 shadow-sm mb-6">
           <div class="prose max-w-none">
@@ -118,7 +135,6 @@
             </div>
           </div>
         </div>
-
         <!-- 代码编辑区 -->
         <div class="bg-white rounded-lg p-6 shadow-sm mb-6">
           <div class="mb-4">
@@ -164,7 +180,6 @@
         请选择一道题目开始刷题
       </div>
     </div>
-
     <!-- PK匹配弹窗 -->
     <div
         v-if="showPKModal"
@@ -191,7 +206,6 @@
 
 <script lang="ts" setup>
 import { ref, computed } from "vue";
-
 const searchQuery = ref("");
 const searchHistory = ref(["二叉树遍历", "动态规划", "链表反转"]);
 const selectedProblem = ref<any>(null);
@@ -199,9 +213,7 @@ const showPKModal = ref(false);
 const matchingTime = ref(0);
 const selectedLanguage = ref("JavaScript");
 const code = ref("");
-
 const languages = ["JavaScript", "Python", "Java", "C++"];
-
 const problems = ref([
   {
     id: 1001,
@@ -240,7 +252,6 @@ const problems = ref([
     sampleOutput: '"bab"',
   },
 ]);
-
 const filteredProblems = computed(() => {
   if (!searchQuery.value) return problems.value;
   return problems.value.filter(
@@ -249,7 +260,6 @@ const filteredProblems = computed(() => {
           p.id.toString().includes(searchQuery.value),
   );
 });
-
 const getDifficultyClass = (difficulty: string) => {
   switch (difficulty) {
     case "简单":
@@ -262,17 +272,13 @@ const getDifficultyClass = (difficulty: string) => {
       return "bg-gray-100 text-gray-600";
   }
 };
-
 const selectProblem = (problem: any) => {
   selectedProblem.value = problem;
 };
-
 const applySearch = (term: string) => {
   searchQuery.value = term;
 };
-
 let matchingInterval: number;
-
 const startPKMatch = () => {
   showPKModal.value = true;
   matchingTime.value = 0;
@@ -280,21 +286,17 @@ const startPKMatch = () => {
     matchingTime.value++;
   }, 1000);
 };
-
 const cancelPKMatch = () => {
   showPKModal.value = false;
   clearInterval(matchingInterval);
   matchingTime.value = 0;
 };
-
 const submitCode = () => {
   // 提交代码逻辑
 };
-
 const runTest = () => {
   // 运行测试逻辑
 };
-
 const resetCode = () => {
   code.value = "";
 };
@@ -304,20 +306,16 @@ const resetCode = () => {
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
-
 .custom-scrollbar::-webkit-scrollbar-track {
   background: #f1f1f1;
 }
-
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: #888;
   border-radius: 3px;
 }
-
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
-
 .prose {
   max-width: none;
 }
