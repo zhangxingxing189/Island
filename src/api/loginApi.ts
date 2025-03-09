@@ -32,6 +32,9 @@ export function post_QQCode(code: string) {
     },
   });
 }
-export function post_QQtoken(token: string) {
-  return useAxios.post("/api/login/qqtoken", token);
+// export function post_QQtoken(token: string) {
+//   return useAxios.post("/api/login/qq", token);
+// }
+export function refreshAToken(rtokens: string) {
+  return useAxios.post("/api/common/token", rtokens);
 }

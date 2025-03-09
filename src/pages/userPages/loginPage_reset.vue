@@ -1,12 +1,14 @@
 <template>
   <div id="login-page">
     <div class="center">
-      <img
-        src="../../assets/Connect_logo.png"
-        alt="QQ登录"
-        @click="QQLogin"
-        class="image"
-      />QQ登录
+      <div class="right">
+        <img
+          src="../../assets/logo.png"
+          alt="QQ登录"
+          @click="QQLogin"
+          class="image"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -15,7 +17,6 @@ import { useUserStore, User } from "@/stores/user";
 import router from "@/router";
 import { useRoute } from "vue-router";
 import { post_QQCode } from "@/api/loginApi";
-import { onMounted } from "vue";
 let route = useRoute();
 let userStore = useUserStore();
 async function QQ() {
@@ -23,61 +24,23 @@ async function QQ() {
   const code = Array.isArray(route.query.code)
     ? route.query.code[0]
     : route.query.code;
-
-  // if (!code) {
-  //   await router.replace("/login");
-  //   console.log("886");
-  //   return;
-  // }
+  console.log(code);
+  if (!code) {
+    await router.replace("/login");
+    console.log("886");
+    return;
+  }
 
   // API 调用
   if (code !== null) {
     const res = await post_QQCode(code);
-    console.log(code);
-    console.log(res);
+    if (res.data.code === 200) {
+      console.log(code);
+      console.log(res);
+      await router.replace("/island");
+    }
   }
 }
-// onMounted(async () => {
-//   try {
-//     // 安全处理 code 参数
-//     const code = Array.isArray(route.query.code)
-//       ? route.query.code[0]
-//       : route.query.code;
-//
-//     // if (!code) {
-//     //   await router.replace("/login");
-//     //   console.log("886");
-//     //   return;
-//     // }
-//
-//     // API 调用
-//     const res = await post_QQCode(code);
-//     console.log(res);
-//     // 验证响应数据结构
-//     if (!res?.data?.access_token) {
-//       throw new Error("无效的响应格式");
-//     }
-//
-//     // 正确初始化用户对象
-//     const user = {
-//       atoken: res.data.atoken, // 匹配下划线命名
-//       rtoken: res.data.rtoken,
-//       username: res.data.username || "QQ用户",
-//       avatar: res.data.avatar || "/default-avatar.png",
-//     };
-//
-//     // 存储用户状态
-//     userStore.setCurrentUser(user);
-//
-//     // 安全跳转
-//     // if (isMounted) {
-//     //   router.replace("/island");
-//     // }
-//   } catch (error) {
-//     console.error("QQ登录失败:", error);
-//     router.replace("/login");
-//   }
-// });
 function QQLogin() {
   console.log(
     "https://graph.qq.com/oauth2.0/show?which=Login&display=pc&response_type=code&client_id=102717058&redirect_uri=http://islandlearning.icu/login&state=10086"
@@ -104,18 +67,19 @@ QQ();
 
   .center {
     position: absolute;
-    right: 0;
-    width: 400px;
-    height: 96%;
+    width: 35%;
+    height: 55%;
     background-color: rgba(255, 255, 255, 0.52);
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 0 40px;
-    border-radius: 5px;
+    border-radius: 10px;
 
     .image {
       cursor: pointer;
+      width: 80px;
+      height: 80px;
     }
   }
 }

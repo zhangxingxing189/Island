@@ -13,6 +13,22 @@ export const useUserStore = defineStore("user", {
     isLogin() {
       return this.currentUser !== null;
     },
+    // // 新增刷新Token方法
+    // async refreshToken() {
+    //   const { rtoken } = this.currentUser;
+    //   const response = await axios.post("/auth/refresh", {
+    //     refresh_token: rtoken,
+    //   });
+    //   this.currentUser.atoken = response.data.new_access_token;
+    //   return this.currentUser;
+    // },
+    setAtoken(atoken: string) {
+      this.currentUser.atoken = atoken;
+    },
+    logout() {
+      this.currentUser = null;
+      localStorage.removeItem("user");
+    },
   },
 });
 let user = {
