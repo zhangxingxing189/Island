@@ -64,7 +64,7 @@ const routes: Array<RouteRecordRaw> = [
     component:()=>import("../pages//quiz/exercise.vue")
   },
   {
-    path:"/quiz/question-bank",
+    path:"/quiz/question-bank/:id(\\d+)",
     name : "question-bank",
     component:()=>import("../pages//quiz/question_bank.vue")
   }
