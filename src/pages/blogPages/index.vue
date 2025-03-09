@@ -15,10 +15,15 @@
         />
         <button class="icon-search-btn iconfont icon-sousuo"></button>
       </div>
-      <!-- 新增发布按钮 -->
-      <div class="publish-btn" @click="handlePublishClick">
-        <i class="iconfont icon-jurassic_edit-user"></i>
-        <p>发布</p>
+      <div class="action-buttons">
+        <div class="publish-btn" @click="handlePublishClick" style="margin-right: 20px">
+          <i class="iconfont icon-jurassic_edit-user"></i>
+          <p>发布</p>
+        </div>
+        <div class="publish-btn" @click="handleQuizClick">
+          <i class="iconfont"><img src="@/assets/images/题库.png" alt="题库" style="width: 22px"></i>
+          <p>刷题</p>
+        </div>
       </div>
       <div class="user-info">
         <a-avatar
@@ -87,8 +92,6 @@ import { useUserStore } from "@/stores/user";
 import { useDebounceFn } from "@vueuse/core";
 import ContentCard from "./ContentCard.vue";
 import HotList from "./HotList.vue";
-import CreationCenter from "./CreationCenter.vue";
-import SaltAuthorRecommend from "./SaltAuthorRecommend.vue";
 import { HotItem, ContentItem, CreateType } from "./blogInterface";
 import { login } from "@/pages/home/UIFunction";
 import "@/assets/font/iconfont.css";
@@ -175,16 +178,17 @@ const handleLike = (item: ContentItem) => {
 const handlePublishClick = () => {
   router.push("/publish");
 };
-// 创作中心操作
-const handleCreate = (type: CreateType) => {
-  router.push(`/creation/${type}`);
-};
+
 
 // 跳转到个人中心
 const navigateToPersonalCenter = () => {
   router.push({
     name: "personalCenter",
   });
+};
+//刷题选择界面跳转
+const handleQuizClick = () => {
+  router.push('/quiz');
 };
 // // 添加路由配置
 // router.addRoute({
@@ -217,8 +221,8 @@ onMounted(async () => {
 }
 
 .nav-bar {
-  display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  display: flex;
+  grid-template-columns: auto minmax(100px, 1200px) repeat(3, auto);
   align-items: center;
   gap: 24px;
   height: 64px;
@@ -228,6 +232,7 @@ onMounted(async () => {
   position: sticky;
   top: 0;
   z-index: 1000;
+  justify-content: space-between;
 }
 
 .nav-bar .logo img {
@@ -275,15 +280,16 @@ onMounted(async () => {
 .search-box input:focus {
   box-shadow: 0 0 0 1px var(--primary-color);
 }
-
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* 控制按钮间距 */
+}
 .publish-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: 60px;
   cursor: pointer;
-  transition: all 0.3s;
 
   &:hover {
     color: var(--primary-color);

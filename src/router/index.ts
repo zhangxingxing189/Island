@@ -48,6 +48,26 @@ const routes: Array<RouteRecordRaw> = [
     name: "Blog",
     component: () => import("../pages/testVue.vue"),
   },
+  {
+    path:"/quiz",
+    name:"quiz-select",
+    component:()=>import("../pages//quiz/select.vue")
+  },
+  {
+    path:"/quiz/pk",
+    name:"pk",
+    component:()=>import("../pages//quiz/pk.vue")
+  },
+  {
+    path:"/quiz/exercise",
+    name:"exercise",
+    component:()=>import("../pages//quiz/exercise.vue")
+  },
+  {
+    path:"/quiz/question-bank",
+    name : "question-bank",
+    component:()=>import("../pages//quiz/question_bank.vue")
+  }
 ];
 
 const router = createRouter({
