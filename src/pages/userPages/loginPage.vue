@@ -1,3 +1,4 @@
+npnnpm
 <template>
   <div id="login-page">
     <div class="center" v-if="usepassword">

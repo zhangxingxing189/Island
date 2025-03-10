@@ -2,7 +2,7 @@ import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: "/home",
+    path: "/",
     name: "homePage",
     component: () => import("../pages/home/homePage.vue"),
     // redirect: "/",
@@ -13,61 +13,63 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("../pages/userPages/loginPage_reset.vue"),
   },
   {
-    path: "/", //计算机分岛
+    path: "/island", //计算机分岛
     name: "island",
     component: () => import("../pages/blogPages/index.vue"),
     // props: true,
+    children: [
+      {
+        path: "",
+        name: "mainContent",
+        component: () => import("../pages/blogPages/mainContent.vue"),
+      },
+      {
+        path: "article",
+        name: "article",
+        component: () => import("../pages/blogPages/ArticleDetail.vue"),
+      },
+      {
+        path: "personalCenter",
+        name: "personalCenter",
+        component: () => import("../pages/blogPages/personalCenter.vue"),
+      },
+      {
+        path: "imageUpload",
+        name: "imageUpload",
+        component: () => import("../components/ImageUpload.vue"),
+      },
+      {
+        path: "create",
+        name: "create",
+        component: () => import("../pages/blogPages/SaltAuthorRecommend.vue"),
+      },
+      {
+        path: "publish",
+        name: "publish",
+        component: () => import("../pages/blogPages/SaltAuthorRecommend.vue"),
+      },
+    ],
   },
   {
-    path: "/article",
-    name: "article",
-    component: () => import("../pages/blogPages/ArticleDetail.vue"),
+    path: "/quiz",
+    name: "quiz-select",
+    component: () => import("../pages/quiz/select.vue"),
   },
   {
-    path: "/personalCenter",
-    name: "personalCenter",
-    component: () => import("../pages/blogPages/personalCenter.vue"),
+    path: "/quiz/pk",
+    name: "pk",
+    component: () => import("../pages/quiz/pk.vue"),
   },
   {
-    path: "/imageUpload",
-    name: "imageUpload",
-    component: () => import("../components/ImageUpload.vue"),
+    path: "/quiz/exercise",
+    name: "exercise",
+    component: () => import("../pages/quiz/exercise.vue"),
   },
   {
-    path: "/create",
-    name: "create",
-    component: () => import("../pages/blogPages/SaltAuthorRecommend.vue"),
+    path: "/quiz/question-bank/:id",
+    name: "question-bank",
+    component: () => import("../pages/quiz/question_bank.vue"),
   },
-  {
-    path: "/publish",
-    name: "publish",
-    component: () => import("../pages/blogPages/SaltAuthorRecommend.vue"),
-  },
-  {
-    path: "/Blog",
-    name: "Blog",
-    component: () => import("../pages/testVue.vue"),
-  },
-  {
-    path:"/quiz",
-    name:"quiz-select",
-    component:()=>import("../pages//quiz/select.vue")
-  },
-  {
-    path:"/quiz/pk",
-    name:"pk",
-    component:()=>import("../pages//quiz/pk.vue")
-  },
-  {
-    path:"/quiz/exercise",
-    name:"exercise",
-    component:()=>import("../pages//quiz/exercise.vue")
-  },
-  {
-    path:"/quiz/question-bank/:id(\\d+)",
-    name : "question-bank",
-    component:()=>import("../pages//quiz/question_bank.vue")
-  }
 ];
 
 const router = createRouter({
