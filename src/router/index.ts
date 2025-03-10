@@ -53,22 +53,22 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/quiz",
     name: "quiz-select",
-    component: () => import("../pages//quiz/select.vue"),
+    component: () => import("../pages/quiz/select.vue"),
   },
   {
     path: "/quiz/pk",
     name: "pk",
-    component: () => import("../pages//quiz/pk.vue"),
+    component: () => import("../pages/quiz/pk.vue"),
   },
   {
     path: "/quiz/exercise",
     name: "exercise",
-    component: () => import("../pages//quiz/exercise.vue"),
+    component: () => import("../pages/quiz/exercise.vue"),
   },
   {
-    path: "/quiz/question-bank",
+    path: "/quiz/question-bank/:id",
     name: "question-bank",
-    component: () => import("../pages//quiz/question_bank.vue"),
+    component: () => import("../pages/quiz/question_bank.vue"),
   },
 ];
 
