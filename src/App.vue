@@ -5,6 +5,9 @@ import { useParentStore } from "@/stores/getIslands";
 const store = useParentStore();
 const userStore = useUserStore();
 onMounted(async () => {
+<<<<<<< HEAD
+  //await store.fetchData();
+=======
   // await store.fetchData();
   if (userStore.loadUser()) {
     let isAuto = await checkLoginAuto();
@@ -16,6 +19,7 @@ onMounted(async () => {
   } else {
     login();
   }
+>>>>>>> d70cba971dffcca68a6e6d24a4fb22a9b2694735
 });
 
 import AiChat from "@/components/aiChat.vue";
