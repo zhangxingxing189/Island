@@ -12,10 +12,10 @@
         {{ questionBankName }}
       </div>
       <div class="flex items-center gap-4">
-        <span class="text-sm text-gray-600">张晓明</span>
+        <span class="text-sm text-gray-600">{{ currentUser.username }}</span>
         <div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
           <img
-              src="https://public.readdy.ai/ai/img_res/361ec56ddbfdd1c27c213da70ae3088d.jpg"
+              :src= "currentUser.avatar"
               alt="用户头像"
               class="w-full h-full object-cover"
           />
@@ -88,22 +88,59 @@
           <div class="flex items-center gap-4 mb-4">
             <h1 class="text-2xl font-bold ms-6 mt-5">{{ selectedQuestion.title }}</h1>
             <div
+                class="inline-block bg-gray-100 text-gray-600 mt-5 px-3 py-1 rounded"
+            >
+              {{ getTypeName(selectedQuestion.type) }}
+            </div>
+            <div
                 :class="getDifficultyClass(selectedQuestion.difficulty)"
                 class="mt-5 px-3 py-1 rounded"
             >
               {{ getDifficultName(selectedQuestion.difficulty) }}
             </div>
           </div>
-          <mavon-editor
-              v-model="questionInfo.content"
-              :editable="false"
-              :subfield="false"
-              :toolbarsFlag="false"
-              :boxShadow="false"
-              previewBackground = "#ffffff"
-              defaultOpen="preview"
-              style="min-height: 100px; border: 0; padding: 0;"
-          />
+          <div>
+            <mavon-editor
+                v-model="questionInfo.content"
+                :editable="false"
+                :subfield="false"
+                :toolbarsFlag="false"
+                :boxShadow="false"
+                previewBackground = "#ffffff"
+                defaultOpen="preview"
+                style="min-height: 10px; border: 0; padding: 0;"
+            />
+          </div>
+          <hr class="mb-8"/>
+<!--          选项-->
+          <div v-if="selectedQuestion.type === 1 || selectedQuestion.type === 2">
+            <div v-for="(option, index) in questionInfo.options" :key="index" class="-my-7 flex items-center">
+              <p class="ml-6 -mt-5">
+                {{ String.fromCharCode(65 + index) + ' .'}}
+              </p>
+              <div>
+                <mavon-editor
+                    v-model="questionInfo.options[index]"
+                    :editable="false"
+                    :subfield="false"
+                    :toolbarsFlag="false"
+                    :boxShadow="false"
+                    previewBackground="#ffffff"
+                    defaultOpen="preview"
+                    style="min-height: 10px; border: 0; padding: 0; margin: 0;"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <br>
+<!--        答案部分-->
+        <div class="bg-white rounded-lg py-1 shadow-sm mb-6">
+          <div class="text-2xl font-bold ml-6 m-5">答案解析</div>
+          <hr/>
+          <div class="text-1xl ml-6 m-5">
+            {{ answerText }}
+          </div>
         </div>
       </div>
     </div>
@@ -136,6 +173,10 @@ import {ref, computed , onMounted, watch} from "vue";
 import { useRoute } from 'vue-router'
 import {get_question, get_question_bank, get_question_list} from "@/api/questionApi";
 import { mavonEditor } from 'mavon-editor'
+import {useUserStore} from "@/stores/user";
+
+const userStore = useUserStore();
+const currentUser = userStore.currentUser;
 
 // 获取路由参数方式
 const route = useRoute()
@@ -229,7 +270,10 @@ const selectQuestion = (question: any) => {
 
 let questionInfo = ref({
   content: "",
+  options: [],
+  answers: [],
 });
+let answerText = ref("");
 
 // 监听题目选择变化，从后端获取题目详情
 watch(selectedQuestion, async (newValue) => {
@@ -237,11 +281,40 @@ watch(selectedQuestion, async (newValue) => {
     try {
       const data = await get_question({question_id: String(newValue.question_id)})
       questionInfo.value = data.data;
+      getAnswerText();
     } catch (error) {
       console.error("获取题目详细信息失败:", error);
     }
   }
 });
+
+const getAnswerText = () => {
+  answerText.value = ""
+  if (selectedQuestion.value.type === 1) {
+    for (let i = 0; i < questionInfo.value.options.length; i++) {
+      if (questionInfo.value.options[i] === questionInfo.value.answers[0]) {
+        console.log("成功");
+        answerText.value = String.fromCharCode(65 + i)
+        return;
+      }
+    }
+  } else if (selectedQuestion.value.type === 2) {
+    let cnt = 0;
+    for (let i = 0; i < questionInfo.value.options.length; i++) {
+      if (questionInfo.value.options[i] === questionInfo.value.answers[cnt]) {
+        answerText.value += String.fromCharCode(65 + i)
+        cnt++;
+        if (cnt >= questionInfo.value.answers.length) {
+          return;
+        }
+      }
+    }
+  } else if (selectedQuestion.value.type === 3) {
+    answerText.value = questionInfo.value.answers.join('，');
+  } else if (selectedQuestion.value.type === 4) {
+    answerText.value = questionInfo.value.answers[0];
+  }
+};
 
 const applySearch = (term: string) => {
   searchQuery.value = term;
