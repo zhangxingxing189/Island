@@ -17,6 +17,7 @@ import { useUserStore, User } from "@/stores/user";
 import router from "@/router";
 import { useRoute } from "vue-router";
 import { post_QQCode } from "@/api/loginApi";
+// import clock from "@/pages/clock.vue";
 let route = useRoute();
 let userStore = useUserStore();
 async function QQ() {
@@ -34,21 +35,25 @@ async function QQ() {
   // API 调用
   if (code !== null) {
     const res = await post_QQCode(code);
-    if (res.data.code === 200) {
-      console.log(code);
+    console.log(res);
+    if (res.code === 20000) {
+      let userInfo: User = {
+        username: res.data.username,
+        avatar: res.data.avatar,
+        atoken: res.data.atoken,
+        rtoken: res.data.rtoken,
+      };
+      userStore.setCurrentUser(userInfo);
+      console.log(code); //调试代码
       console.log(res);
       await router.replace("/island");
     }
   }
 }
 function QQLogin() {
-  console.log(
-    "https://graph.qq.com/oauth2.0/show?which=Login&display=pc&response_type=code&client_id=102717058&redirect_uri=http://islandlearning.icu/login&state=10086"
-  );
   window.open(
     "https://graph.qq.com/oauth2.0/show?which=Login&display=pc&response_type=code&client_id=102717058&redirect_uri=http://islandlearning.icu/login&state=10086",
-    "TencentLogin",
-    "width=450,height=320,menubar=0,scrollbars=1,resizable=1,status=1,titlebar=0,toolbar=0,location=1"
+    "_blank"
   );
 }
 QQ();

@@ -2,8 +2,13 @@
   <div class="personal-homepage">
     <!-- 头部区域 -->
     <header class="header">
-      <div class="cover">
-        <div class="cover-upload">点击上传封面</div>
+      <div class="banner-container">
+        <!--        <div class="cover-upload">点击上传封面</div>-->
+        <img
+          class="adaptive-image"
+          src="https://api.yimian.xyz/img"
+          alt="点击上传封面"
+        />
       </div>
       <div class="profile">
         <div class="avatar-container">
@@ -103,11 +108,12 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive } from "vue";
+import { useUserStore } from "@/stores/user";
 
 // 类型定义
 interface UserInfo {
   avatar: string;
-  nickname: string;
+  username: string;
   ipLocation: string;
   following: number;
   followers: number;
@@ -123,9 +129,10 @@ interface DynamicItem {
 }
 
 // 用户信息
+const user = useUserStore();
 const userInfo = reactive<UserInfo>({
-  avatar: "https://api.yimian.xyz/img",
-  nickname: "开发者",
+  avatar: user.currentUser.avatar,
+  username: user.currentUser.username,
   ipLocation: "东莞",
   following: 234,
   followers: 4567,
@@ -190,14 +197,34 @@ const filteredDynamics = computed(() => {
   margin-bottom: 20px;
 }
 
-.cover {
+/* CSS 实现 */
+.banner-container {
+  /* 容器尺寸示例 (根据实际需求修改) */
+  width: 1200px;
   height: 200px;
-  background: #f0f2f4;
+
+  /* 关键定位属性 */
+  position: relative;
+  overflow: hidden; /* 隐藏溢出部分 */
   display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius);
-  cursor: pointer;
+  justify-content: center; /* 水平居中 */
+  align-items: center; /* 垂直居中 */
+
+  /* 可选装饰 */
+  background: #f0f0f0; /* 加载时的背景色 */
+}
+
+.adaptive-image {
+  /* 自适应核心代码 */
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 关键属性 */
+  object-position: center; /* 聚焦中心区域 */
+
+  /* 兼容旧版浏览器的备选方案 */
+  /* font-family: "object-fit: cover; object-position: center;";  针对 IE/Edge */
+  /*  min-width: 100%;防止窄图留白 */
+  /* min-height: 100%;  防止矮图留白 */
 }
 
 .profile {
@@ -227,6 +254,7 @@ const filteredDynamics = computed(() => {
 }
 
 .ip {
+  margin: 10px;
   color: var(--text-secondary);
   font-size: 14px;
 }

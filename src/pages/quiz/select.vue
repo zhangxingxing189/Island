@@ -1,20 +1,15 @@
 <template>
+  <Head></Head>
   <div class="quiz-container">
     <h2>选择挑战模式</h2>
     <div class="mode-select">
-      <div
-          class="mode-card"
-          @click="selectMode('practice')"
-      >
+      <div class="mode-card" @click="selectMode('practice')">
         <i class="iconfont icon-shu"></i>
         <h3>普通刷题</h3>
         <p>海量题库随时练习</p>
       </div>
 
-      <div
-          class="mode-card"
-          @click="selectMode('pk')"
-      >
+      <div class="mode-card" @click="selectMode('pk')">
         <i class="iconfont icon-shandian1"></i>
         <h3>实时PK</h3>
         <p>与其他用户实时对战</p>
@@ -24,14 +19,15 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
+import { useRouter } from "vue-router";
+import Head from "@/pages/blogPages/index.vue";
 
 const router = useRouter();
 
-const selectMode = (modeType: 'practice' | 'pk') => {
+const selectMode = (modeType: "practice" | "pk") => {
   router.push({
-    path: '/quiz',
-    query: { mode: modeType }
+    path: "/quiz",
+    query: { mode: modeType },
   });
 };
 </script>

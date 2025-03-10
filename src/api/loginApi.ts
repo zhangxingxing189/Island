@@ -1,6 +1,7 @@
 import { useAxios } from "@/api/index";
 
 export interface usertype {
+  //废弃,正在用的是stores里面的
   id: number;
   username: string;
   email: string;
@@ -37,4 +38,14 @@ export function post_QQCode(code: string) {
 // }
 export function refreshAToken(rtokens: string) {
   return useAxios.post("/api/common/token", rtokens);
+}
+export function getUserInfo(id: number) {
+  return useAxios.get("/api/common/user", {
+    params: {
+      user_id: id,
+    },
+  });
+}
+export function checkLoginAuto() {
+  return useAxios.post("/api/login/auto");
 }
