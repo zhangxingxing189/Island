@@ -27,13 +27,14 @@ async function QQ() {
     : route.query.code;
   console.log(code);
   if (!code) {
-    await router.replace("/login");
+    // await router.replace("/login");
     console.log("886");
-    return;
+    // return;
   }
-
+  console.log("yes");
   // API 调用
-  if (code !== null) {
+  if (code !== undefined && code !== null) {
+    console.log("in");
     const res = await post_QQCode(code);
     console.log(res);
     if (res.code === 20000) {
@@ -46,14 +47,13 @@ async function QQ() {
       userStore.setCurrentUser(userInfo);
       console.log(code); //调试代码
       console.log(res);
-      await router.replace("/island");
+      await router.replace("/");
     }
   }
 }
 function QQLogin() {
   window.open(
-    "https://graph.qq.com/oauth2.0/show?which=Login&display=pc&response_type=code&client_id=102717058&redirect_uri=http://islandlearning.icu/login&state=10086",
-    "_blank"
+    "https://graph.qq.com/oauth2.0/show?which=Login&display=pc&response_type=code&client_id=102717058&redirect_uri=http://islandlearning.icu/login&state=10086"
   );
 }
 QQ();

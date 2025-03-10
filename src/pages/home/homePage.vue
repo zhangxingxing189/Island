@@ -17,7 +17,7 @@ function intoIsland(islandName: string) {
   router.push({
     name: "island",
     query: {
-      islandName: islandName,
+      islandId: "50005",
       form: "home",
     },
   });

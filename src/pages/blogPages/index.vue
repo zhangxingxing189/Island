@@ -56,9 +56,9 @@ const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
 const currentUser = userStore.currentUser;
-let islandName = route.query.islandName;
-if (!islandName) {
-  islandName = "island1";
+let islandId = route.query.islandId;
+if (!islandId) {
+  islandId = "50005";
   //默认值
 }
 // 搜索功能
@@ -85,7 +85,12 @@ const navigateToPersonalCenter = () => {
 };
 
 const handleQuizClick = () => {
-  router.push("/quiz");
+  router.push({
+    path: "/quiz",
+    query: {
+      islandId: islandId,
+    },
+  });
 };
 </script>
 

@@ -5,18 +5,17 @@ import { useParentStore } from "@/stores/getIslands";
 const store = useParentStore();
 const userStore = useUserStore();
 onMounted(async () => {
-  //await store.fetchData();
-
-
   // await store.fetchData();
   if (userStore.loadUser()) {
     let isAuto = await checkLoginAuto();
     console.log(isAuto);
     if (isAuto.code !== 20000) {
+      console.log("no20000");
       userStore.logout();
       login();
     }
   } else {
+    console.log("loadFalse");
     login();
   }
 });

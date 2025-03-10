@@ -3,9 +3,9 @@ const path = require("path"); // 新增这行
 module.exports = defineConfig({
   transpileDependencies: true,
   devServer: {
-    host: "0.0.0.0", // 允许外部访问
-    port: 8080, // 确保端口与转发端口一致
-    allowedHosts: "all", // 允许所有 Host 头
+    // host: "0.0.0.0", // 允许外部访问
+    // port: 8080, // 确保端口与转发端口一致
+    // allowedHosts: "all", // 允许所有 Host 头
     proxy: {
       "/images": {
         target: "http://localhost:8000",
