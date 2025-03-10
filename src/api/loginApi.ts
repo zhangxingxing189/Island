@@ -47,5 +47,5 @@ export function getUserInfo(id: number) {
   });
 }
 export function checkLoginAuto() {
-  return useAxios.post("/api/login/auto");
+  return useAxios.get("/api/login/auto");
 }
