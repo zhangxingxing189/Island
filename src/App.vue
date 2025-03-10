@@ -4,7 +4,7 @@ import { onMounted } from "vue";
 import { useParentStore } from "@/stores/getIslands";
 const store = useParentStore();
 onMounted(async () => {
-  // await store.fetchData();
+  //await store.fetchData();
 });
 
 import AiChat from "@/components/aiChat.vue";

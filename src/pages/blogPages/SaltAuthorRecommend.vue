@@ -43,6 +43,7 @@
     <mavon-editor
         v-model="formData.content"
         :toolbars="markdownToolbars"
+        :imgUpload="handleEditorImageUpload"
     />
 
     <!-- 提交按钮 -->
@@ -56,7 +57,9 @@ import { mavonEditor } from 'mavon-editor'
 import "mavon-editor/dist/css/index.css";
 import { useAxios } from "@/api";
 import { getIslandMessages } from "@/api/islandApi";
-
+import { useRouter } from "vue-router";
+import { createArticle, getArticleList } from "@/api/articleApi";
+import { message } from 'ant-design-vue';
 const formData = ref({
   title: "",
   brief: "",
@@ -95,22 +98,47 @@ const handleCoverUpload = async (event) => {
   }
 };
 
-// 提交文章
-const handleSubmit = async () => {
+
+// 添加图片上传处理器
+const handleEditorImageUpload = async (file, insertImage) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
   try {
-    const response = await useAxios.post("/api/article", formData.value);
-    if (response.data.code === 200) {
-      alert("文章提交成功！");
-    } else {
-      throw new Error(response.data.message);
-    }
+    const response = await useAxios.post("/api/common/images", formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    });
+    insertImage(response.data.url);
   } catch (error) {
-    console.error("提交失败:", error);
-    alert(`提交失败: ${error.message}`);
+    console.error("图片上传失败:", error);
   }
 };
 
-import { useRouter } from "vue-router";
+
+// 提交方法
+const handleSubmit = async () => {
+  try {
+    const { data } = await createArticle({
+      title: formData.value.title,
+      content: formData.value.content,
+      cover: formData.value.cover,
+      islandId: formData.value.island
+    });
+
+    if (data.code === 200) {
+      message.success("文章创建成功");
+      router.push(`/article/${data.data.id}`);
+    } else {
+      message.error(data.msg);
+    }
+  } catch (error) {
+    message.error("文章提交失败");
+    console.error("提交错误:", error);
+  }
+};
+
+
+
 const router = useRouter();
 
 const handleBack = () => {

@@ -58,8 +58,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import {ref, computed, onMounted, reactive} from "vue";
 import type { ContentItem } from "./blogInterface";
+import {ArticleListItem, getArticleList} from "@/api/articleApi";
+
 const props = defineProps<{ id: string }>();
 const articleData = ref<ContentItem>();
 
@@ -88,6 +90,31 @@ const formattedContent = computed(() =>
 const handleLike = () => {
   isLiked.value = !isLiked.value;
   // 这里可以添加API调用
+};
+
+// 分页参数
+const pagination = reactive({
+  page: 1,
+  pageSize: 10,
+  total: 0
+});
+
+// 文章列表数据
+const articles = ref<ArticleListItem[]>([]);
+
+// 加载文章列表
+const loadArticles = async () => {
+  try {
+    const { data } = await getArticleList({
+      page: pagination.page,
+      pageSize: pagination.pageSize
+    });
+
+    articles.value = data.list;
+    pagination.total = data.count;
+  } catch (error) {
+    console.error("加载文章失败:", error);
+  }
 };
 
 // 文章内容（保持原始内容，通过computed自动格式化）
