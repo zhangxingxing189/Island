@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-gray-50" v-if="currentUser">
     <!-- 顶部导航栏 -->
     <div
         class="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-50 flex items-center px-6"
@@ -166,6 +166,16 @@
       </div>
     </div>
   </div>
+  <div v-else>
+    <div class="text-center text-2xl font-bold m-96">
+      <h1 class="mb-6 ml-4">
+        加载中...
+      </h1>
+      <div class="animate-spin mb-6">
+        <i class="fas fa-circle-notch text-4xl text-blue-500"></i>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -182,6 +192,8 @@ import router from "@/router";
 
 const userStore = useUserStore();
 const currentUser = userStore.currentUser;
+
+console.log("新版本");
 
 // 获取路由参数方式
 const route = useRoute()
