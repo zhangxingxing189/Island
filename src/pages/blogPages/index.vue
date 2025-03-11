@@ -35,11 +35,7 @@
       </div>
     </div>
     <div class="user-info">
-      <a-avatar
-        :src="currentUser.avatar"
-        :user="currentUser"
-        @click="navigateToPersonalCenter"
-      />
+      <a-avatar :src="currentUser.avatar" @click="navigateToPersonalCenter" />
     </div>
   </header>
   <router-view></router-view>
@@ -56,6 +52,7 @@ const router = useRouter();
 const route = useRoute();
 const userStore = useUserStore();
 const currentUser = userStore.currentUser;
+console.log(currentUser);
 let islandId = route.query.islandId;
 if (!islandId) {
   islandId = "50005";
@@ -72,7 +69,7 @@ const goHome = () => {
   router.push({
     path: "/island",
     query: {
-      islandName: islandName,
+      islandId: islandId,
     },
   });
 };

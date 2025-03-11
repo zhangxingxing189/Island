@@ -2,28 +2,34 @@
 import { RouterView } from "vue-router";
 import { onMounted } from "vue";
 import { useParentStore } from "@/stores/getIslands";
-const store = useParentStore();
-const userStore = useUserStore();
-onMounted(async () => {
-  // await store.fetchData();
-  if (userStore.loadUser()) {
-    let isAuto = await checkLoginAuto();
-    console.log(isAuto);
-    if (isAuto.code !== 20000) {
-      console.log("no20000");
-      userStore.logout();
-      login();
-    }
-  } else {
-    console.log("loadFalse");
-    login();
-  }
-});
-
-import AiChat from "@/components/aiChat.vue";
-import { useUserStore } from "@/stores/user";
+import { User, useUserStore } from "@/stores/user";
 import { checkLoginAuto } from "@/api/loginApi";
 import { login } from "@/pages/home/UIFunction";
+import { useRoute } from "vue-router";
+import router from "@/router";
+const route = useRoute();
+const userStore = useUserStore();
+// onMounted(async () => {
+//   // await store.fetchData();
+// });
+// async function checkLogin() {
+//   if (userStore.isLogin() || userStore.loadUser()) {
+//     let isAuto = await checkLoginAuto();
+//     console.log(isAuto);
+//     if (isAuto.code !== 20000) {
+//       console.log("no20000");
+//       userStore.logout();
+//       login();
+//       // console.log("没有登录,去登录,这里先不跳转");
+//     }
+//   } else {
+//     console.log("loadFalse");
+//     // console.log("没有登录,去登录,这里先不跳转");
+//     login();
+//   }
+// }
+// // checkLogin();
+import AiChat from "@/components/aiChat.vue";
 </script>
 <template>
   <div id="app">
@@ -32,24 +38,3 @@ import { login } from "@/pages/home/UIFunction";
 </template>
 
 <style></style>
-
-<!--<script>-->
-<!--window.difyChatbotConfig = {-->
-<!--  token: "pkwi18XUXamz24r4",-->
-<!--  baseUrl: "http://localhost",-->
-<!--};-->
-<!--</script>-->
-<!--<script-->
-<!--  src="http://localhost/embed.min.js"-->
-<!--  id="pkwi18XUXamz24r4"-->
-<!--  defer-->
-<!--&gt;</script>-->
-<!--<style>-->
-<!--#dify-chatbot-bubble-button {-->
-<!--  background-color: #1c64f2 !important;-->
-<!--}-->
-<!--#dify-chatbot-bubble-window {-->
-<!--  width: 24rem !important;-->
-<!--  height: 40rem !important;-->
-<!--}-->
-<!--</style>-->

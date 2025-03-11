@@ -14,8 +14,9 @@ export const useUserStore = defineStore("user", {
     currentUser: null as User | null, // 初始化时设为 null
   }),
   actions: {
-    setCurrentUser(user: User) {
+    async setCurrentUser(user: User) {
       localStorage.setItem("user", JSON.stringify(user));
+      console.log(user);
       this.currentUser = user;
     },
     isLogin() {
@@ -31,11 +32,12 @@ export const useUserStore = defineStore("user", {
       localStorage.removeItem("user");
     },
     loadUser() {
+      console.log("loading");
       const userData = localStorage.getItem("user");
       if (userData) {
         try {
-          const parsedUser = JSON.parse(userData) as User;
-          this.setCurrentUser(parsedUser);
+          this.currentUser = JSON.parse(userData) as User;
+          console.log(this.currentUser);
         } catch (error) {
           console.error("用户数据解析失败", error);
           localStorage.removeItem("user"); // 清除无效数据
@@ -43,6 +45,9 @@ export const useUserStore = defineStore("user", {
           return false;
         }
         return true;
+      } else {
+        console.log("no userData in localStorage");
+        return false;
       }
     },
   },

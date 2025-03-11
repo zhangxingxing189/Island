@@ -18,8 +18,13 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("../pages/blogPages/index.vue"),
     // props: true,
     children: [
+      // 添加默认重定向
       {
         path: "",
+        redirect: { name: "mainContent" },
+      },
+      {
+        path: "mainContent",
         name: "mainContent",
         component: () => import("../pages/blogPages/mainContent.vue"),
       },
@@ -74,7 +79,7 @@ const routes: Array<RouteRecordRaw> = [
     path: "/quiz/list/:id",
     name: "question-bank-list",
     component: () => import("../pages/quiz/list.vue"),
-  }
+  },
 ];
 
 const router = createRouter({

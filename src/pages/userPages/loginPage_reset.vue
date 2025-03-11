@@ -22,12 +22,14 @@ let route = useRoute();
 let userStore = useUserStore();
 async function QQ() {
   // 安全处理 code 参数
+  let trueCode = route.query.code;
+  console.log(trueCode);
   const code = Array.isArray(route.query.code)
     ? route.query.code[0]
     : route.query.code;
   console.log(code);
   if (!code) {
-    // await router.replace("/login");
+    await router.replace("/login");
     console.log("886");
     // return;
   }
@@ -44,19 +46,35 @@ async function QQ() {
         atoken: res.data.atoken,
         rtoken: res.data.rtoken,
       };
-      userStore.setCurrentUser(userInfo);
+      userStore.currentUser = userInfo;
+      await userStore.setCurrentUser(userInfo);
       console.log(code); //调试代码
       console.log(res);
-      await router.replace("/");
+      router.push("/");
     }
   }
 }
+function safePageRedirect(url) {
+  try {
+    // 尝试通过修改 location 实现跳转
+    window.location.assign(url);
+  } catch (error) {
+    console.error("跳转失败:", error);
+    // 极少数浏览器可能需要以下方式
+    window.location.replace(url);
+  }
+}
+
 function QQLogin() {
-  window.open(
-    "https://graph.qq.com/oauth2.0/show?which=Login&display=pc&response_type=code&client_id=102717058&redirect_uri=http://islandlearning.icu/login&state=10086"
-  );
+  const url =
+    "https://graph.qq.com/oauth2.0/show?which=Login&display=pc&response_type=code&client_id=102717058&redirect_uri=http://islandlearning.icu/login&state=10086";
+  safePageRedirect(url);
+}
+if (userStore.isLogin()) {
+  router.push("/");
 }
 QQ();
+console.log("loginPage");
 </script>
 <style scoped>
 #login-page {
