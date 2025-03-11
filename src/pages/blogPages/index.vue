@@ -1,44 +1,48 @@
 <template>
-  <header class="nav-bar">
-    <div class="logo">
-      <img
-        class="logo-img"
-        src="@/assets/myLogo.png"
-        alt="Home"
-        @click="goHome"
-      />
-    </div>
-    <div class="search-box">
-      <input
-        type="text"
-        placeholder="请输入搜索内容"
-        v-model="searchText"
-        @input="handleSearch"
-        class="search-input"
-      />
-      <button class="icon-search-btn iconfont icon-sousuo"></button>
-    </div>
-    <div class="action-buttons">
-      <div
-        class="publish-btn"
-        @click="handlePublishClick"
-        style="margin-right: 20px"
-      >
-        <i class="iconfont icon-jurassic_edit-user"></i>
-        <p>发布</p>
+  <div class="app-container">
+    <header class="nav-bar">
+      <div class="logo">
+        <img
+          class="logo-img"
+          src="@/assets/myLogo.png"
+          alt="Home"
+          @click="goHome"
+        />
       </div>
-      <div class="publish-btn" @click="handleQuizClick">
-        <i class="iconfont"
-          ><img src="@/assets/images/题库.png" alt="题库" style="width: 22px"
-        /></i>
-        <p>刷题</p>
+      <div class="search-box">
+        <input
+          type="text"
+          placeholder="请输入搜索内容"
+          v-model="searchText"
+          @input="handleSearch"
+          class="search-input"
+        />
+        <button class="icon-search-btn iconfont icon-sousuo"></button>
       </div>
+      <div class="action-buttons">
+        <div
+          class="publish-btn"
+          @click="handlePublishClick"
+          style="margin-right: 20px"
+        >
+          <i class="iconfont icon-jurassic_edit-user"></i>
+          <p>发布</p>
+        </div>
+        <div class="publish-btn" @click="handleQuizClick">
+          <i class="iconfont"
+            ><img src="@/assets/images/题库.png" alt="题库" style="width: 22px"
+          /></i>
+          <p>刷题</p>
+        </div>
+      </div>
+      <div class="user-info">
+        <a-avatar :src="currentUser.avatar" @click="navigateToPersonalCenter" />
+      </div>
+    </header>
+    <div class="main">
+      <router-view></router-view>
     </div>
-    <div class="user-info">
-      <a-avatar :src="currentUser.avatar" @click="navigateToPersonalCenter" />
-    </div>
-  </header>
-  <router-view></router-view>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -46,7 +50,7 @@ import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import { useDebounceFn } from "@vueuse/core";
-import { login } from "@/pages/home/UIFunction";
+import { checkLogin } from "@/pages/userPages/loginFunction";
 
 const router = useRouter();
 const route = useRoute();
@@ -89,9 +93,25 @@ const handleQuizClick = () => {
     },
   });
 };
+checkLogin();
 </script>
 
 <style scoped>
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+.main {
+  overflow: auto;
+}
+/* 新增容器样式 */
+.app-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 .nav-bar {
   display: flex;
   grid-template-columns: auto minmax(100px, 1200px) repeat(3, auto);

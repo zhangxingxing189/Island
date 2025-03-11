@@ -46,6 +46,12 @@ export function getUserInfo(id: number) {
     },
   });
 }
-export function checkLoginAuto() {
+// 定义 API 响应结构
+interface ApiResponse<T = any> {
+  code: number;
+  message?: string;
+  data: T;
+}
+export function checkLoginAuto(): Promise<ApiResponse<usertype>> {
   return useAxios.get("/api/login/auto");
 }

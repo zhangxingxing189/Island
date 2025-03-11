@@ -14,6 +14,7 @@ import { useParentStore } from "@/stores/getIslands";
 import { useUserStore } from "@/stores/user";
 import { checkLoginAuto } from "@/api/loginApi";
 import { login } from "@/pages/home/UIFunction";
+import { checkLogin } from "@/pages/userPages/loginFunction";
 
 let res = useParentStore();
 function intoIsland(islandName: string) {
@@ -441,22 +442,6 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 let userStore = useUserStore();
-async function checkLogin() {
-  if (userStore.isLogin() || userStore.loadUser()) {
-    let isAuto = await checkLoginAuto();
-    console.log(isAuto);
-    if (isAuto.code !== 20000) {
-      console.log("no20000");
-      userStore.logout();
-      login();
-      // console.log("没有登录,去登录,这里先不跳转");
-    }
-  } else {
-    console.log("loadFalse");
-    // console.log("没有登录,去登录,这里先不跳转");
-    login();
-  }
-}
 checkLogin();
 onUnmounted(() => {
   if (game) {
