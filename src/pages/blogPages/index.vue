@@ -39,24 +39,27 @@
         <a-avatar :src="currentUser.avatar" @click="navigateToPersonalCenter" />
       </div>
     </header>
-    <div class="main">
+    <div class="main" :class="{ 'main-height': isSelectStore }" :key="isSelect">
       <router-view></router-view>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { nextTick, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import { useDebounceFn } from "@vueuse/core";
 import { checkLogin } from "@/pages/userPages/loginFunction";
+import { login } from "@/pages/home/UIFunction";
+import { useLayoutStore } from "@/stores/layoutStore";
 
 const router = useRouter();
 const route = useRoute();
-const userStore = useUserStore();
-const currentUser = userStore.currentUser;
-console.log(currentUser);
+
+const isSelect = ref(true);
+const isSelectStore = useLayoutStore().isSelect;
+
 let islandId = route.query.islandId;
 if (!islandId) {
   islandId = "50005";
@@ -70,6 +73,7 @@ const handleSearch = useDebounceFn((e: Event) => {
 
 // 导航操作
 const goHome = () => {
+  isSelect.value = true;
   router.push({
     path: "/island",
     query: {
@@ -78,22 +82,41 @@ const goHome = () => {
   });
 };
 const handlePublishClick = () => {
+  isSelect.value = true;
   router.push("/island/publish");
 };
 
 const navigateToPersonalCenter = () => {
+  isSelect.value = true;
   router.push("/island/personalCenter");
 };
 
-const handleQuizClick = () => {
-  router.push({
+const handleQuizClick = async () => {
+  isSelect.value = false;
+  await nextTick(); // 等待DOM更新
+
+  await router.push({
     path: "/quiz",
-    query: {
-      islandId: islandId,
-    },
+    query: { islandId: islandId },
   });
 };
-checkLogin();
+const userStore = useUserStore();
+if (userStore.loadUser() || userStore.isLogin()) {
+  // let isAuto = await checkLoginAuto();
+  // console.log(isAuto);
+  // if (isAuto.code !== 20000) {
+  //   console.log("no20000");
+  //   userStore.logout();
+  //   login();
+  //   // console.log("没有登录,去登录,这里先不跳转");
+  // }
+} else {
+  console.log("loadFalse");
+  // console.log("没有登录,去登录,这里先不跳转");
+  login();
+}
+const currentUser = userStore.currentUser;
+console.log(currentUser);
 </script>
 
 <style scoped>
@@ -103,11 +126,12 @@ body {
   margin: 0;
 }
 .main {
-  overflow: auto;
+}
+.main-height {
+  height: calc(100vh - 64px);
 }
 /* 新增容器样式 */
 .app-container {
-  height: 100vh;
   display: flex;
   flex-direction: column;
 }

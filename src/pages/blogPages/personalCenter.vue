@@ -186,6 +186,7 @@ const filteredDynamics = computed(() => {
 }
 
 .personal-homepage {
+  overflow-y: auto;
   max-width: 1200px;
   margin: 0 auto;
   background: var(--bg-color);

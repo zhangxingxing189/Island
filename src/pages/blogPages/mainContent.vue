@@ -127,7 +127,7 @@ onMounted(async () => {
   max-width: 1440px;
   margin: 0 auto;
   background: #f8f9fa;
-  min-height: 100vh;
+  overflow: auto;
 }
 
 .main-content {

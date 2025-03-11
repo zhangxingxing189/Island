@@ -58,9 +58,9 @@
 </template>
 
 <script setup lang="ts">
-import {ref, computed, onMounted, reactive} from "vue";
+import { ref, computed, onMounted, reactive } from "vue";
 import type { ContentItem } from "./blogInterface";
-import {ArticleListItem, getArticleList} from "@/api/articleApi";
+import { ArticleListItem, getArticleList } from "@/api/articleApi";
 
 const props = defineProps<{ id: string }>();
 const articleData = ref<ContentItem>();
@@ -96,7 +96,7 @@ const handleLike = () => {
 const pagination = reactive({
   page: 1,
   pageSize: 10,
-  total: 0
+  total: 0,
 });
 
 // 文章列表数据
@@ -107,7 +107,7 @@ const loadArticles = async () => {
   try {
     const { data } = await getArticleList({
       page: pagination.page,
-      pageSize: pagination.pageSize
+      pageSize: pagination.pageSize,
     });
 
     articles.value = data.list;
@@ -162,7 +162,7 @@ const content =
   background: white;
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
+  overflow: auto;
 }
 
 .cover-container {
