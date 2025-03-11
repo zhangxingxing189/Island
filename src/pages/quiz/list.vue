@@ -77,66 +77,12 @@ onMounted(async () => {
 
 
 interface QuestionBank {
-  id: number;
+  question_bank_id: number;
   title: string;
   description: string;
-  imageUrl: string;
-  questionCount: number;
-  userCount: number;
+  logo_url: string;
+  count: number;
 }
-//
-// const questionBanks = ref<QuestionBank[]>([
-//   {
-//     id: 1,
-//     title: "高级前端开发工程师题库",
-//     description:
-//         "包含 Vue、React、TypeScript、性能优化等前端核心技术的综合题目，助你快速提升技术深度。",
-//     imageUrl:
-//         "https://public.readdy.ai/ai/img_res/5ac8e9a51d7a8b2703bcbacd5a8c4a17.jpg",
-//     questionCount: 358,
-//     userCount: 12659,
-//   },
-//   {
-//     id: 2,
-//     title: "算法与数据结构精选题集",
-//     description:
-//         "精心筛选的算法题目，覆盖常见数据结构、排序算法、动态规划等，配有详细解析和最优解答。",
-//     imageUrl:
-//         "https://public.readdy.ai/ai/img_res/e3a277069ad67d20d72179a8a893f677.jpg",
-//     questionCount: 246,
-//     userCount: 8934,
-//   },
-//   {
-//     id: 3,
-//     title: "系统设计面试题库",
-//     description:
-//         "涵盖分布式系统、微服务架构、数据库设计等核心知识点，帮助你应对系统设计面试。",
-//     imageUrl:
-//         "https://public.readdy.ai/ai/img_res/cca34e6e5559681676d1832236da71af.jpg",
-//     questionCount: 189,
-//     userCount: 6723,
-//   },
-//   {
-//     id: 4,
-//     title: "计算机网络实践题库",
-//     description:
-//         "从 TCP/IP 协议到网络安全，全面覆盖计算机网络知识，配有实际案例分析。",
-//     imageUrl:
-//         "https://public.readdy.ai/ai/img_res/d9bafd9b4f9d409cc4f98560411175f8.jpg",
-//     questionCount: 275,
-//     userCount: 9156,
-//   },
-//   {
-//     id: 5,
-//     title: "数据库优化专项训练",
-//     description:
-//         "专注于数据库性能优化、索引设计、SQL 调优等实战题目，提升数据库开发能力。",
-//     imageUrl:
-//         "https://public.readdy.ai/ai/img_res/ae1084426690d81b702082b742fd4111.jpg",
-//     questionCount: 167,
-//     userCount: 5438,
-//   },
-// ]);
 
 const handleQuestionBankClick = (item: QuestionBank) => {
   // 跳转
