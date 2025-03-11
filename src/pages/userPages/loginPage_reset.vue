@@ -29,16 +29,11 @@ async function QQ() {
     : route.query.code;
   console.log(code);
   if (!code) {
-    await router.replace("/login");
-    console.log("886");
-    // return;
+    return;
   }
-  console.log("yes");
   // API 调用
   if (code !== undefined && code !== null) {
-    console.log("in");
     const res = await post_QQCode(code);
-    console.log(res);
     if (res.code === 20000) {
       let userInfo: User = {
         username: res.data.username,
@@ -48,8 +43,6 @@ async function QQ() {
       };
       userStore.currentUser = userInfo;
       await userStore.setCurrentUser(userInfo);
-      console.log(code); //调试代码
-      console.log(res);
       router.push("/");
     }
   }
@@ -64,7 +57,6 @@ function safePageRedirect(url) {
     window.location.replace(url);
   }
 }
-
 function QQLogin() {
   const url =
     "https://graph.qq.com/oauth2.0/show?which=Login&display=pc&response_type=code&client_id=102717058&redirect_uri=http://islandlearning.icu/login&state=10086";
@@ -74,7 +66,6 @@ if (userStore.isLogin()) {
   router.push("/");
 }
 QQ();
-console.log("loginPage");
 </script>
 <style scoped>
 #login-page {

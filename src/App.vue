@@ -2,13 +2,6 @@
 import { RouterView } from "vue-router";
 import { onMounted } from "vue";
 import { useParentStore } from "@/stores/getIslands";
-import { User, useUserStore } from "@/stores/user";
-import { checkLoginAuto } from "@/api/loginApi";
-import { login } from "@/pages/home/UIFunction";
-import { useRoute } from "vue-router";
-import router from "@/router";
-const route = useRoute();
-const userStore = useUserStore();
 // onMounted(async () => {
 //   // await store.fetchData();
 // });
