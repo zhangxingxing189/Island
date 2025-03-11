@@ -70,6 +70,11 @@ const routes: Array<RouteRecordRaw> = [
     name: "question-bank",
     component: () => import("../pages/quiz/question_bank.vue"),
   },
+  {
+    path: "/quiz/list/:id",
+    name: "question-bank-list",
+    component: () => import("../pages/quiz/list.vue"),
+  }
 ];
 
 const router = createRouter({

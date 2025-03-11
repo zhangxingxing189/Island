@@ -174,6 +174,8 @@ import { useRoute } from 'vue-router'
 import {get_question, get_question_bank, get_question_list} from "@/api/questionApi";
 import { mavonEditor } from 'mavon-editor'
 import {useUserStore} from "@/stores/user";
+import Head from "@/pages/blogPages/index.vue";
+
 
 const userStore = useUserStore();
 const currentUser = userStore.currentUser;
