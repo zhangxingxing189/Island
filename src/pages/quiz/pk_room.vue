@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-gray-50" v-if="currentUser">
     <!-- 顶部导航 -->
     <nav
         class="fixed top-0 left-0 right-0 h-14 bg-indigo-700 text-white shadow-lg z-50"
@@ -88,11 +88,11 @@
             <div
                 v-for="(question, index) in questions"
                 :key="index"
-                @click="selectQuestion(index)"
+                @click="selectQuestion(question)"
                 class="cursor-pointer p-3 rounded-lg border transition-all duration-200 flex items-center justify-between"
                 :class="[
-currentQuestionIndex === index ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300',
-getMyQuestionStatus(index).color
+questionInfo.question_id === question.question_id ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300',
+getMyQuestionStatus(question).color
 ]"
             >
               <span class="font-medium">题 {{ index + 1 }}</span>
@@ -103,16 +103,42 @@ getMyQuestionStatus(index).color
           </div>
         </div>
         <!-- 答题区域 -->
-        <div class="col-span-3 bg-white rounded-xl p-8 shadow-sm">
-          <div v-if="currentQuestion" class="space-y-6">
-            <div class="text-lg font-medium">{{ currentQuestion.title }}</div>
+        <div class="col-span-3 bg-white rounded-xl p-6 pl-0 shadow-sm">
+          <div v-if="questionInfo" class="flex items-center gap-4 mb-0">
+            <h1 class="text-2xl font-bold ms-6">{{ questionInfo.title }}</h1>
+            <div
+                class="inline-block bg-gray-100 text-gray-600 px-3 py-1 rounded"
+            >
+              {{ getTypeName(questionInfo.type) }}
+            </div>
+            <div
+                :class="getDifficultyClass(questionInfo.difficulty)"
+                class="px-3 py-1 rounded"
+            >
+              {{ getDifficultName(questionInfo.difficulty) }}
+            </div>
+          </div>
+          <hr class="mt-4 ml-5"/>
+          <div>
+            <mavon-editor
+                v-model="questionInfo.content"
+                :editable="false"
+                :subfield="false"
+                :toolbarsFlag="false"
+                :boxShadow="false"
+                previewBackground = "#ffffff"
+                defaultOpen="preview"
+                style="min-height: 10px; border: 0; padding: 0;"
+            />
+          </div>
             <!-- 选择题 -->
-            <div v-if="currentQuestion.type === '选择'" class="space-y-3">
+          <div>
+            <div v-if="questionInfo.type === 1" class="space-y-3 ml-5">
               <label
-                  v-for="(option, index) in currentQuestion.options"
+                  v-for="(option, index) in questionInfo.options"
                   :key="index"
-                  class="flex items-center space-x-3 p-3 rounded-lg border cursor-pointer hover:bg-gray-50"
-                  :class="{'border-indigo-500 bg-indigo-50': selectedAnswer === option}"
+                  class="flex items-center space-x-3 p-3 rounded-lg border-2 border-gray-100 cursor-pointer transition-all duration-200 "
+                  :class="{ 'border-indigo-500': selectedAnswer === option , 'hover:border-gray-300' : selectedAnswer != option}"
               >
                 <input
                     type="radio"
@@ -120,16 +146,25 @@ getMyQuestionStatus(index).color
                     v-model="selectedAnswer"
                     class="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
                 />
-                <span>{{ option }}</span>
+                <mavon-editor
+                    v-model="questionInfo.options[index]"
+                    :editable="false"
+                    :subfield="false"
+                    :toolbarsFlag="false"
+                    :boxShadow="false"
+                    previewBackground="#ffffff"
+                    defaultOpen="preview"
+                    style="min-height: 10px; border: 0; padding: 0; margin: 0; margin-bottom: -12px"
+                />
               </label>
             </div>
             <!-- 多选题 -->
-            <div v-else-if="currentQuestion.type === '多选'" class="space-y-3">
+            <div v-else-if="questionInfo.type === 2" class="space-y-3 ml-5">
               <label
-                  v-for="(option, index) in currentQuestion.options"
+                  v-for="(option, index) in questionInfo.options"
                   :key="index"
-                  class="flex items-center space-x-3 p-3 rounded-lg border cursor-pointer hover:bg-gray-50"
-                  :class="{'border-indigo-500 bg-indigo-50': selectedAnswers.includes(option)}"
+                  class="flex items-center space-x-3 p-3 rounded-lg border-2 border-gray-100 cursor-pointer transition-all duration-200"
+                  :class="{ 'border-indigo-500': selectedAnswers.includes(option) ,'hover:border-gray-300' : !selectedAnswers.includes(option)}"
               >
                 <input
                     type="checkbox"
@@ -137,11 +172,20 @@ getMyQuestionStatus(index).color
                     v-model="selectedAnswers"
                     class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                 />
-                <span>{{ option }}</span>
+                <mavon-editor
+                    v-model="questionInfo.options[index]"
+                    :editable="false"
+                    :subfield="false"
+                    :toolbarsFlag="false"
+                    :boxShadow="false"
+                    previewBackground="#ffffff"
+                    defaultOpen="preview"
+                    style="min-height: 10px; border: 0; padding: 0; margin: 0; margin-bottom: -12px"
+                />
               </label>
             </div>
             <!-- 填空题 -->
-            <div v-else class="space-y-3">
+            <div v-else class="space-y-3 ml-5">
               <input
                   type="text"
                   v-model="selectedAnswer"
@@ -149,12 +193,15 @@ getMyQuestionStatus(index).color
                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
-            <button
-                @click="submitAnswer"
-                class="!rounded-button whitespace-nowrap w-full bg-indigo-600 text-white py-3 px-6 text-lg font-medium hover:bg-indigo-700 transition-colors cursor-pointer"
-            >
-              提交答案
-            </button>
+            <div class="p-3">
+              <button
+                  @click="submitAnswer"
+                  class="!rounded-button whitespace-nowrap w-full bg-indigo-600 text-white py-3 px-6 text-lg font-medium hover:bg-indigo-700 transition-colors cursor-pointer ml-3 mt-6 "
+              >
+                提交答案
+              </button>
+            </div>
+
           </div>
         </div>
       </div>
@@ -190,29 +237,43 @@ getMyQuestionStatus(index).color
       </div>
     </div>
   </div>
+  <div v-else>
+    <div class="text-center text-2xl font-bold m-96">
+      <h1 class="mb-6 ml-4">
+        加载中...
+      </h1>
+      <div class="animate-spin mb-6">
+        <i class="fas fa-circle-notch text-4xl text-blue-500"></i>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
-import {ref, computed, onMounted} from "vue";
+import {ref, computed, onMounted, watch} from "vue";
 import {useUserStore} from "@/stores/user";
 import {useRoute} from "vue-router";
-import {get_pk_info, get_user_info} from "@/api/pkApi";
+import {get_pk_info, get_user_info , pk_submit} from "@/api/pkApi";
 import JSONbig from 'json-bigint';
+import {get_question} from "@/api/questionApi";
+import { mavonEditor } from 'mavon-editor'
 
-const myScore = ref(60);
-const opponentScore = ref(50);
-const remainingTime = ref(1800); // 30分钟
 const showRules = ref(false);
-const currentQuestionIndex = ref(0);
-const selectedAnswer = ref("");
-const selectedAnswers = ref<string[]>([]);
 
 // 获取路由参数方式
 const route = useRoute()
 console.log(route.params.id);
 
 // 比赛房间信息
-let pk_info = ref();
+let pkInfo = ref({
+  end_timestamp: 0,
+  start_timestamp: 0,
+  user1_id: "",
+  user2_id: "",
+  questions: [],
+  user1_score_total: 0,
+  user2_score_total: 0,
+});
 
 // 先获取用户信息
 const userStore = useUserStore();
@@ -221,34 +282,49 @@ const currentUser = userStore.currentUser;
 let myID = ref("");
 let myName = ref("");
 let myAvatar = ref("");
+const myScore = ref(0);
 let opponentUserID = ref("");
 let opponentName = ref("");
 let opponentAvatar = ref("");
+const opponentScore = ref(0);
 
+// 初始化信息
 onMounted(async () => {
+  // 初始化自己的信息
   myName.value = currentUser.username;
   myAvatar.value = currentUser.avatar;
+  // 获取初始房间信息
   const pk_info_data= await get_pk_info({room_id: String(route.params.id)});
   if (pk_info_data.code != 20000) {
     console.log('获取房间信息失败:', pk_info_data.message);
     return;
   }
-  pk_info.value = pk_info_data.data;
-  console.log(pk_info);
+  pkInfo.value = pk_info_data.data;
+  console.log(pkInfo);
+  // 获取自己的用户ID
   const tokenData = parseJWT(currentUser.atoken);
   if (tokenData) {
     console.log('用户ID:', tokenData.userid);
     myID.value = tokenData.userid;
   }
-  if (pk_info.value.user1_id === myID.value) {
-    opponentUserID.value = pk_info.value.user2_id;
+  // 通过自己的ID判断对方的ID
+  if (pkInfo.value.user1_id === myID.value) {
+    opponentUserID.value = pkInfo.value.user2_id;
   } else {
-    opponentUserID.value = pk_info.value.user1_id;
+    opponentUserID.value = pkInfo.value.user1_id;
   }
+  // 获取对手的用户信息
+  console.log(opponentUserID.value);
   const user_info_data = await get_user_info({user_id: opponentUserID.value});
   console.log(user_info_data);
   opponentName.value = user_info_data.data.username;
   opponentAvatar.value = user_info_data.data.avatar;
+  // 获取题目列表
+  questions.value = pkInfo.value.questions;
+  selectedQuestion.value = pkInfo.value.questions[0];
+  console.log(questions);
+  //初始化
+  await updateRoomInfo();
 });
 
 const parseJWT = (token: string) => {
@@ -265,92 +341,192 @@ const parseJWT = (token: string) => {
   }
 };
 
-const questions = ref([
-  {
-    id: 1,
-    type: "选择",
-    title: "以下哪个不是JavaScript的数据类型？",
-    options: ["String", "Boolean", "Character", "Number"],
-    answer: "Character",
-    myAnswer: null,
-    opponentAnswer: "Character",
-  },
-  {
-    id: 2,
-    type: "多选",
-    title: "以下哪些是Vue.js的生命周期钩子？",
-    options: ["mounted", "created", "updated", "destroyed"],
-    answer: ["mounted", "created", "updated", "destroyed"],
-    myAnswer: null,
-    opponentAnswer: ["mounted", "created"],
-  },
-  {
-    id: 3,
-    type: "填空",
-    title: "在Vue3中，创建响应式数据的核心函数是____",
-    answer: "ref",
-    myAnswer: null,
-    opponentAnswer: "ref",
-  },
-  {
-    id: 4,
-    type: "选择",
-    title: "TypeScript是由哪个公司开发的？",
-    options: ["Google", "Microsoft", "Facebook", "Apple"],
-    answer: "Microsoft",
-    myAnswer: null,
-    opponentAnswer: null,
-  },
-]);
-const currentQuestion = computed(
-    () => questions.value[currentQuestionIndex.value],
-);
+// 轮询房间信息
+setInterval( () => {
+  updateRoomInfo();
+}, 2000);
+
+const updateRoomInfo = async () => {
+  const pk_info_data = await get_pk_info({room_id: String(route.params.id)});
+  if (pk_info_data.code != 20000) {
+    console.log('获取房间信息失败:', pk_info_data.message);
+    return;
+  }
+  pkInfo.value = pk_info_data.data;
+  questions.value = pkInfo.value.questions;
+  // 倒计时更新
+  // 获取目前时间戳(毫秒)
+  const now = new Date().getTime();
+  const end = pkInfo.value.end_timestamp;
+  remainingTime.value = Math.floor((end - now)/1000);
+  // 获取分数
+  if (myID.value == pkInfo.value.user1_id) {
+    myScore.value = pkInfo.value.user1_score_total;
+    opponentScore.value = pkInfo.value.user2_score_total;
+  } else {
+    myScore.value = pkInfo.value.user2_score_total;
+    opponentScore.value = pkInfo.value.user1_score_total;
+  }
+}
+
+// 倒计时
+let remainingTime = ref(0); // 30分钟
+setInterval(() => {
+  if (remainingTime.value > 0) {
+    remainingTime.value--;
+  }
+}, 5000);
+
 const formatTime = (seconds: number) => {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
   return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
 };
-const getMyQuestionStatus = (index: number) => {
-  const question = questions.value[index];
-  if (!question.myAnswer) {
-    return { icon: "far fa-circle", color: "" };
+
+// 题目列表
+let questions = ref([{
+
+}])
+
+// 选择题目逻辑
+let questionInfo = ref({
+  question_id: "",
+  type: 1,
+  difficulty: 1,
+  title: "",
+  content: "",
+  options: [],
+  answers: [],
+});
+
+const selectedQuestion = ref<any>(null);
+const selectQuestion = (item : any) => {
+  selectedQuestion.value = item;
+  console.log(selectedQuestion.value);
+};
+
+// 监听题目选择变化，从后端获取题目详情
+watch(selectedQuestion, async (newValue) => {
+  if (newValue) {
+    try {
+      const data = await get_question({question_id: String(newValue.question_id)})
+      questionInfo.value = data.data;
+      // 清空选择
+      selectedAnswers.value = [];
+      selectedAnswer.value = "";
+      console.log(questionInfo.value);
+    } catch (error) {
+      console.error("获取题目详细信息失败:", error);
+    }
   }
-  const isCorrect = Array.isArray(question.answer)
-      ? JSON.stringify(question.myAnswer) === JSON.stringify(question.answer)
-      : question.myAnswer === question.answer;
-  return isCorrect
-      ? { icon: "fas fa-check text-green-500", color: "bg-green-50" }
-      : { icon: "fas fa-times text-red-500", color: "bg-red-50" };
-};
-const selectQuestion = (index: number) => {
-  currentQuestionIndex.value = index;
-  selectedAnswer.value = "";
-  selectedAnswers.value = [];
-};
-const submitAnswer = () => {
-  const question = questions.value[currentQuestionIndex.value];
-  if (question.type === "多选") {
-    question.myAnswer = [...selectedAnswers.value];
+});
+
+// 获取颜色
+const getMyQuestionStatus = (question: any) => {
+  // 判断提交和分数
+  let submit = false;
+  let score = 0;
+  if (myID.value == pkInfo.value.user1_id) {
+    submit = question.user1_submit;
+    score = question.user1_score;
   } else {
-    question.myAnswer = selectedAnswer.value;
+    submit = question.user2_submit;
+    score = question.user2_score;
   }
-  // 判断答案是否正确并更新分数
-  const isCorrect = Array.isArray(question.answer)
-      ? JSON.stringify(question.myAnswer) === JSON.stringify(question.answer)
-      : question.myAnswer === question.answer;
-  if (isCorrect) {
-    myScore.value += 10;
+  // 返回样式
+  if (!submit) {
+    return { icon: "far fa-circle", color: "" };
+  } else if (score==100) {
+    return { icon: "fas fa-check text-green-500", color: "bg-green-50" }
+  } else {
+    return { icon: "fas fa-times text-red-500", color: "bg-red-50" };
   }
+};
+
+// 选择答案逻辑，假设最多10个选项
+let selectedAnswer = ref("");
+let selectedAnswers = ref<string[]>([]);
+
+watch(selectedAnswer, async (newValue) => {
+  if (newValue) {
+    console.log(newValue);
+  }
+})
+
+
+const submitAnswer = async () => {
+  let answers = [];
+  let answer = "";
+  if (questionInfo.value.type === 2) {
+    answers = [...selectedAnswers.value];
+    console.log(answers);
+  } else {
+    answers.push(selectedAnswer.value);
+    console.log(answers);
+  }
+  // 发送提交
+  console.log(questionInfo.value);
+  const data = await pk_submit({
+    room_id: String(route.params.id),
+    question_id: String(selectedQuestion.value.question_id),
+    answer: answers
+  })
+  console.log(data);
+  await updateRoomInfo();
+
+
+  // // 判断答案是否正确并更新分数
+  // const isCorrect = Array.isArray(question.answer)
+  //     ? JSON.stringify(question.myAnswer) === JSON.stringify(question.answer)
+  //     : question.myAnswer === question.answer;
+  // if (isCorrect) {
+  //   myScore.value += 10;
+  // }
+
   // 清空选择
   selectedAnswer.value = "";
   selectedAnswers.value = [];
 };
-// 倒计时
-setInterval(() => {
-  if (remainingTime.value > 0) {
-    remainingTime.value--;
+
+// 难度、类型转换函数部分
+const getDifficultyClass = (difficulty: number) => {
+  switch (difficulty) {
+    case 1:
+      return "bg-green-100 text-green-600";
+    case 2:
+      return "bg-yellow-100 text-yellow-600";
+    case 3:
+      return "bg-red-100 text-red-600";
+    default:
+      return "bg-gray-100 text-gray-600";
   }
-}, 1000);
+};
+const getDifficultName = (difficulty: number) => {
+  switch (difficulty) {
+    case 1:
+      return "简单";
+    case 2:
+      return "中等";
+    case 3:
+      return "困难";
+    default:
+      return "未知";
+  }
+}
+const getTypeName = (type: number) => {
+  switch (type) {
+    case 1:
+      return "单选题";
+    case 2:
+      return "多选题";
+    case 3:
+      return "填空题";
+    case 4:
+      return "主观题";
+    default:
+      return "未知";
+  }
+}
 </script>
 
 <style scoped>

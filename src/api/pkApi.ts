@@ -15,3 +15,8 @@ export function get_pk_info(data: { room_id: string }) {
         },
     });
 }
+
+export function pk_submit(data: { room_id: string , question_id: string, answer: any }) {
+    console.log(data);
+    return useAxios.post("/api/pk/submit", data);
+}
