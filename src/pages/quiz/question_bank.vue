@@ -175,6 +175,9 @@ import {get_question, get_question_bank, get_question_list} from "@/api/question
 import { mavonEditor } from 'mavon-editor'
 import {useUserStore} from "@/stores/user";
 import Head from "@/pages/blogPages/index.vue";
+import {useAxios} from "@/api/index";
+import axios, {CancelTokenSource} from "axios";
+import router from "@/router";
 
 
 const userStore = useUserStore();
@@ -183,6 +186,58 @@ const currentUser = userStore.currentUser;
 // 获取路由参数方式
 const route = useRoute()
 console.log(route.params.id);
+
+// 匹配部分
+// 修改后的PK匹配逻辑
+const axiosSource = ref<CancelTokenSource>()
+
+const startPKMatch = async () => {
+  // 先取消已有请求
+  if (axiosSource.value) {
+    axiosSource.value.cancel('用户取消匹配')
+  }
+
+  // 创建新的取消令牌
+  axiosSource.value = axios.CancelToken.source()
+
+  matchingInterval = setInterval(() => {
+    matchingTime.value++;
+  }, 1000);
+
+  try {
+    showPKModal.value = true
+    matchingTime.value = 0
+
+    // 为了方便处理取消请求，这里不在 api 层封装
+    const response = await useAxios.post('api/pk/matching', {
+      question_bank_id: route.params.id,
+      question_id: selectedQuestion.value?.question_id
+    }, {
+      cancelToken: axiosSource.value.token
+    })
+
+    // 匹配成功处理...
+    // 跳转
+    await router.push({path: "/quiz/pk-room/" + response.data.room_id});
+
+  } catch (error) {
+    if (axios.isCancel(error)) {
+      console.log('请求取消', error.message)
+      return
+    }
+    console.error('匹配错误', error)
+  } finally {
+    showPKModal.value = false
+    clearInterval(matchingInterval)
+  }
+}
+
+const cancelPKMatch = () => {
+  if (axiosSource.value) {
+    axiosSource.value.cancel('用户主动取消匹配')
+    axiosSource.value = undefined
+  }
+}
 
 // 获取题库信息
 let questionBankName = ref("题库名")
@@ -322,18 +377,20 @@ const applySearch = (term: string) => {
   searchQuery.value = term;
 };
 let matchingInterval: number;
-const startPKMatch = () => {
-  showPKModal.value = true;
-  matchingTime.value = 0;
-  matchingInterval = setInterval(() => {
-    matchingTime.value++;
-  }, 1000);
-};
-const cancelPKMatch = () => {
-  showPKModal.value = false;
-  clearInterval(matchingInterval);
-  matchingTime.value = 0;
-};
+// const startPKMatch = () => {
+//   startWithAxios();
+//   showPKModal.value = true;
+//   matchingTime.value = 0;
+//   matchingInterval = setInterval(() => {
+//     matchingTime.value++;
+//   }, 1000);
+// };
+// const cancelPKMatch = () => {
+//   cancelAxiosRequest();
+//   showPKModal.value = false;
+//   clearInterval(matchingInterval);
+//   matchingTime.value = 0;
+// };
 const submitCode = () => {
   // 提交代码逻辑
 };

@@ -5,7 +5,8 @@ import { useUserStore } from "@/stores/user";
 import { refreshAToken } from "./loginApi";
 import router from "@/router";
 export const useAxios = axios.create({
-  baseURL: "http://118.31.119.216:8080",
+  // baseURL: "http://118.31.119.216:8080",
+  baseURL: "http://localhost:8080",
 });
 
 export interface baseResponse<T> {
