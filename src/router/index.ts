@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
+import { useLayoutStore } from "@/stores/layoutStore";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -84,12 +85,16 @@ const routes: Array<RouteRecordRaw> = [
     path: "/quiz/pk-room/:id",
     name: "pk-room",
     component: () => import("../pages/quiz/pk_room.vue"),
-  }
+  },
 ];
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
 });
-
+router.beforeEach((to, from) => {
+  const layoutStore = useLayoutStore();
+  if (to.path === "/quiz") layoutStore.isSelect = false;
+  if (from.path === "/quiz") layoutStore.isSelect = true;
+});
 export default router;

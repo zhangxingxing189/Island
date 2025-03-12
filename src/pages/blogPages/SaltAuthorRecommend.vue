@@ -2,30 +2,39 @@
   <div class="article-editor">
     <!-- 退出按钮 -->
     <button class="back-btn" @click="handleBack">
-      <img src="@/assets/images/退出.png" alt="退出" class="exit-icon">
+      <img src="@/assets/images/退出.png" alt="退出" class="exit-icon" />
     </button>
 
     <h1 class="editor-title">文章编辑</h1>
     <!-- 标题输入框 -->
     <label>标题</label>
-    <input v-model="formData.title" type="text" class="input" placeholder="请输入文章标题" />
+    <input
+      v-model="formData.title"
+      type="text"
+      class="input"
+      placeholder="请输入文章标题"
+    />
 
     <!-- 简介输入框 -->
     <div class="optional-field">
       <label>简介（可选）</label>
       <textarea
-          v-model="formData.brief"
-          class="input"
-          placeholder="请输入文章简介，最多200字"
-          rows="3"
-          maxlength="200"
+        v-model="formData.brief"
+        class="input"
+        placeholder="请输入文章简介，最多200字"
+        rows="3"
+        maxlength="200"
       ></textarea>
     </div>
 
     <!-- 分类选择框 -->
     <label>分类</label>
     <select v-model="formData.island" class="select">
-      <option v-for="island in islandList" :key="island.id" :value="island.name">
+      <option
+        v-for="island in islandList"
+        :key="island.id"
+        :value="island.name"
+      >
         {{ island.name }}
       </option>
     </select>
@@ -36,14 +45,20 @@
       <img v-if="formData.cover" :src="formData.cover" class="cover-preview" />
       <span v-else>+</span>
     </div>
-    <input type="file" ref="fileInput" accept="image/*" class="hidden" @change="handleCoverUpload" />
+    <input
+      type="file"
+      ref="fileInput"
+      accept="image/*"
+      class="hidden"
+      @change="handleCoverUpload"
+    />
 
     <!-- Markdown 富文本编辑器 -->
     <label>内容</label>
     <mavon-editor
-        v-model="formData.content"
-        :toolbars="markdownToolbars"
-        :imgUpload="handleEditorImageUpload"
+      v-model="formData.content"
+      :toolbars="markdownToolbars"
+      :imgUpload="handleEditorImageUpload"
     />
 
     <!-- 提交按钮 -->
@@ -53,19 +68,19 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { mavonEditor } from 'mavon-editor'
+import { mavonEditor } from "mavon-editor";
 import "mavon-editor/dist/css/index.css";
 import { useAxios } from "@/api";
 import { getIslandMessages } from "@/api/islandApi";
 import { useRouter } from "vue-router";
 import { createArticle, getArticleList } from "@/api/articleApi";
-import { message } from 'ant-design-vue';
+import { message } from "ant-design-vue";
 const formData = ref({
   title: "",
   brief: "",
   content: "",
   cover: "",
-  island: ""
+  island: "",
 });
 
 const islandList = ref([]);
@@ -98,22 +113,20 @@ const handleCoverUpload = async (event) => {
   }
 };
 
-
 // 添加图片上传处理器
 const handleEditorImageUpload = async (file, insertImage) => {
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append("file", file);
 
   try {
     const response = await useAxios.post("/api/common/images", formData, {
-      headers: { "Content-Type": "multipart/form-data" }
+      headers: { "Content-Type": "multipart/form-data" },
     });
     insertImage(response.data.url);
   } catch (error) {
     console.error("图片上传失败:", error);
   }
 };
-
 
 // 提交方法
 const handleSubmit = async () => {
@@ -122,7 +135,7 @@ const handleSubmit = async () => {
       title: formData.value.title,
       content: formData.value.content,
       cover: formData.value.cover,
-      islandId: formData.value.island
+      islandId: formData.value.island,
     });
 
     if (data.code === 200) {
@@ -137,8 +150,6 @@ const handleSubmit = async () => {
   }
 };
 
-
-
 const router = useRouter();
 
 const handleBack = () => {
@@ -147,7 +158,6 @@ const handleBack = () => {
 </script>
 
 <style scoped>
-
 .editor-title {
   font-size: 24px;
   font-weight: 600;
@@ -156,6 +166,7 @@ const handleBack = () => {
   color: #2d3748;
 }
 .article-editor {
+  overflow-y: auto;
   max-width: 800px;
   margin: 20px auto;
   padding: 20px;
@@ -177,13 +188,13 @@ const handleBack = () => {
   min-height: 80px;
 }
 
-.input, .select {
+.input,
+.select {
   width: 100%;
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
-
 
 .cover-upload {
   width: 120px;

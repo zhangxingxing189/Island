@@ -56,6 +56,7 @@ const formatHeat = (heat: number) => {
   --text-primary: #1a1a1a;
   --text-secondary: #8590a6;
   --border-color: #f0f2f4;
+  overflow-y: auto;
 }
 
 .hot-list {
