@@ -282,7 +282,7 @@ getMyQuestionStatus(question).color
     <!-- 规则弹窗 -->
     <div
         v-if="showRules"
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999]"
     >
       <div class="bg-white rounded-xl p-6 max-w-lg w-full mx-4">
         <div class="flex justify-between items-center mb-4">
@@ -295,11 +295,10 @@ getMyQuestionStatus(question).color
           </button>
         </div>
         <div class="space-y-4">
-          <p>1. 本场比赛总时长为30分钟</p>
-          <p>2. 共10道题目，包含选择题、多选题和填空题</p>
-          <p>3. 每道题目答对得10分，答错不扣分</p>
-          <p>4. 可以自由选择题目顺序作答</p>
-          <p>5. 提交后不可更改答案</p>
+          <p>1. 不同题库的PK有不同的比赛时间和题目数量</p>
+          <p>2. 可以自由选择答题顺序，每道题只能提交一次</p>
+          <p>3. 每道题的满分为100分，比赛结束后将优先比较总分，然后比较最后提交时间</p>
+          <p>4. 仅当时间结束或双方所有题目都提交，才会结束比赛</p>
         </div>
         <button
             @click="showRules = false"

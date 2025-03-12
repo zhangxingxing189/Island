@@ -188,10 +188,21 @@ import Head from "@/pages/blogPages/index.vue";
 import {useAxios} from "@/api/index";
 import axios, {CancelTokenSource} from "axios";
 import router from "@/router";
+import {login} from "@/pages/home/UIFunction";
 
 
 const userStore = useUserStore();
+if (userStore.loadUser() || userStore.isLogin()) {
+
+} else {
+  console.log("loadFalse");
+  login();
+}
 const currentUser = userStore.currentUser;
+
+onMounted(() => {
+  console.log(currentUser);
+});
 
 console.log("新版本");
 
@@ -258,7 +269,7 @@ onMounted(async () => {
   try {
     const data = await get_question_bank({question_bank_id: String(route.params.id)})
     questionBankName.value = data.data.title
-    console.log(data.data.title);
+    //console.log(data.data.title);
   } catch (error) {
     console.error("获取题库信息失败:", error);
   }
@@ -271,7 +282,7 @@ onMounted(async () => {
     const data = await get_question_list({question_bank_id: String(route.params.id)})
     questionList.value = data.data.questions
     selectedQuestion.value = data.data.questions[0]
-    console.log(questionList);
+    //console.log(questionList);
   } catch (error) {
     console.error("获取题库题目列表失败:", error);
   }
