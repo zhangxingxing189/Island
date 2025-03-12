@@ -45,16 +45,34 @@
             </div>
             <div class="mt-2">
               <div class="font-medium">{{ myName }}</div>
-              <div class="text-sm opacity-80">钻石段位</div>
+              <div v-if = "pkInfo.winner_id === '0'" class="text-sm opacity-80">
+                答题进度 (
+                {{ myFinishedCount }}
+                /
+                {{ questions.length }}
+                )
+              </div>
+              <div v-else class="text-sm opacity-80">
+                <div v-if = "pkInfo.winner_id === String(myID)" class="text-green-500 font-bold">
+                  获胜者
+                </div>
+                <div v-else class="text-gray-200">
+                  落败者
+                </div>
+              </div>
               <div class="text-2xl font-bold mt-1">{{ myScore }}分</div>
             </div>
           </div>
           <!-- VS区域 -->
           <div class="text-center">
             <div class="text-3xl font-bold mb-2">VS</div>
-            <div class="text-xl">
+            <div v-if = "pkInfo.winner_id === '0'" class="text-xl" >
               <i class="far fa-clock"></i>
               <span class="ml-2">{{ formatTime(remainingTime) }}</span>
+            </div>
+            <div v-else class="text-xl text-green-500">
+              <i class="fas fa-check-circle"></i>
+              <span class="ml-2">比赛结束！</span>
             </div>
           </div>
           <!-- 对方信息 -->
@@ -71,7 +89,21 @@
             </div>
             <div class="mt-2">
               <div class="font-medium">{{ opponentName }}</div>
-              <div class="text-sm opacity-80">白金段位</div>
+              <div v-if = "pkInfo.winner_id === '0'" class="text-sm opacity-80">
+                答题进度 (
+                {{ opponentFinishedCount }}
+                /
+                {{ questions.length }}
+                )
+              </div>
+              <div v-else class="text-sm opacity-80">
+                <div v-if = "pkInfo.winner_id === opponentUserID" class="text-green-500 font-bold">
+                  获胜者
+                </div>
+                <div v-else class="text-gray-200">
+                  落败者
+                </div>
+              </div>
               <div class="text-2xl font-bold mt-1">{{ opponentScore }}分</div>
             </div>
           </div>
@@ -97,7 +129,7 @@ getMyQuestionStatus(question).color
             >
               <span class="font-medium">题 {{ index + 1 }}</span>
               <div class="flex items-center space-x-3">
-                <i :class="getMyQuestionStatus(index).icon"></i>
+                <i :class="getMyQuestionStatus(question).icon"></i>
               </div>
             </div>
           </div>
@@ -116,6 +148,18 @@ getMyQuestionStatus(question).color
                 class="px-3 py-1 rounded"
             >
               {{ getDifficultName(questionInfo.difficulty) }}
+            </div>
+            <div class="ml-auto min-w-20">
+              得分:
+              <span
+                  :class="{
+                    'text-green-500': questionScore === 100,
+                    'text-yellow-500': questionScore >= 50 && questionScore < 100,
+                    'text-red-500': questionScore <= 50,
+                  }"
+              >
+                {{ questionScore }}
+              </span>
             </div>
           </div>
           <hr class="mt-4 ml-5"/>
@@ -138,13 +182,21 @@ getMyQuestionStatus(question).color
                   v-for="(option, index) in questionInfo.options"
                   :key="index"
                   class="flex items-center space-x-3 p-3 rounded-lg border-2 border-gray-100 cursor-pointer transition-all duration-200 "
-                  :class="{ 'border-indigo-500': selectedAnswer === option , 'hover:border-gray-300' : selectedAnswer != option}"
+                  :class="{
+                    'border-indigo-500': selectedAnswer === option && !buttonDisabled,
+                    'hover:border-gray-300' : selectedAnswer != option && !buttonDisabled,
+                    'cursor-not-allowed' : buttonDisabled && !buttonDisabled,
+                    
+                    'border-red-500': redAnswers.includes(option) && buttonDisabled,
+                    'border-green-500': greenAnswers.includes(option) && buttonDisabled,
+                  }"
               >
                 <input
                     type="radio"
                     :value="option"
                     v-model="selectedAnswer"
                     class="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                    :disabled = buttonDisabled
                 />
                 <mavon-editor
                     v-model="questionInfo.options[index]"
@@ -164,7 +216,13 @@ getMyQuestionStatus(question).color
                   v-for="(option, index) in questionInfo.options"
                   :key="index"
                   class="flex items-center space-x-3 p-3 rounded-lg border-2 border-gray-100 cursor-pointer transition-all duration-200"
-                  :class="{ 'border-indigo-500': selectedAnswers.includes(option) ,'hover:border-gray-300' : !selectedAnswers.includes(option)}"
+                  :class="{
+                    'border-indigo-500': selectedAnswers.includes(option) && !buttonDisabled,
+                    'hover:border-gray-300' : !selectedAnswers.includes(option) && !buttonDisabled,
+
+                    'border-red-500': redAnswers.includes(option) && buttonDisabled,
+                    'border-green-500': greenAnswers.includes(option) && buttonDisabled
+                    }"
               >
                 <input
                     type="checkbox"
@@ -191,17 +249,32 @@ getMyQuestionStatus(question).color
                   v-model="selectedAnswer"
                   placeholder="请输入答案"
                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  :disabled = buttonDisabled
+
+                  :class="{
+                    'text-red-500' : redAnswers.includes(selectedAnswer) && buttonDisabled,
+                    'text-green-500' : greenAnswers.includes(selectedAnswer) && buttonDisabled
+                  }"
               />
+              <div v-if="buttonDisabled" class="ml-2">
+                <h2 class="text-lg font-bold mt-5 mb-2">
+                  正确答案:
+                </h2>
+                <p class="underline">
+                  {{ questionInfo.answers.join('、') }}
+                </p>
+              </div>
             </div>
             <div class="p-3">
               <button
                   @click="submitAnswer"
-                  class="!rounded-button whitespace-nowrap w-full bg-indigo-600 text-white py-3 px-6 text-lg font-medium hover:bg-indigo-700 transition-colors cursor-pointer ml-3 mt-6 "
+                  class="!rounded-button whitespace-nowrap w-full text-white py-3 px-6 text-lg font-medium transition-colors cursor-pointer ml-3 mt-6 "
+                  :class = "{ 'bg-gray-300 cursor-not-allowed': buttonDisabled , 'bg-indigo-600 hover:bg-indigo-700' : !buttonDisabled }"
+                  :disabled = buttonDisabled
               >
                 提交答案
               </button>
             </div>
-
           </div>
         </div>
       </div>
@@ -250,7 +323,7 @@ getMyQuestionStatus(question).color
 </template>
 
 <script lang="ts" setup>
-import {ref, computed, onMounted, watch} from "vue";
+import {ref, computed, onMounted, watch, Ref, onBeforeUnmount} from "vue";
 import {useUserStore} from "@/stores/user";
 import {useRoute} from "vue-router";
 import {get_pk_info, get_user_info , pk_submit} from "@/api/pkApi";
@@ -273,6 +346,7 @@ let pkInfo = ref({
   questions: [],
   user1_score_total: 0,
   user2_score_total: 0,
+  winner_id: "0",
 });
 
 // 先获取用户信息
@@ -287,6 +361,10 @@ let opponentUserID = ref("");
 let opponentName = ref("");
 let opponentAvatar = ref("");
 const opponentScore = ref(0);
+
+// 完成题目
+let myFinishedCount = ref(0);
+let opponentFinishedCount = ref(0);
 
 // 初始化信息
 onMounted(async () => {
@@ -322,8 +400,7 @@ onMounted(async () => {
   // 获取题目列表
   questions.value = pkInfo.value.questions;
   selectedQuestion.value = pkInfo.value.questions[0];
-  console.log(questions);
-  //初始化
+  // 初始化
   await updateRoomInfo();
 });
 
@@ -341,10 +418,40 @@ const parseJWT = (token: string) => {
   }
 };
 
+
+// 计时器
 // 轮询房间信息
-setInterval( () => {
-  updateRoomInfo();
-}, 2000);
+const intervalID_updateRoomInfo = ref(null);
+onMounted(() => {
+  intervalID_updateRoomInfo.value = setInterval( () => {
+    updateRoomInfo();
+    //console.log(questions.value);
+  }, 5000);
+})
+// 倒计时
+const intervalID_remainingTime = ref(null);
+let remainingTime = ref(0); // 30分钟
+onMounted(() => {
+  intervalID_remainingTime.value = setInterval(() => {
+    if (remainingTime.value > 0) {
+      remainingTime.value--;
+    }
+  },1000);
+})
+// 清除计时器
+onBeforeUnmount(() => {
+  if (intervalID_updateRoomInfo.value) {
+    clearInterval(intervalID_updateRoomInfo.value);
+    intervalID_updateRoomInfo.value = null; // 可选，重置ID
+  }
+  if (intervalID_remainingTime.value) {
+    clearInterval(intervalID_remainingTime.value);
+    intervalID_remainingTime.value = null; // 可选，重置ID
+  }
+  console.log('定时器已清除');
+})
+
+
 
 const updateRoomInfo = async () => {
   const pk_info_data = await get_pk_info({room_id: String(route.params.id)});
@@ -367,15 +474,28 @@ const updateRoomInfo = async () => {
     myScore.value = pkInfo.value.user2_score_total;
     opponentScore.value = pkInfo.value.user1_score_total;
   }
+  // 获得完成数目
+  myFinishedCount.value = 0;
+  opponentFinishedCount.value = 0;
+  for (let i = 0; i < pkInfo.value.questions.length; i++) {
+    if (myID.value === pkInfo.value.user1_id) {
+      if (pkInfo.value.questions[i].user1_submit) {
+        myFinishedCount.value++;
+      }
+      if (pkInfo.value.questions[i].user2_submit) {
+        opponentFinishedCount.value++;
+      }
+    } else {
+      if (pkInfo.value.questions[i].user2_submit) {
+        myFinishedCount.value++;
+      }
+      if (pkInfo.value.questions[i].user1_submit) {
+        opponentFinishedCount.value++;
+      }
+    }
+  }
 }
 
-// 倒计时
-let remainingTime = ref(0); // 30分钟
-setInterval(() => {
-  if (remainingTime.value > 0) {
-    remainingTime.value--;
-  }
-}, 5000);
 
 const formatTime = (seconds: number) => {
   const minutes = Math.floor(seconds / 60);
@@ -385,7 +505,9 @@ const formatTime = (seconds: number) => {
 
 // 题目列表
 let questions = ref([{
-
+  question_id: "",
+  user1_submit: false,
+  user2_submit: false,
 }])
 
 // 选择题目逻辑
@@ -399,22 +521,42 @@ let questionInfo = ref({
   answers: [],
 });
 
-const selectedQuestion = ref<any>(null);
+let selectedQuestion = ref({
+  question_id: "",
+  your_submit: false,
+  your_score: 0,
+});
+
 const selectQuestion = (item : any) => {
   selectedQuestion.value = item;
   console.log(selectedQuestion.value);
 };
 
+let buttonDisabled = ref(false);
+let questionScore = ref(0);
 // 监听题目选择变化，从后端获取题目详情
 watch(selectedQuestion, async (newValue) => {
   if (newValue) {
     try {
       const data = await get_question({question_id: String(newValue.question_id)})
       questionInfo.value = data.data;
+      // 判断可否提交
+      buttonDisabled.value = newValue.your_submit;
+      questionScore.value = newValue.your_score;
       // 清空选择
       selectedAnswers.value = [];
       selectedAnswer.value = "";
-      console.log(questionInfo.value);
+      // 显示颜色
+      redAnswers.value = redAnswersMap.get(newValue.question_id) || [];
+      greenAnswers.value = greenAnswersMap.get(newValue.question_id) || [];
+      if (buttonDisabled.value) {
+        if (redAnswers.value.length > 0) {
+          selectedAnswer.value = redAnswers.value[0];
+        } else {
+          selectedAnswer.value = greenAnswers.value[0];
+        }
+      }
+      //console.log(questionInfo.value);
     } catch (error) {
       console.error("获取题目详细信息失败:", error);
     }
@@ -424,19 +566,12 @@ watch(selectedQuestion, async (newValue) => {
 // 获取颜色
 const getMyQuestionStatus = (question: any) => {
   // 判断提交和分数
-  let submit = false;
-  let score = 0;
-  if (myID.value == pkInfo.value.user1_id) {
-    submit = question.user1_submit;
-    score = question.user1_score;
-  } else {
-    submit = question.user2_submit;
-    score = question.user2_score;
-  }
+  //console.log(question);
+
   // 返回样式
-  if (!submit) {
+  if (!question.your_submit) {
     return { icon: "far fa-circle", color: "" };
-  } else if (score==100) {
+  } else if (question.your_score == 100) {
     return { icon: "fas fa-check text-green-500", color: "bg-green-50" }
   } else {
     return { icon: "fas fa-times text-red-500", color: "bg-red-50" };
@@ -446,6 +581,43 @@ const getMyQuestionStatus = (question: any) => {
 // 选择答案逻辑，假设最多10个选项
 let selectedAnswer = ref("");
 let selectedAnswers = ref<string[]>([]);
+// 用于显示颜色。
+let redAnswersMap = new Map<string,string[]>();
+let greenAnswersMap = new Map<string,string[]>();
+
+let redAnswers = ref<string[]>([]);
+let greenAnswers = ref<string[]>([]);
+
+
+const checkAnswer = () => {
+  redAnswers.value = [];
+  greenAnswers.value = [];
+  if (questionInfo.value.type === 1) {
+    greenAnswers.value.push(questionInfo.value.answers[0]);
+    if (selectedAnswer.value != questionInfo.value.answers[0]) {
+      redAnswers.value.push(selectedAnswer.value);
+    }
+  } else if (questionInfo.value.type === 2) {
+    for (let i = 0; i < questionInfo.value.options.length; i++) {
+      if  (questionInfo.value.answers.includes(questionInfo.value.answers[i])) {
+        greenAnswers.value.push(questionInfo.value.answers[i]);
+      } else if (selectedAnswers.value.includes(questionInfo.value.options[i])) {
+        redAnswers.value.push(questionInfo.value.options[i]);
+      }
+    }
+  } else if (questionInfo.value.type === 3) {
+    if (questionInfo.value.answers.includes(selectedAnswer.value)) {
+      greenAnswers.value.push(selectedAnswer.value);
+    } else {
+      redAnswers.value.push(selectedAnswer.value);
+    }
+  }
+
+
+  redAnswersMap.set(selectedQuestion.value.question_id, redAnswers.value);
+  greenAnswersMap.set(selectedQuestion.value.question_id, greenAnswers.value);
+}
+
 
 watch(selectedAnswer, async (newValue) => {
   if (newValue) {
@@ -455,6 +627,7 @@ watch(selectedAnswer, async (newValue) => {
 
 
 const submitAnswer = async () => {
+  buttonDisabled.value = true;
   let answers = [];
   let answer = "";
   if (questionInfo.value.type === 2) {
@@ -471,21 +644,16 @@ const submitAnswer = async () => {
     question_id: String(selectedQuestion.value.question_id),
     answer: answers
   })
+  questionScore.value = data.data.score;
   console.log(data);
   await updateRoomInfo();
 
-
-  // // 判断答案是否正确并更新分数
-  // const isCorrect = Array.isArray(question.answer)
-  //     ? JSON.stringify(question.myAnswer) === JSON.stringify(question.answer)
-  //     : question.myAnswer === question.answer;
-  // if (isCorrect) {
-  //   myScore.value += 10;
-  // }
+  // 检查答案
+  checkAnswer();
 
   // 清空选择
-  selectedAnswer.value = "";
-  selectedAnswers.value = [];
+  //selectedAnswer.value = "";
+  //selectedAnswers.value = [];
 };
 
 // 难度、类型转换函数部分

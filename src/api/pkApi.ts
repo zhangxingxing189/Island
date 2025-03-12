@@ -1,7 +1,7 @@
 import {useAxios} from "@/api/index";
 
 export function get_user_info(data: { user_id: string }) {
-    return useAxios.get("/api/common/user", {
+    return useAxios.get("/api/user/detail", {
         params: {
             user_id: data.user_id,
         },
