@@ -4,10 +4,10 @@
       <div class="center-content">
         <div class="tab-nav">
           <button
-            v-for="tab in tabs"
-            :key="tab.id"
-            :class="['tab-item', { active: activeTab === tab.id }]"
-            @click="activeTab = tab.id"
+              v-for="tab in tabs"
+              :key="tab.id"
+              :class="['tab-item', { active: activeTab === tab.id }]"
+              @click="activeTab = tab.id"
           >
             {{ tab.title }}
           </button>
@@ -18,21 +18,24 @@
           <template v-if="activeTab === 'follow'">
             <h3 class="section-title">关注动态</h3>
             <content-card
-              v-for="item in followList"
-              :key="item.id"
-              :data="item"
-              @like="handleLike"
+                v-for="item in followList"
+                :key="item.id"
+                :data="item"
+                @like="handleLike"
             />
+            <div v-if="!followList.length" class="empty">
+              暂无关注内容，快去关注你感兴趣的作者吧！
+            </div>
           </template>
 
           <!-- 推荐内容 -->
           <template v-if="activeTab === 'recommend'">
             <h3 class="section-title">热门推荐</h3>
             <content-card
-              v-for="item in recommendList"
-              :key="item.id"
-              :data="item"
-              @like="handleLike"
+                v-for="item in recommendList"
+                :key="item.id"
+                :data="item"
+                @like="handleLike"
             />
           </template>
 
@@ -52,8 +55,91 @@ import { ref, reactive, onMounted } from "vue";
 import ContentCard from "./ContentCard.vue";
 import HotList from "./HotList.vue";
 import { HotItem, ContentItem } from "./blogInterface";
+import {useRoute} from "vue-router";
+import {getArticleList} from "@/api/articleApi";
+import {formatTime} from "@/utils/formatters";
+import {getFollowList} from "@/api/focusApi";
 
-// 选项卡配置
+// 内容数据
+const followList = ref<ContentItem[]>([]);
+const recommendList = ref<ContentItem[]>([]);
+const hotList = ref<HotItem[]>([]);
+const route = useRoute();
+const loading = ref(false);
+const islandId = ref(route.query.islandId?.toString() || "50005");
+const followLoading = ref(false);
+
+// 获取关注文章
+const loadFollowArticles = async () => {
+  followLoading.value = true;
+  try {
+    // 先获取关注列表
+    const { data: followData } = await getFollowList({
+      page: 1,
+    });
+
+    // 获取关注用户的文章
+    const { data } = await getArticleList({
+      page: 1,
+      pageSize: 10,
+      userIds: followData.list.map(u => u.user_id)
+    });
+
+    followList.value = data.list.map(item => ({
+      id: item.id,
+      title: item.title,
+      brief: item.abstract,
+      cover: item.cover || 'https://api.yimian.xyz/img',
+      likes: item.digg_count,
+      comments: item.collect_count,
+      author: item.username,
+      timestamp: formatTime(new Date(item.created_at))
+    }));
+  }
+  catch (error) {
+    console.error("加载关注文章失败:", error);
+  }finally {
+    followLoading.value = false;
+  }
+};
+
+const loadRecommendArticles = async () => {
+  loading.value = true;
+  try {
+    const { data } = await getArticleList({
+      page: 1,
+      pageSize: 10,
+      order: 'desc',
+      islandId: islandId.value
+    });
+
+    recommendList.value = data.list.map((item): ContentItem => ({
+      id: item.id.toString(),
+      title: item.title,
+      brief: item.abstract,
+      cover: item.cover || 'https://api.yimian.xyz/img',
+      likes: Number(item.digg_count),
+      comments: Number(item.collect_count),
+      author: item.username,
+      timestamp: formatTime(new Date(item.created_at))
+    }));
+  } catch (error) {
+    console.error("加载推荐文章失败:", error);
+  } finally {
+    loading.value = false;
+  }
+};
+onMounted(async () => {
+  await Promise.all([
+    loadRecommendArticles(),  // 使用新的加载方法
+    loadFollowArticles(),
+    fetchData()
+  ]);
+});
+
+
+
+
 const tabs = [
   { id: "follow", title: "关注" },
   { id: "recommend", title: "推荐" },
@@ -61,10 +147,7 @@ const tabs = [
 ];
 const activeTab = ref("recommend");
 
-// 内容数据
-const followList = reactive<ContentItem[]>([]);
-const recommendList = reactive<ContentItem[]>([]);
-const hotList = reactive<HotItem[]>([]);
+
 
 // 模拟数据（使用用户提供的图片链接）
 const mockFollowData: ContentItem[] = [
@@ -75,6 +158,7 @@ const mockFollowData: ContentItem[] = [
     clickCount: 256,
     likes: 1500,
     author: "AI研究员",
+    brief: "人工智能的未来将如何影响我们的生活？",
     authorID: 1,
     timestamp: "2小时前",
   },
@@ -85,10 +169,11 @@ const mockRecommendData: ContentItem[] = [
     id: 12,
     title: "如何评价2023年人工智能发展趋势？",
     cover: "https://api.yimian.xyz/img",
+    brief: "人工智能的未来将如何影响我们的生活22？",
     clickCount: 256,
     likes: 1500,
     author: "AI研究员",
-    authorID: 1,
+    authorID: 2,
     timestamp: "2小时前",
   },
 ];
@@ -103,18 +188,12 @@ const mockHotData: HotItem[] = [
   },
 ];
 async function fetchData() {
-  followList.push(...mockFollowData);
-  recommendList.push(...mockRecommendData);
-  hotList.push(...mockHotData);
+  followList.value.push(...mockFollowData);
+  recommendList.value.push(...mockRecommendData);
+  hotList.value.push(...mockHotData);
 }
 
-const handleLike = (item: ContentItem) => {
-  console.log("Like item:", item.id);
-};
 
-onMounted(async () => {
-  await fetchData();
-});
 </script>
 
 <style scoped>

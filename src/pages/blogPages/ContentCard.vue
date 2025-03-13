@@ -6,15 +6,16 @@
     <div class="content">
       <h3 class="title">{{ data.title }}</h3>
       <div class="meta">
-        <span class="author">{{ data.author }}</span>
-        <span class="time">{{ data.timestamp }}</span>
+        <div class="brief">{{ data.brief || '暂无简介' }}</div>
       </div>
       <div class="stats">
         <button class="like-btn" @click.stop="handleLike">
           <i class="icon-like"></i>点赞 <i class="iconfont icon-dianzan"></i> {{ data.likes }}
         </button>
         <span class="comments">
-          <i class="icon-comment"></i> 观看数{{ data.comments }}
+          <i class="icon-comment"></i> 观看数:{{ data.comments }}
+          <span class="author">作者: {{ data.author }}</span>
+        <span class="time">{{ data.timestamp }}</span>
         </span>
       </div>
     </div>
@@ -79,8 +80,8 @@ const navigateToArticle = () => {
   }
 
   .meta {
-    color: #8590a6;
-    font-size: 12px;
+    color: #666;
+    font-size: 13px;
     margin-bottom: 8px;
   }
 
@@ -102,6 +103,9 @@ const navigateToArticle = () => {
 
     .comments {
       color: #8590a6;
+      display: flex;
+      align-items: center;
+      gap: 20px;
     }
   }
 }

@@ -26,6 +26,9 @@ export interface ArticleListResponse {
 export const getArticleList = (params: {
     page: number;
     pageSize: number;
+    userIds?: string[];
+    order?: string;
+    key?: string;
     islandId?: string;
 }): Promise<baseResponse<ArticleListResponse>> => {
     return useAxios.get("/api/articles", { params });
@@ -59,3 +62,4 @@ export const getOwnerCollectArticles = (params: {
 }): Promise<baseResponse<CollectArticleListResponse>> => {
     return useAxios.get("/api/article/collect/owner", { params });
 };
+
