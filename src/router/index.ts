@@ -16,8 +16,8 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/island", //计算机分岛
     name: "island",
-    component: () => import("../pages/blogPages/index.vue"),
-    props: route => ({ islandId: route.query.islandId }),
+    component: () => import("../pages/blogPages/newIndex.vue"),
+    props: (route) => ({ islandId: route.query.islandId }),
     // props: true,
     children: [
       // 添加默认重定向
