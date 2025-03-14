@@ -129,10 +129,31 @@ const loadRecommendArticles = async () => {
     loading.value = false;
   }
 };
+//热点
+const loadHotArticles = async () => {
+  try {
+    const { data } = await getArticleList({
+      page: 1,
+      pageSize: 10,
+      order: 'digg_count desc',
+    });
+
+    hotList.value = data.list.map((item, index) => ({
+      rank: index + 1,
+      title: item.title,
+      heat: item.digg_count,
+      contentItemID: item.id,
+      url: `/article/${item.id}`
+    }));
+  } catch (error) {
+    console.error("加载热榜数据失败:", error);
+  }
+};
 onMounted(async () => {
   await Promise.all([
     loadRecommendArticles(),  // 使用新的加载方法
     loadFollowArticles(),
+    loadHotArticles(),
     fetchData()
   ]);
 });

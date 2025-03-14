@@ -14,7 +14,7 @@ export type HotItem = {
   title: string;
   heat: number;
   url: string;
-  contentItemID: number;
+  contentItemID: string;
 };
 // 文章列表响应类型
 export interface ArticleListResponse {

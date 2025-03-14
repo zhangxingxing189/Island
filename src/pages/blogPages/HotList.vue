@@ -20,7 +20,12 @@
           target="_blank"
           rel="noopener noreferrer"
         >
-          {{ item.title }}
+          <router-link
+              :to="`/island/article/${item.contentItemID}`"
+              class="title"
+          >
+            {{ item.title }}
+          </router-link>
         </a>
         <span class="heat">
           {{ formatHeat(item.heat) }}

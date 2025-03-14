@@ -21,6 +21,14 @@
 
       <!-- 内容区域 -->
       <section class="content-section">
+        <mavon-editor
+            v-model="article.content"
+            :editable="false"
+            :subfield="false"
+            :toolbarsFlag="false"
+            defaultOpen="preview"
+            style="min-height: 500px; border: none;"
+        />
         <template v-for="(para, index) in formattedContent" :key="index">
           <p v-if="!para.startsWith('#')" class="content-para">{{ para }}</p>
           <h3 v-else class="content-subtitle">{{ para.slice(1) }}</h3>
@@ -61,12 +69,34 @@
 import { ref, computed, onMounted, reactive } from "vue";
 import type { ContentItem } from "./blogInterface";
 import { ArticleListItem, getArticleList } from "@/api/articleApi";
+import {formatTime} from "@/utils/formatters";
 
 const props = defineProps<{ id: string }>();
 const articleData = ref<ContentItem>();
 
 onMounted(async () => {
-  // articleData.value = await fetchArticleById(props.id); // 根据 ID 请求接口,还没写好,暂时写个模拟数据
+  try {
+    const { data } = await getArticleList({
+      page: 1,
+      pageSize: 1,
+      ids: [props.id]
+    });
+
+    if(data.list.length > 0) {
+      article.value = {
+        id: data.list[0].id,
+        title: data.list[0].title,
+        content: data.list[0].content,
+        cover: data.list[0].cover,
+        likes: data.list[0].digg_count,
+        comments: data.list[0].collect_count,
+        author: data.list[0].username,
+        timestamp: formatTime(new Date(data.list[0].created_at))
+      }
+    }
+  } catch (error) {
+    console.error("加载文章详情失败:", error);
+  }
 });
 // 响应式数据
 const isLiked = ref(false);
