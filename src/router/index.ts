@@ -87,6 +87,11 @@ const routes: Array<RouteRecordRaw> = [
     name: "pk-room",
     component: () => import("../pages/quiz/pk_room.vue"),
   },
+  {
+    path: "/quiz/create-question",
+    name: "create-question",
+    component: () => import("../pages/quiz/create-question.vue"),
+  }
 ];
 
 const router = createRouter({
