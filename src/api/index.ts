@@ -38,7 +38,7 @@ useAxios.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
-
+    console.log(error);
     // Token过期且未重试过
     if (error.response?.code === -20000 && !originalRequest._retry) {
       originalRequest._retry = true;

@@ -39,9 +39,6 @@
         <a-avatar :src="currentUser.avatar" @click="navigateToPersonalCenter" />
       </div>
     </header>
-    <div class="main" :class="{ 'main-height': isSelectStore }" :key="isSelect">
-      <router-view></router-view>
-    </div>
   </div>
 </template>
 
@@ -53,6 +50,7 @@ import { useDebounceFn } from "@vueuse/core";
 import { checkLogin } from "@/pages/userPages/loginFunction";
 import { login } from "@/pages/home/UIFunction";
 import { useLayoutStore } from "@/stores/layoutStore";
+import { checkLoginAuto } from "@/api/loginApi";
 
 const router = useRouter();
 const route = useRoute();
@@ -93,7 +91,7 @@ const navigateToPersonalCenter = () => {
 
 const handleQuizClick = async () => {
   isSelect.value = false;
-  await nextTick(); // 等待DOM更新
+  // await nextTick(); // 等待DOM更新
 
   await router.push({
     path: "/quiz",
@@ -124,11 +122,6 @@ html,
 body {
   height: 100%;
   margin: 0;
-}
-.main {
-}
-.main-height {
-  height: calc(100vh - 64px);
 }
 /* 新增容器样式 */
 .app-container {

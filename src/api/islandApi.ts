@@ -66,3 +66,7 @@ export async function getIslandMessages() {
 
   return islands;
 }
+
+export async function createIsland(newIsland: Island) {
+  return await axios.post("/api/island", newIsland);
+}
