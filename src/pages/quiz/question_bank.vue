@@ -29,7 +29,12 @@
       <!-- PK匹配按钮 -->
       <button
           @click="startPKMatch"
-          class="!rounded-button mb-4 bg-gradient-to-r from-purple-600 to-blue-500 text-white py-3 flex items-center justify-center gap-2 hover:opacity-90 cursor-pointer whitespace-nowrap"
+          class="!rounded-button mb-4 text-white py-3 flex items-center justify-center gap-2  cursor-pointer whitespace-nowrap "
+          :class = "{
+            'bg-gradient-to-r from-purple-600 to-blue-500 hover:opacity-90' : hasPK,
+            'bg-gray-300' : !hasPK
+          }"
+          :disabled="!hasPK"
       >
         <i class="fas fa-gamepad"></i>
         <span>开始 PK 匹配</span>
@@ -264,11 +269,13 @@ const cancelPKMatch = () => {
 
 // 获取题库信息
 let questionBankName = ref("题库名")
+let hasPK = ref(false);
 
 onMounted(async () => {
   try {
     const data = await get_question_bank({question_bank_id: String(route.params.id)})
     questionBankName.value = data.data.title
+    hasPK.value = data.data.has_pk
     //console.log(data.data.title);
   } catch (error) {
     console.error("获取题库信息失败:", error);
