@@ -66,7 +66,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { mavonEditor } from "mavon-editor";
 import "mavon-editor/dist/css/index.css";
@@ -75,6 +75,7 @@ import { getIslandMessages } from "@/api/islandApi";
 import { useRouter } from "vue-router";
 import { createArticle, getArticleList } from "@/api/articleApi";
 import { message } from "ant-design-vue";
+import  { IslandItem } from "./blogInterface.ts";
 const formData = ref({
   title: "",
   brief: "",
@@ -85,11 +86,16 @@ const formData = ref({
 
 const islandList = ref([]);
 
+
 // 获取分类数据
 onMounted(async () => {
   try {
     const data = await getIslandMessages();
-    islandList.value = Object.values(data.islandMsg);
+
+    islandList.value = Object.values(data.islandMsg).map((item: any) => ({
+      id: item.id,
+      name: item.islandName
+    }));
   } catch (error) {
     console.error("获取分类失败:", error);
   }
@@ -135,7 +141,7 @@ const handleSubmit = async () => {
       title: formData.value.title,
       content: formData.value.content,
       cover: formData.value.cover,
-      islandId: formData.value.island,
+      island: formData.value.island
     });
 
     if (data.code === 200) {

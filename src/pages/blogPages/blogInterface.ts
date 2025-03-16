@@ -31,3 +31,9 @@ export interface ArticleListResponse {
   total: number;
 }
 export type CreateType = "question" | "answer" | "article" | "idea";
+
+export interface IslandItem {
+  id: string;
+  islandName: string;
+
+}

@@ -73,7 +73,7 @@
       <aside class="sidebar">
         <div class="stats-card">
           <h3 class="stats-title">创作中心</h3>
-          <button class="btn create-btn">开始创作</button>
+          <button class="btn create-btn" @click="handlePublish">开始创作</button>
           <div class="follower-stats">
             <div class="stat-item">
               <span class="stat-number">{{ userInfo.following }}</span>
@@ -109,7 +109,12 @@
 <script setup lang="ts">
 import { ref, computed, reactive } from "vue";
 import { useUserStore } from "@/stores/user";
+import { useRouter } from 'vue-router';
+const router = useRouter();
 
+const handlePublish = () => {
+  router.push({ name: 'publish' });
+};
 // 类型定义
 interface UserInfo {
   avatar: string;
@@ -140,12 +145,12 @@ const userInfo = reactive<UserInfo>({
 
 // 导航标签
 const tabs = [
-  { id: "dynamic", name: "动态" },
+ // { id: "dynamic", name: "动态" },
   // { id: "answer", name: "回答" },
-  { id: "video", name: "视频" },
+  //{ id: "video", name: "视频" },
   // { id: "question", name: "提问" },
-  { id: "article", name: "文章" },
-  { id: "column", name: "专栏" },
+  { id: "article", name: "我的文章" },
+  //{ id: "column", name: "专栏" },
   { id: "idea", name: "想法" },
   { id: "collection", name: "收藏" },
   { id: "subscription", name: "关注订阅" },

@@ -30,8 +30,9 @@ export const getArticleList = (params: {
     order?: string;
     key?: string;
     islandId?: string;
+    islandName?: string;
 }): Promise<baseResponse<ArticleListResponse>> => {
-    return useAxios.get("/api/articles", { params });
+    return useAxios.get("/api/article", { params });
 };
 
 
@@ -63,3 +64,14 @@ export const getOwnerCollectArticles = (params: {
     return useAxios.get("/api/article/collect/owner", { params });
 };
 
+export interface CreateArticleParams {
+    title: string;
+    content: string;
+    cover?: string;
+    island: string;
+}
+
+// 创建文章接口
+export const createArticle = (params: CreateArticleParams) => {
+    return useAxios.post("/api/article", {params});
+};
