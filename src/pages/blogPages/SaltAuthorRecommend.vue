@@ -113,12 +113,13 @@ const coverFile = ref<File | null>(null);  // 新增文件存储
 const handleCoverUpload = async (event) => {
   const file = event.target.files[0];
   if (file) {
+    // 仅进行本地预览
     const reader = new FileReader();
     reader.onload = (e) => {
-
-      formData.value.cover = e.target.result as string;
+      formData.value.cover = e.target.result as string; // 临时使用本地URL
     };
     reader.readAsDataURL(file);
+    coverFile.value = file; // 存储文件对象用于后续提交
   }
 };
 
@@ -139,14 +140,13 @@ const handleEditorImageUpload = async (file, insertImage) => {
 
 // 提交方法
 const handleSubmit = async () => {
-  // try {
-  //   const { data } = await createArticle({
-  //     title: formData.value.title,
-  //     content: formData.value.content,
-  //     abstract: formData.value.brief,
-  //     cover: formData.value.cover,
-  //     island: formData.value.island
-  //   });
+  try {
+    // 如果有封面文件，先上传
+    if (coverFile.value) {
+      const { data } = await uploadImage(coverFile.value);
+      formData.value.cover = data; // 替换为服务器URL
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
        console.log(formData.value);
        const res = await createArticle({
          title: formData.value.title,
@@ -155,17 +155,15 @@ const handleSubmit = async () => {
          cover: formData.value.cover,
          island: formData.value.island
        });
-       console.log(res);
-  //   if (data.code === 200) {
-  //     message.success("文章创建成功");
-  //     router.push(`/article/${data.data.id}`);
-  //   } else {
-  //     message.error(data.msg);
-  //   }
-  // } catch (error) {
-  //   message.error("文章提交失败");
-  //   console.error("提交错误:", error);
-  // }
+    console.log(res);
+   message.success("文章创建成功");
+    router.push(`/article/${res.data.id}`);
+  } catch (error) {
+    console.error("提交错误:", error);
+    message.error("文章提交失败");
+  } finally {
+    coverFile.value = null; // 清除临时文件
+  }
 };
 
 const router = useRouter();
