@@ -44,8 +44,10 @@ export interface OwnerArticleListResponse {
 // 获取用户文章
 export const getOwnerArticleList = (params: {
     page: number;
-    pageSize: number;
-    ownerId?: string;
+    limit?: number;
+    order?: string;
+    key?: string;
+    user_id?: string;
 }): Promise<baseResponse<OwnerArticleListResponse>> => {
     return useAxios.get("/api/article/owner", { params });
 };
@@ -66,6 +68,7 @@ export const getOwnerCollectArticles = (params: {
 
 export interface CreateArticleParams {
     title: string;
+    abstract: string;
     content: string;
     cover?: string;
     island: string;
@@ -73,5 +76,6 @@ export interface CreateArticleParams {
 
 // 创建文章接口
 export const createArticle = (params: CreateArticleParams) => {
-    return useAxios.post("/api/article", {params});
+    console.log(params);
+    return useAxios.post("/api/article", params);
 };

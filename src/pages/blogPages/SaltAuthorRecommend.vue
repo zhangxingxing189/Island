@@ -75,7 +75,7 @@ import { getIslandMessages } from "@/api/islandApi";
 import { useRouter } from "vue-router";
 import { createArticle, getArticleList } from "@/api/articleApi";
 import { message } from "ant-design-vue";
-import  { IslandItem } from "./blogInterface.ts";
+import { uploadImage } from "@/api/commonApi";
 const formData = ref({
   title: "",
   brief: "",
@@ -91,7 +91,7 @@ const islandList = ref([]);
 onMounted(async () => {
   try {
     const data = await getIslandMessages();
-
+    console.log(data);
     islandList.value = Object.values(data.islandMsg).map((item: any) => ({
       id: item.id,
       name: item.islandName
@@ -108,12 +108,15 @@ const triggerFileUpload = () => {
   fileInput.value.click();
 };
 
+const coverFile = ref<File | null>(null);  // 新增文件存储
+
 const handleCoverUpload = async (event) => {
   const file = event.target.files[0];
   if (file) {
     const reader = new FileReader();
     reader.onload = (e) => {
-      formData.value.cover = e.target.result;
+
+      formData.value.cover = e.target.result as string;
     };
     reader.readAsDataURL(file);
   }
@@ -136,24 +139,33 @@ const handleEditorImageUpload = async (file, insertImage) => {
 
 // 提交方法
 const handleSubmit = async () => {
-  try {
-    const { data } = await createArticle({
-      title: formData.value.title,
-      content: formData.value.content,
-      cover: formData.value.cover,
-      island: formData.value.island
-    });
-
-    if (data.code === 200) {
-      message.success("文章创建成功");
-      router.push(`/article/${data.data.id}`);
-    } else {
-      message.error(data.msg);
-    }
-  } catch (error) {
-    message.error("文章提交失败");
-    console.error("提交错误:", error);
-  }
+  // try {
+  //   const { data } = await createArticle({
+  //     title: formData.value.title,
+  //     content: formData.value.content,
+  //     abstract: formData.value.brief,
+  //     cover: formData.value.cover,
+  //     island: formData.value.island
+  //   });
+       console.log(formData.value);
+       const res = await createArticle({
+         title: formData.value.title,
+         content: formData.value.content,
+         abstract: formData.value.brief,
+         cover: formData.value.cover,
+         island: formData.value.island
+       });
+       console.log(res);
+  //   if (data.code === 200) {
+  //     message.success("文章创建成功");
+  //     router.push(`/article/${data.data.id}`);
+  //   } else {
+  //     message.error(data.msg);
+  //   }
+  // } catch (error) {
+  //   message.error("文章提交失败");
+  //   console.error("提交错误:", error);
+  // }
 };
 
 const router = useRouter();

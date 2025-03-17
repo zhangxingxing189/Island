@@ -47,10 +47,10 @@
           <span class="count">{{ article.likes + (isLiked ? 1 : 0) }}</span>
         </button>
 
-        <div class="comment-info">
-          <i class="icon-eye"></i>
-          <span>{{ article.comments }}次浏览</span>
-        </div>
+<!--        <div class="comment-info">-->
+<!--          <i class="icon-eye"></i>-->
+<!--          <span>{{ article.comments }}次浏览</span>-->
+<!--        </div>-->
       </footer>
 
       <!-- 评论区 -->

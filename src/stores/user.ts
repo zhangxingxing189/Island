@@ -4,8 +4,10 @@ import { defineStore } from "pinia";
 export interface User {
   username: string;
   avatar: string;
+  nickname?: string;
   atoken: string;
   rtoken: string;
+  user_id: string;
   // 其他用户属性
 }
 

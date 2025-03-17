@@ -17,6 +17,7 @@ import { useUserStore, User } from "@/stores/user";
 import router from "@/router";
 import { useRoute } from "vue-router";
 import { post_QQCode } from "@/api/loginApi";
+import JSONbig from "json-bigint";
 // import clock from "@/pages/clock.vue";
 let route = useRoute();
 let userStore = useUserStore();
@@ -35,18 +36,38 @@ async function QQ() {
   if (code !== undefined && code !== null) {
     const res = await post_QQCode(code);
     if (res.code === 20000) {
+      console.log(res.data);
+      const tokenData = parseJWT(res.data.atoken);
+      if(tokenData) {
+        console.log('用户ID:', tokenData.userid);
+      }
       let userInfo: User = {
         username: res.data.username,
         avatar: res.data.avatar,
         atoken: res.data.atoken,
         rtoken: res.data.rtoken,
+        user_id:tokenData.userid,
       };
+      console.log(userInfo);
       userStore.currentUser = userInfo;
       await userStore.setCurrentUser(userInfo);
       router.push("/");
     }
   }
 }
+const parseJWT = (token: string) => {
+  if (!token) return null;
+
+  try {
+    const base64Payload = token.split('.')[1];
+    const payload = atob(base64Payload.replace(/-/g, '+').replace(/_/g, '/'));
+
+    return JSONbig({ storeAsString: true }).parse(payload);
+  } catch (error) {
+    console.error('Token 解析失败:', error);
+    return null;
+  }
+};
 function safePageRedirect(url) {
   try {
     // 尝试通过修改 location 实现跳转

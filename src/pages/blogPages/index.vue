@@ -30,9 +30,9 @@
         </div>
         <div class="publish-btn" @click="handleQuizClick">
           <i class="iconfont"
-            ><img src="@/assets/images/题库.png" alt="题库" style="width: 22px"
+            ><img src="@/assets/images/题库.png" alt="题库" style="width: 22px; display: block;"
           /></i>
-          <p>刷题</p>
+          <p >刷题</p>
         </div>
       </div>
       <div class="user-info">
@@ -205,6 +205,7 @@ body {
   cursor: pointer;
 }
 
+
 .publish-btn:hover {
   color: var(--primary-color);
 }
@@ -217,6 +218,9 @@ body {
   font-size: 22px;
   margin-bottom: 1px;
   transition: transform 0.3s;
+  height: 30px;  
+  display: flex;
+  align-items: center;
 }
 
 .publish-btn p {

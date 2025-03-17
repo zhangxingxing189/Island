@@ -37,15 +37,17 @@ export interface List {
   yPoint: number;
 }
 export async function getIslandMessages() {
-  let res = await axios.get("/api/island"); // 指定响应类型为 Response
-  // console.log(res.data.data.list);
+  let res = await useAxios.get("/api/island"); // 指定响应类型为 Response
+  console.log(res);
   const islands: IslandType = {
     islandPosition: [],
     islandMsg: {},
   };
   // 遍历 list 数据
-  res.data.data.list.forEach((item) => {
+
+  res.data.list.forEach((item) => {
     // 1. 转换每个 list 项为 Island 并存入 islandMsg
+
     const islandKey = item.id; // 假设 name 是唯一键
     islands.islandMsg[islandKey] = {
       imageUrl: item.path, // 对应 list.path -> Island.imageUrl
@@ -63,7 +65,7 @@ export async function getIslandMessages() {
       y: item.yPoint,
     });
   });
-
+  console.log(islands);
   return islands;
 }
 

@@ -14,7 +14,7 @@
         <div class="avatar-container">
           <img :src="userInfo.avatar" class="avatar" alt="用户头像" />
           <div class="nickname-ip">
-            <h1 class="nickname">{{ userInfo.nickname }}</h1>
+            <h1 class="nickname">{{ userInfo.username }}</h1>
             <span class="ip">属地：{{ userInfo.ipLocation }}</span>
           </div>
         </div>
@@ -45,6 +45,42 @@
 
         <!-- 动态列表 -->
         <div class="dynamic-list">
+          <!-- 在此处添加关注列表模板 -->
+          <template v-if="activeTab === 'focus'">
+            <div v-if="isLoading" class="loading">加载中...</div>
+            <div v-else-if="!followList.length" class="empty">暂无关注用户</div>
+            <div v-for="item in followList" :key="item.user_id" class="follow-item">
+              <img
+                  :src="item.avatar || '/default-avatar.png'"
+                  class="follow-avatar"
+                  alt="用户头像"
+              />
+              <div class="follow-info">
+                <h4 class="follow-name">{{ item.username }}</h4>
+                <p v-if="item.latest_article" class="latest-article">
+                  {{ item.latest_article.title }}
+                </p>
+              </div>
+            </div>
+          </template>
+          <template v-else-if="activeTab === 'article'">
+            <div v-if="isLoading" class="loading">加载中...</div>
+            <div v-else-if="articleList.length === 0" class="empty">暂无发表文章</div>
+            <div v-for="article in articleList" :key="article.id" class="article-item">
+              <div class="article-cover" v-if="article.cover">
+                <img :src="article.cover" alt="文章封面" />
+              </div>
+              <div class="article-content">
+                <h3 class="article-title">{{ article.title }}</h3>
+                <p class="article-abstract">{{ article.abstract }}</p>
+                <div class="article-meta">
+                  <span class="digg-count">❤️ {{ article.digg_count }}</span>
+                  <span class="collect-count">⭐ {{ article.collect_count }}</span>
+                  <time class="create-time">{{ formatDate(article.created_at) }}</time>
+                </div>
+              </div>
+            </div>
+          </template>
           <div
             v-for="(item, index) in filteredDynamics"
             :key="index"
@@ -86,7 +122,7 @@
           </div>
         </div>
 
-        <div class="quick-links">
+<!--        <div class="quick-links">
           <h3 class="links-title">我的关注</h3>
           <div class="link-item">
             <span class="link-name">话题</span>
@@ -100,28 +136,39 @@
             <span class="link-name">收藏夹</span>
             <span class="link-count">8</span>
           </div>
-        </div>
+        </div>-->
       </aside>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive } from "vue";
+import {ref, computed, reactive, watchEffect} from "vue";
 import { useUserStore } from "@/stores/user";
 import { useRouter } from 'vue-router';
+import {ArticleListItem, getArticleList, getOwnerArticleList, getOwnerCollectArticles} from "@/api/articleApi";
+import {FollowItem, getFollowList} from "@/api/focusApi";
 const router = useRouter();
+const userStore = useUserStore();
+console.log( userStore.currentUser);
 
+const user_id = ref(userStore.currentUser.user_id);
+console.log( user_id.value );
 const handlePublish = () => {
   router.push({ name: 'publish' });
+};
+
+const formatDate = (isoString: string) => {
+  const date = new Date(isoString);
+  return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
 };
 // 类型定义
 interface UserInfo {
   avatar: string;
   username: string;
-  ipLocation: string;
-  following: number;
-  followers: number;
+  atoken: string;
+  rtoken: string;
+  user_id: string;
 }
 
 interface DynamicItem {
@@ -132,7 +179,71 @@ interface DynamicItem {
   time: string;
   showMore: boolean;
 }
+const activeTab = ref("focus");
+//const activeTab = ref("dynamic");
+const followList = ref<FollowItem[]>([]);
+const articleList = ref<ArticleListItem[]>([]);
+const collectList = ref<ArticleListItem[]>([]);
+const isLoading = ref(false);
 
+// 加载关注列表
+const loadFollows = async () => {
+  try {
+    isLoading.value = true;
+    const res = await getFollowList({
+      user_id: user_id.value,
+      limit: 10
+    });
+    console.log(res);
+    followList.value = res.data.list;
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// 加载我的文章
+const loadArticles = async () => {
+  try {
+    isLoading.value = true;
+    const res = await getOwnerArticleList({
+      user_id: user_id.value,
+      page: 1
+    });
+    console.log(res);
+    articleList.value = res.data.list;
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// 加载收藏文章
+const loadCollects = async () => {
+  try {
+    isLoading.value = true;
+    const res = await getOwnerCollectArticles({
+      page: 1,
+      pageSize: 10
+    });
+    collectList.value = res.data.list;
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// 监听标签切换
+watchEffect(() => {
+  switch(activeTab.value) {
+    case 'focus':
+      loadFollows();
+      break;
+    case 'article':
+      loadArticles();
+      break;
+    case 'collection':
+      loadCollects();
+      break;
+  }
+});
 // 用户信息
 const user = useUserStore();
 const userInfo = reactive<UserInfo>({
@@ -149,14 +260,15 @@ const tabs = [
   // { id: "answer", name: "回答" },
   //{ id: "video", name: "视频" },
   // { id: "question", name: "提问" },
+  {id:"focus",name:"我的关注"},
   { id: "article", name: "我的文章" },
   //{ id: "column", name: "专栏" },
-  { id: "idea", name: "想法" },
+  //{ id: "idea", name: "想法" },
   { id: "collection", name: "收藏" },
-  { id: "subscription", name: "关注订阅" },
+  //{ id: "subscription", name: "关注订阅" },
 ];
 
-const activeTab = ref("dynamic");
+
 
 // 动态数据
 const dynamics = reactive<DynamicItem[]>([
@@ -257,12 +369,19 @@ const filteredDynamics = computed(() => {
 .nickname {
   margin: 0;
   font-size: 24px;
+  color: white;
+  font-weight: bold;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-
+.nickname-ip {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
 .ip {
-  margin: 10px;
   color: var(--text-secondary);
   font-size: 14px;
+  margin: 10px 0 0;
 }
 
 /* 导航栏 */
@@ -340,6 +459,40 @@ const filteredDynamics = computed(() => {
   margin-top: 16px;
 }
 
+/* 关注列表项样式 */
+.follow-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 8px;
+  background: var(--bg-color);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.follow-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 16px;
+  border: 1px solid var(--border-color);
+}
+
+.follow-name {
+  margin: 0;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.latest-article {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .stat-item {
   text-align: center;
 }
@@ -391,6 +544,58 @@ const filteredDynamics = computed(() => {
 
   .nav-list {
     overflow-x: auto;
+  }
+}
+
+.article-item {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: var(--bg-color);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.article-cover {
+  width: 120px;
+  height: 80px;
+  flex-shrink: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+}
+
+.article-title {
+  margin: 0 0 8px;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.article-abstract {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.article-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
   }
 }
 </style>
