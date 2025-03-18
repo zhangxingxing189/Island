@@ -120,24 +120,6 @@ const loadFollowArticles = async () => {
           author: item.username,
           timestamp: formatTime(new Date(item.created_at))
         }));
-
-    // 获取关注用户的文章
-    const { data } = await getArticleList({
-      page: 1,
-      pageSize: 10,
-      userIds: followData.list.map((u) => u.user_id),
-    });
-
-    followList.value = data.list.map((item) => ({
-      id: item.id,
-      title: item.title,
-      brief: item.abstract,
-      cover: item.cover || "https://api.yimian.xyz/img",
-      likes: item.digg_count,
-      comments: item.collect_count,
-      author: item.username,
-      timestamp: formatTime(new Date(item.created_at)),
-    }));
   } catch (error) {
     console.error("加载关注文章失败:", error);
   } finally {
