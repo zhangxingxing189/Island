@@ -157,16 +157,18 @@ const loadRecommendArticles = async () => {
   try {
     const { data } = await getArticleList({
       page: 1,
-      pageSize: 10,
-      order: "desc",
+      pageSize: 15,
+      order: "",
       islandId: islandId.value,
+      islandName: route.query.islandName?.toString()
     });
 
     recommendList.value = data.list.map(
       (item): ContentItem => ({
         id: item.id.toString(),
         title: item.title,
-        brief: item.abstract,
+        abstract: item.abstract,
+        content: item.content,
         cover: item.cover || "https://api.yimian.xyz/img",
         likes: Number(item.digg_count),
         comments: Number(item.collect_count),

@@ -84,6 +84,14 @@ export const createArticle = (params: CreateArticleParams) => {
     return useAxios.post("/api/article", params);
 };
 //文章删除
-export const deleteArticle = (id: string) => {
-    return useAxios.delete(`/api/article/${id}`);
+export const deleteArticle = (ids: string[]) => {
+    console.log('删除请求参数:', { ids });
+    return useAxios.delete("/api/article", {
+        data: { ids },  // 使用data字段传数组
+        headers: {
+            "Content-Type": "application/json", // 明确指定内容类型
+            "Authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJEV01BVF8xIiwidXNlck5hbWUiOiLmnKvmnZcigm2mm2EnmJOkIiwiZ3JvdXBzIjpbeyJpZCI6IkRXTUFUXzEiLCJyb2xlIjoiYWRtaW4ifV0sImlhdCI6MTY4NzQ4MjYyMywiZXhwIjoxNjg3NTY2NjIzfQ.ErYjw5kIiwiZXhwIjo0MDQxMjc1OTY2LCJpc3MiOiJ0dW5rdW5nIiwiYXVkIjoidHVua3VuZyJ9.MFbMnACeKAZf5bGi02MVk6mpMABQICn165bAapPlo30"
+
+        }
+    });
 };

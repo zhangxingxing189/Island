@@ -75,14 +75,7 @@
                 <p class="article-abstract">{{ article.abstract }}</p>
 
                 <div class="article-meta">
-                  <el-button
-                      type="danger"
-                      size="mini"
-                      @click.stop="handleDelete(article.id)"
-                      class="delete-btn"
-                  >
-                    删除
-                  </el-button>
+                  <el-button @click.stop="showDeleteDialog(article.id)">删除</el-button>
                   <span class="digg-count">❤️ {{ article.digg_count }}</span>
                   <span class="collect-count">⭐ {{ article.collect_count }}</span>
                   <time class="create-time">{{ formatDate(article.created_at) }}</time>
@@ -149,6 +142,32 @@
       </aside>
     </div>
   </div>
+  <div v-if="isDeleteDialogVisible" class="custom-dialog-mask">
+    <div class="custom-dialog">
+      <h3>确认删除文章吗？</h3>
+      <div class="dialog-buttons">
+        <button @click="confirmDelete" class="confirm-btn">确认删除</button>
+        <button @click="cancelDelete" class="cancel-btn">取消操作</button>
+      </div>
+    </div>
+  </div>
+  <div v-if="showCustomDialog" class="custom-dialog-mask">
+    <div class="custom-dialog" :class="dialogType">
+      <div class="dialog-header">
+        <h3>{{ dialogTitle }}</h3>
+      </div>
+      <div class="dialog-body">
+        <p>{{ dialogMessage }}</p>
+      </div>
+      <div class="dialog-footer">
+        <template v-if="dialogTitle === '删除确认'">
+          <button class="btn cancel-btn" @click="showCustomDialog = false">取消</button>
+          <button class="btn confirm-btn" @click="confirmDelete">确认删除</button>
+        </template>
+        <button v-else class="btn confirm-btn" @click="showCustomDialog = false">确定</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -162,7 +181,7 @@ import {
   getOwnerArticleList,
   getOwnerCollectArticles
 } from "@/api/articleApi";
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ElNotification } from 'element-plus';
 import {FollowItem, getFollowList} from "@/api/focusApi";
 const router = useRouter();
 const userStore = useUserStore();
@@ -293,7 +312,7 @@ const dynamics = reactive<DynamicItem[]>([
     type: "关注了问题",
     title: "如何评价Vue3的Composition API？",
     content:
-      "Vue3的Composition API为开发者提供了更灵活的逻辑组织方式，相比Options API有以下优势...（此处省略200字）",
+        "Vue3的Composition API为开发者提供了更灵活的逻辑组织方式，相比Options API有以下优势...（此处省略200字）",
     time: "2024-02-21 14:30",
     showMore: false,
   },
@@ -304,28 +323,158 @@ const dynamics = reactive<DynamicItem[]>([
 const filteredDynamics = computed(() => {
   return dynamics.filter((item) => item.type === activeTab.value);
 });
-const handleDelete = async (id: string) => {
-  try {
-    await ElMessageBox.confirm('此操作将永久删除该文章，是否继续？', '删除确认', {
-      confirmButtonText: '确定删除',
-      cancelButtonText: '取消',
-      customClass: 'delete-confirm-box', // 添加自定义样式类
-      confirmButtonClass: 'confirm-delete-btn', // 确认按钮样式
-      cancelButtonClass: 'cancel-delete-btn' // 取消按钮样式
-    });
+const isDeleteDialogVisible = ref(false)
+const deletingArticleId = ref<string | null>(null)
 
-    await deleteArticle(id);
-    articleList.value = articleList.value.filter(article => article.id !== id);
-    ElMessage.success('删除成功');
+const showDeleteDialog = (id: string) => {
+  isDeleteDialogVisible.value = true
+  deletingArticleId.value = id
+}
+
+const showCustomDialog = ref(false);
+const dialogTitle = ref('');
+const dialogMessage = ref('');
+const dialogType = ref<'success' | 'error'>('success');
+
+const confirmDelete = async () => {
+  if (!deletingArticleId.value) return
+
+  try {
+    await deleteArticle([deletingArticleId.value])
+    articleList.value = articleList.value.filter(a => a.id !== deletingArticleId.value)
+    dialogTitle.value = '操作成功';
+    dialogMessage.value = '文章已删除';
+    dialogType.value = 'success';
+    showCustomDialog.value = true;
   } catch (error) {
-    if (error !== 'cancel') {
-      ElMessage.error('删除失败，请稍后重试');
-    }
+    dialogTitle.value = '操作失败';
+    dialogMessage.value = '删除文章失败，请稍后重试';
+    dialogType.value = 'error';
+    showCustomDialog.value = true;
+  } finally {
+    isDeleteDialogVisible.value = false
   }
-};
+}
+
+const cancelDelete = () => {
+  isDeleteDialogVisible.value = false
+  deletingArticleId.value = null
+}
+
 </script>
 
 <style>
+.custom-dialog-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.custom-dialog {
+  background: white;
+  border-radius: 8px;
+  width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dialog-header {
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.dialog-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.dialog-body {
+  padding: 24px 16px;
+  text-align: center;
+}
+
+.dialog-footer {
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.confirm-btn {
+  background: #0084ff;
+  color: white;
+}
+
+/* 成功/错误状态样式 */
+.custom-dialog.success .dialog-header {
+  background: #f6ffed;
+  border-color: #b7eb8f;
+}
+
+.custom-dialog.error .dialog-header {
+  background: #fff2f0;
+  border-color: #ffccc7;
+}
+.custom-dialog-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-dialog {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  width: 400px;
+  text-align: center;
+}
+
+.dialog-buttons {
+  margin-top: 20px;
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.confirm-btn {
+  background: #f56c6c;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+}
+
+.cancel-btn {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 8px 16px;
+  border-radius: 4px;
+}
 :root {
   --primary-color: #0084ff;
   --text-primary: #1a1a1a;
@@ -620,20 +769,7 @@ const handleDelete = async (id: string) => {
     text-decoration: underline;
   }
 }
-.delete-confirm-box {
-  max-width: 400px;
-  border-radius: 8px;
-}
 
-.confirm-delete-btn {
-  background-color: #f56c6c !important;
-  border-color: #f56c6c !important;
-}
-
-.cancel-delete-btn {
-  background-color: #fff !important;
-  color: #606266 !important;
-}
 .delete-btn {
   margin-left: auto;
   padding: 4px 8px;
