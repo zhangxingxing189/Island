@@ -103,7 +103,6 @@ const loadFollowArticles = async () => {
       pageSize: 20
     });
 
-<<<<<<< HEAD
     // 使用Set优化匹配效率
     const followUserIds = new Set(followData.list.map(item => item.user_id));
 
@@ -113,6 +112,7 @@ const loadFollowArticles = async () => {
         .map((item): ContentItem => ({
           id: item.id.toString(),
           title: item.title,
+          content: item.content,
           abstract: item.abstract,
           cover: item.cover || 'https://api.yimian.xyz/img',
           likes: Number(item.digg_count),
@@ -121,7 +121,6 @@ const loadFollowArticles = async () => {
           timestamp: formatTime(new Date(item.created_at))
         }));
 
-=======
     // 获取关注用户的文章
     const { data } = await getArticleList({
       page: 1,
@@ -139,7 +138,6 @@ const loadFollowArticles = async () => {
       author: item.username,
       timestamp: formatTime(new Date(item.created_at)),
     }));
->>>>>>> 2cafd9850585d3eb2e22583f251ed148b8f13140
   } catch (error) {
     console.error("加载关注文章失败:", error);
   } finally {
@@ -225,10 +223,7 @@ onMounted(async () => {
     loadRecommendArticles(), // 使用新的加载方法
     loadFollowArticles(),
     loadHotArticles(),
-<<<<<<< HEAD
-=======
-    fetchData(),
->>>>>>> 2cafd9850585d3eb2e22583f251ed148b8f13140
+
   ]);
 });
 
@@ -239,56 +234,6 @@ const tabs = [
 ];
 const activeTab = ref("recommend");
 
-<<<<<<< HEAD
-
-
-
-
-=======
-// 模拟数据（使用用户提供的图片链接）
-const mockFollowData: ContentItem[] = [
-  {
-    id: "2",
-    title: "如何评价2023年人工智能发展趋势？",
-    cover: "https://api.yimian.xyz/img",
-    clickCount: 256,
-    likes: 1500,
-    author: "AI研究员",
-    brief: "人工智能的未来将如何影响我们的生活？",
-    authorID: 1,
-    timestamp: "2小时前",
-  },
-];
-
-const mockRecommendData: ContentItem[] = [
-  {
-    id: 12,
-    title: "如何评价2023年人工智能发展趋势？",
-    cover: "https://api.yimian.xyz/img",
-    brief: "人工智能的未来将如何影响我们的生活22？",
-    clickCount: 256,
-    likes: 1500,
-    author: "AI研究员",
-    authorID: 2,
-    timestamp: "2小时前",
-  },
-];
-
-const mockHotData: HotItem[] = [
-  {
-    rank: 1,
-    title: "如何理解量子计算的最新突破？",
-    heat: 15000,
-    url: "#",
-    contentItemID: 1,
-  },
-];
-async function fetchData() {
-  followList.value.push(...mockFollowData);
-  recommendList.value.push(...mockRecommendData);
-  hotList.value.push(...mockHotData);
-}
->>>>>>> 2cafd9850585d3eb2e22583f251ed148b8f13140
 </script>
 
 <style scoped>
