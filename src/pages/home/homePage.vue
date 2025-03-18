@@ -55,7 +55,7 @@ const preLoad = async () => {
     } else {
       await login();
     }
-    await islandStore.getIslands();
+    await islandStore.getIslandsMsg();
     console.log(islandStore.islandData);
   } catch (err) {
     error.value = err instanceof Error ? err.message : "未知错误";
@@ -209,18 +209,18 @@ onMounted(async () => {
       // 添加碰撞效果
       (islandGroup as Phaser.Physics.Arcade.Image).setTint(0xff0000);
 
-      // 碰撞后反弹
-      if (player.body.touching.right) {
-        player.setVelocityX(-this.moveSpeed);
-      } else if (player.body.touching.left) {
-        player.setVelocityX(this.moveSpeed);
-      }
-
-      if (player.body.touching.down) {
-        player.setVelocityY(-this.moveSpeed);
-      } else if (player.body.touching.up) {
-        player.setVelocityY(this.moveSpeed);
-      }
+      // // 碰撞后反弹
+      // if (player.body.touching.right) {
+      //   player.setVelocityX(-this.moveSpeed);
+      // } else if (player.body.touching.left) {
+      //   player.setVelocityX(this.moveSpeed);
+      // }
+      //
+      // if (player.body.touching.down) {
+      //   player.setVelocityY(-this.moveSpeed);
+      // } else if (player.body.touching.up) {
+      //   player.setVelocityY(this.moveSpeed);
+      // }
       router.push({
         path: "/island/",
         query: {
@@ -447,37 +447,49 @@ onMounted(async () => {
       // 设置角色动画
       this.anims.create({
         key: "stop",
-        frames: this.anims.generateFrameNumbers("player", { frames: [0] }),
+        frames: this.anims.generateFrameNumbers("player", {
+          frames: [0, 11, 22],
+        }),
         frameRate: 10,
         repeat: -1,
       });
       this.anims.create({
         key: "down",
-        frames: this.anims.generateFrameNumbers("player", { frames: [0] }),
+        frames: this.anims.generateFrameNumbers("player", {
+          frames: [3, 14, 25],
+        }),
         frameRate: 10,
         repeat: -1,
       });
       this.anims.create({
         key: "up",
-        frames: this.anims.generateFrameNumbers("player", { frames: [0] }),
+        frames: this.anims.generateFrameNumbers("player", {
+          frames: [10, 20, 30],
+        }),
         frameRate: 10,
         repeat: -1,
       });
       this.anims.create({
         key: "left",
-        frames: this.anims.generateFrameNumbers("player", { frames: [0] }),
+        frames: this.anims.generateFrameNumbers("player", {
+          frames: [9, 19, 29],
+        }),
         frameRate: 10,
         repeat: -1,
       });
       this.anims.create({
         key: "left-up",
-        frames: this.anims.generateFrameNumbers("player", { frames: [0] }),
+        frames: this.anims.generateFrameNumbers("player", {
+          frames: [7, 17, 27],
+        }),
         frameRate: 10,
         repeat: -1,
       });
       this.anims.create({
         key: "left-down",
-        frames: this.anims.generateFrameNumbers("player", { frames: [0] }),
+        frames: this.anims.generateFrameNumbers("player", {
+          frames: [2, 12, 22],
+        }),
         frameRate: 10,
         repeat: -1,
       });

@@ -9,6 +9,14 @@
           @click="goHome"
         />
       </div>
+      <div class="world">
+        <img
+          class="world-img"
+          src="@/assets/home.png"
+          alt="world"
+          @click="goWorld"
+        />
+      </div>
       <div class="search-box">
         <input
           type="text"
@@ -30,9 +38,12 @@
         </div>
         <div class="publish-btn" @click="handleQuizClick">
           <i class="iconfont"
-            ><img src="@/assets/images/题库.png" alt="题库" style="width: 22px; display: block;"
+            ><img
+              src="@/assets/images/题库.png"
+              alt="题库"
+              style="width: 22px; display: block"
           /></i>
-          <p >刷题</p>
+          <p>刷题</p>
         </div>
       </div>
       <div class="user-info">
@@ -43,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from "vue";
+import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import { useDebounceFn } from "@vueuse/core";
@@ -85,6 +96,9 @@ const goHome = () => {
       islandId: islandId,
     },
   });
+};
+const goWorld = () => {
+  router.push("/");
 };
 const handlePublishClick = () => {
   isSelect.value = true;
@@ -212,7 +226,6 @@ body {
   cursor: pointer;
 }
 
-
 .publish-btn:hover {
   color: var(--primary-color);
 }
@@ -225,7 +238,7 @@ body {
   font-size: 22px;
   margin-bottom: 1px;
   transition: transform 0.3s;
-  height: 30px;  
+  height: 30px;
   display: flex;
   align-items: center;
 }
