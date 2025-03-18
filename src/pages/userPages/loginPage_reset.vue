@@ -19,9 +19,11 @@ import { useRoute } from "vue-router";
 import { post_QQCode } from "@/api/loginApi";
 import JSONbig from "json-bigint";
 // import clock from "@/pages/clock.vue";
+import { message } from "ant-design-vue";
 let route = useRoute();
 let userStore = useUserStore();
-async function QQ() {
+
+const QQ = async () => {
   // 安全处理 code 参数
   let trueCode = route.query.code;
   console.log(trueCode);
@@ -33,38 +35,40 @@ async function QQ() {
     return;
   }
   // API 调用
-  if (code !== undefined && code !== null) {
+  try {
     const res = await post_QQCode(code);
     if (res.code === 20000) {
       console.log(res.data);
       const tokenData = parseJWT(res.data.atoken);
-      if(tokenData) {
-        console.log('用户ID:', tokenData.userid);
+      if (tokenData) {
+        console.log("用户ID:", tokenData.userid);
       }
       let userInfo: User = {
         username: res.data.username,
         avatar: res.data.avatar,
         atoken: res.data.atoken,
         rtoken: res.data.rtoken,
-        user_id:tokenData.userid,
+        user_id: tokenData.userid,
       };
       console.log(userInfo);
       userStore.currentUser = userInfo;
       await userStore.setCurrentUser(userInfo);
       router.push("/");
     }
+  } catch (e) {
+    message.error(e.message);
   }
-}
+};
 const parseJWT = (token: string) => {
   if (!token) return null;
 
   try {
-    const base64Payload = token.split('.')[1];
-    const payload = atob(base64Payload.replace(/-/g, '+').replace(/_/g, '/'));
+    const base64Payload = token.split(".")[1];
+    const payload = atob(base64Payload.replace(/-/g, "+").replace(/_/g, "/"));
 
     return JSONbig({ storeAsString: true }).parse(payload);
   } catch (error) {
-    console.error('Token 解析失败:', error);
+    console.error("Token 解析失败:", error);
     return null;
   }
 };

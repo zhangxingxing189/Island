@@ -14,7 +14,7 @@ module.exports = defineConfig({
       },
       // "/api": {
       //   // 代理标识	10.61.28.40:8080
-      //   target: "http://10.61.28.40:8080", // 后端服务器地址
+      //   target: "http://118.31.119.216:8080", // 后端服务器地址
       //   changeOrigin: true, // 修改请求头中的host
       //   pathRewrite: {
       //     "^/api": "/api", // 路径重写（可选）
