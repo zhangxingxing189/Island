@@ -9,6 +9,14 @@
           @click="goHome"
         />
       </div>
+      <div class="world">
+        <img
+          class="world-img"
+          src="@/assets/home.png"
+          alt="world"
+          @click="goWorld"
+        />
+      </div>
       <div class="search-box">
         <input
           type="text"
@@ -30,9 +38,12 @@
         </div>
         <div class="publish-btn" @click="handleQuizClick">
           <i class="iconfont"
-            ><img src="@/assets/images/题库.png" alt="题库" style="width: 22px; display: block;"
+            ><img
+              src="@/assets/images/题库.png"
+              alt="题库"
+              style="width: 22px; display: block"
           /></i>
-          <p >刷题</p>
+          <p>刷题</p>
         </div>
       </div>
       <div class="user-info">
@@ -43,14 +54,11 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from "vue";
+import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import { useDebounceFn } from "@vueuse/core";
-import { checkLogin } from "@/pages/userPages/loginFunction";
-import { login } from "@/pages/home/UIFunction";
 import { useLayoutStore } from "@/stores/layoutStore";
-import { checkLoginAuto } from "@/api/loginApi";
 
 const router = useRouter();
 const route = useRoute();
@@ -63,6 +71,16 @@ if (!islandId) {
   islandId = "50005";
   //默认值
 }
+
+const userStore = useUserStore();
+const login = async () => {
+  if (!userStore.isLogin()) {
+    if (!userStore.loadUser()) {
+      await router.push("/login");
+    }
+  }
+};
+login();
 // 搜索功能
 const searchText = ref("");
 const handleSearch = useDebounceFn((e: Event) => {
@@ -78,6 +96,9 @@ const goHome = () => {
       islandId: islandId,
     },
   });
+};
+const goWorld = () => {
+  router.push("/");
 };
 const handlePublishClick = () => {
   isSelect.value = true;
@@ -98,23 +119,23 @@ const handleQuizClick = async () => {
     query: { islandId: islandId },
   });
 };
-const userStore = useUserStore();
-if (userStore.loadUser() || userStore.isLogin()) {
-  // let isAuto = await checkLoginAuto();
-  // console.log(isAuto);
-  // if (isAuto.code !== 20000) {
-  //   console.log("no20000");
-  //   userStore.logout();
-  //   login();
-  //   // console.log("没有登录,去登录,这里先不跳转");
-  // }
-} else {
-  console.log("loadFalse");
-  // console.log("没有登录,去登录,这里先不跳转");
-  login();
-}
+
+// if (userStore.loadUser() || userStore.isLogin()) {
+//   // let isAuto = await checkLoginAuto();
+//   // console.log(isAuto);
+//   // if (isAuto.code !== 20000) {
+//   //   console.log("no20000");
+//   //   userStore.logout();
+//   //   login();
+//   //   // console.log("没有登录,去登录,这里先不跳转");
+//   // }
+// } else {
+//   console.log("loadFalse");
+//   // console.log("没有登录,去登录,这里先不跳转");
+//   login();
+// }
 const currentUser = userStore.currentUser;
-console.log(currentUser);
+// console.log(currentUser);
 </script>
 
 <style scoped>
@@ -205,7 +226,6 @@ body {
   cursor: pointer;
 }
 
-
 .publish-btn:hover {
   color: var(--primary-color);
 }
@@ -218,7 +238,7 @@ body {
   font-size: 22px;
   margin-bottom: 1px;
   transition: transform 0.3s;
-  height: 30px;  
+  height: 30px;
   display: flex;
   align-items: center;
 }

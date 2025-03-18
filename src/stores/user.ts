@@ -18,7 +18,7 @@ export const useUserStore = defineStore("user", {
   actions: {
     async setCurrentUser(user: User) {
       localStorage.setItem("user", JSON.stringify(user));
-      console.log(user);
+      // console.log(user);
       this.currentUser = user;
     },
     isLogin() {
@@ -29,17 +29,25 @@ export const useUserStore = defineStore("user", {
         this.currentUser.atoken = atoken;
       }
     },
+    setRtoken(rtoken: string) {
+      if (this.currentUser) {
+        this.currentUser.rtoken = rtoken;
+      }
+    },
     logout() {
       this.currentUser = null;
       localStorage.removeItem("user");
     },
-    loadUser() {
-      console.log("loading");
+    async loadUser() {
+      if (this.currentUser) {
+        return true;
+      }
+      // console.log("loading");
       const userData = localStorage.getItem("user");
       if (userData) {
         try {
           this.currentUser = JSON.parse(userData) as User;
-          console.log(this.currentUser);
+          // console.log(this.currentUser);
         } catch (error) {
           console.error("用户数据解析失败", error);
           localStorage.removeItem("user"); // 清除无效数据

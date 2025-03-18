@@ -4,10 +4,10 @@
       <div class="center-content">
         <div class="tab-nav">
           <button
-              v-for="tab in tabs"
-              :key="tab.id"
-              :class="['tab-item', { active: activeTab === tab.id }]"
-              @click="activeTab = tab.id"
+            v-for="tab in tabs"
+            :key="tab.id"
+            :class="['tab-item', { active: activeTab === tab.id }]"
+            @click="activeTab = tab.id"
           >
             {{ tab.title }}
           </button>
@@ -18,10 +18,10 @@
           <template v-if="activeTab === 'follow'">
             <h3 class="section-title">关注动态</h3>
             <content-card
-                v-for="item in followList"
-                :key="item.id"
-                :data="item"
-                @like="handleLike"
+              v-for="item in followList"
+              :key="item.id"
+              :data="item"
+              @like="handleLike"
             />
             <div v-if="!followList.length" class="empty">
               暂无关注内容，快去关注你感兴趣的作者吧！
@@ -32,10 +32,10 @@
           <template v-if="activeTab === 'recommend'">
             <h3 class="section-title">热门推荐</h3>
             <content-card
-                v-for="item in recommendList"
-                :key="item.id"
-                :data="item"
-                @like="handleLike"
+              v-for="item in recommendList"
+              :key="item.id"
+              :data="item"
+              @like="handleLike"
             />
           </template>
 
@@ -55,10 +55,10 @@ import { ref, reactive, onMounted } from "vue";
 import ContentCard from "./ContentCard.vue";
 import HotList from "./HotList.vue";
 import { HotItem, ContentItem } from "./blogInterface";
-import {useRoute} from "vue-router";
-import {getArticleList} from "@/api/articleApi";
-import {formatTime} from "@/utils/formatters";
-import {getFollowList} from "@/api/focusApi";
+import { useRoute } from "vue-router";
+import { getArticleList } from "@/api/articleApi";
+import { formatTime } from "@/utils/formatters";
+import { getFollowList } from "@/api/focusApi";
 
 // 内容数据
 const followList = ref<ContentItem[]>([]);
@@ -103,6 +103,7 @@ const loadFollowArticles = async () => {
       pageSize: 20
     });
 
+<<<<<<< HEAD
     // 使用Set优化匹配效率
     const followUserIds = new Set(followData.list.map(item => item.user_id));
 
@@ -120,6 +121,25 @@ const loadFollowArticles = async () => {
           timestamp: formatTime(new Date(item.created_at))
         }));
 
+=======
+    // 获取关注用户的文章
+    const { data } = await getArticleList({
+      page: 1,
+      pageSize: 10,
+      userIds: followData.list.map((u) => u.user_id),
+    });
+
+    followList.value = data.list.map((item) => ({
+      id: item.id,
+      title: item.title,
+      brief: item.abstract,
+      cover: item.cover || "https://api.yimian.xyz/img",
+      likes: item.digg_count,
+      comments: item.collect_count,
+      author: item.username,
+      timestamp: formatTime(new Date(item.created_at)),
+    }));
+>>>>>>> 2cafd9850585d3eb2e22583f251ed148b8f13140
   } catch (error) {
     console.error("加载关注文章失败:", error);
   } finally {
@@ -158,20 +178,22 @@ const loadRecommendArticles = async () => {
     const { data } = await getArticleList({
       page: 1,
       pageSize: 10,
-      order: 'desc',
-      islandId: islandId.value
+      order: "desc",
+      islandId: islandId.value,
     });
 
-    recommendList.value = data.list.map((item): ContentItem => ({
-      id: item.id.toString(),
-      title: item.title,
-      brief: item.abstract,
-      cover: item.cover || 'https://api.yimian.xyz/img',
-      likes: Number(item.digg_count),
-      comments: Number(item.collect_count),
-      author: item.username,
-      timestamp: formatTime(new Date(item.created_at))
-    }));
+    recommendList.value = data.list.map(
+      (item): ContentItem => ({
+        id: item.id.toString(),
+        title: item.title,
+        brief: item.abstract,
+        cover: item.cover || "https://api.yimian.xyz/img",
+        likes: Number(item.digg_count),
+        comments: Number(item.collect_count),
+        author: item.username,
+        timestamp: formatTime(new Date(item.created_at)),
+      })
+    );
   } catch (error) {
     console.error("加载推荐文章失败:", error);
   } finally {
@@ -184,7 +206,7 @@ const loadHotArticles = async () => {
     const { data } = await getArticleList({
       page: 1,
       pageSize: 10,
-      order: 'digg_count desc',
+      order: "digg_count desc",
     });
 
     hotList.value = data.list.map((item, index) => ({
@@ -192,7 +214,7 @@ const loadHotArticles = async () => {
       title: item.title,
       heat: item.digg_count,
       contentItemID: item.id,
-      url: `/article/${item.id}`
+      url: `/article/${item.id}`,
     }));
   } catch (error) {
     console.error("加载热榜数据失败:", error);
@@ -200,14 +222,15 @@ const loadHotArticles = async () => {
 };
 onMounted(async () => {
   await Promise.all([
-    loadRecommendArticles(),  // 使用新的加载方法
+    loadRecommendArticles(), // 使用新的加载方法
     loadFollowArticles(),
     loadHotArticles(),
+<<<<<<< HEAD
+=======
+    fetchData(),
+>>>>>>> 2cafd9850585d3eb2e22583f251ed148b8f13140
   ]);
 });
-
-
-
 
 const tabs = [
   { id: "follow", title: "关注" },
@@ -216,10 +239,56 @@ const tabs = [
 ];
 const activeTab = ref("recommend");
 
+<<<<<<< HEAD
 
 
 
 
+=======
+// 模拟数据（使用用户提供的图片链接）
+const mockFollowData: ContentItem[] = [
+  {
+    id: "2",
+    title: "如何评价2023年人工智能发展趋势？",
+    cover: "https://api.yimian.xyz/img",
+    clickCount: 256,
+    likes: 1500,
+    author: "AI研究员",
+    brief: "人工智能的未来将如何影响我们的生活？",
+    authorID: 1,
+    timestamp: "2小时前",
+  },
+];
+
+const mockRecommendData: ContentItem[] = [
+  {
+    id: 12,
+    title: "如何评价2023年人工智能发展趋势？",
+    cover: "https://api.yimian.xyz/img",
+    brief: "人工智能的未来将如何影响我们的生活22？",
+    clickCount: 256,
+    likes: 1500,
+    author: "AI研究员",
+    authorID: 2,
+    timestamp: "2小时前",
+  },
+];
+
+const mockHotData: HotItem[] = [
+  {
+    rank: 1,
+    title: "如何理解量子计算的最新突破？",
+    heat: 15000,
+    url: "#",
+    contentItemID: 1,
+  },
+];
+async function fetchData() {
+  followList.value.push(...mockFollowData);
+  recommendList.value.push(...mockRecommendData);
+  hotList.value.push(...mockHotData);
+}
+>>>>>>> 2cafd9850585d3eb2e22583f251ed148b8f13140
 </script>
 
 <style scoped>
