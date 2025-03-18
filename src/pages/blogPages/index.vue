@@ -68,7 +68,7 @@ const isSelectStore = useLayoutStore().isSelect;
 
 let islandId = route.query.islandId;
 if (!islandId) {
-  islandId = "50005";
+  islandId = "11111111111111";
   //默认值
 }
 
@@ -173,7 +173,15 @@ body {
 .nav-bar .logo img:hover {
   transform: scale(1.05);
 }
+.nav-bar .world img {
+  border-radius: 50%;
+  height: 40px;
+  transition: transform 0.3s ease;
+}
 
+.nav-bar .world img:hover {
+  transform: scale(1.05);
+}
 .search-box {
   position: relative;
   max-width: 720px;

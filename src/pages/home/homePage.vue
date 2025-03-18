@@ -624,7 +624,7 @@ document.addEventListener("visibilitychange", () => {
 </script>
 
 <style>
-body {
+#phaser-example {
   overflow: hidden;
 }
 .loading-container {
