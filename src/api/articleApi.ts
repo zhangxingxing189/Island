@@ -28,13 +28,17 @@ export const getArticleList = (params: {
     pageSize: number;
     userIds?: string[];
     order?: string;
+    content?: string;
     key?: string;
     islandId?: string;
     islandName?: string;
 }): Promise<baseResponse<ArticleListResponse>> => {
     return useAxios.get("/api/article", { params });
 };
-
+// 获取文章详情
+export const getArticleDetail = (id: string) => {
+    return useAxios.get<baseResponse<ArticleListItem>>(`/api/article/${id}`);
+};
 
 export interface OwnerArticleListResponse {
     count: number;
@@ -78,4 +82,8 @@ export interface CreateArticleParams {
 export const createArticle = (params: CreateArticleParams) => {
     console.log(params);
     return useAxios.post("/api/article", params);
+};
+//文章删除
+export const deleteArticle = (id: string) => {
+    return useAxios.delete(`/api/article/${id}`);
 };

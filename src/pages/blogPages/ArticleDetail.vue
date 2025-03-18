@@ -68,13 +68,34 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, reactive } from "vue";
 import type { ContentItem } from "./blogInterface";
-import { ArticleListItem, getArticleList } from "@/api/articleApi";
+import {ArticleListItem, getArticleDetail, getArticleList} from "@/api/articleApi";
 import {formatTime} from "@/utils/formatters";
+import { useRoute } from 'vue-router';
 
-const props = defineProps<{ id: string }>();
-const articleData = ref<ContentItem>();
-
+/*const props = defineProps<{ id: string }>();
+const articleData = ref<ContentItem>();*/
+const route = useRoute();
+const article = ref<ContentItem>();
+const loading = ref(true);
 onMounted(async () => {
+  try {
+    const { data } = await getArticleDetail(route.params.id.toString());
+    article.value = {
+      title: data.data.title,
+      abstract: data.data.abstract,
+      content: data.data.content,
+      id: data.data.id.toString(),
+      timestamp: formatTime(new Date(data.data.created_at)),
+      likes: Number(data.data.digg_count),
+      comments: Number(data.data.collect_count)
+    };
+  } catch (error) {
+    console.error('加载文章失败:', error);
+  } finally {
+    loading.value = false;
+  }
+});
+/*onMounted(async () => {
   try {
     const { data } = await getArticleList({
       page: 1,
@@ -97,10 +118,10 @@ onMounted(async () => {
   } catch (error) {
     console.error("加载文章详情失败:", error);
   }
-});
+});*/
 // 响应式数据
 const isLiked = ref(false);
-const article = ref<ContentItem>({
+/*const article = ref<ContentItem>({
   id: 1,
   title: "如何评价2023年人工智能发展趋势？",
   cover: "https://api.yimian.xyz/img", // 简化后的图片地址
@@ -109,12 +130,12 @@ const article = ref<ContentItem>({
   author: "AI研究员",
   authorID: 1,
   timestamp: "2小时前",
-});
+});*/
 
-// 格式化内容
+/*// 格式化内容
 const formattedContent = computed(() =>
   content.split("\n").filter((p) => p.trim())
-);
+);*/
 
 // 点赞逻辑
 const handleLike = () => {
@@ -147,35 +168,8 @@ const loadArticles = async () => {
   }
 };
 
-// 文章内容（保持原始内容，通过computed自动格式化）
-const content =
-  "2023年AI发展趋势评析：技术突破与生态重构之年\n" +
-  "2023年被视为人工智能发展的历史性转折点，技术突破、应用落地与行业变革三重浪潮交织，推动人类社会加速迈入智能时代。以下从技术演进、行业应用和生态格局三个维度，深度解析年度核心发展趋势：\n" +
-  "\n" +
-  "一、技术突破：多模态大模型开启通用人工智能新纪元\n" +
-  "生成式AI爆发增长\n" +
-  "\n" +
-  "GPT-4、PaLM-2等千亿级参数模型实现跨模态内容生成，文本生成质量逼近人类水平（GPT-4在BAR考试中超过90%考生）\n" +
-  "Stable Diffusion 3、MidJourney V6等图像生成工具突破艺术创作边界，引发版权与创作伦理大讨论\n" +
-  "视频生成技术跨越奇点，Runway Gen-2、Pika 1.0实现分钟级高质量视频生成\n" +
-  "具身智能突破\n" +
-  "\n" +
-  "Tesla Optimus、Figure 01等人形机器人实现复杂环境下的自主操作能力\n" +
-  "神经符号系统融合技术突破，DeepMind的AlphaDev自主发现优化算法\n" +
-  "科学智能崛起\n" +
-  "\n" +
-  "DeepMind的GNoME发现220万种新材料，加速材料科学研发周期\n" +
-  "蛋白质结构预测工具AlphaFold 3扩展至核酸、配体相互作用预测\n" +
-  "二、行业应用：垂直领域渗透率突破临界点\n" +
-  "领域\t典型应用场景\t商业价值\n" +
-  "医疗\tAI辅助诊断准确率达95%+\t全球AI医疗市场规模突破200亿美元\n" +
-  "制造\t工业质检效率提升300%\t预测性维护节省15%运维成本\n" +
-  "金融\t智能投顾管理资产超5万亿美元\t反欺诈系统拦截损失120亿美元\n" +
-  "教育\t个性化学习系统覆盖1.2亿学生\t教育科技融资额同比增长67%\n" +
-  "典型案例：\n" +
-  "\n" +
-  "微软Copilot重构Office生产力套件，用户任务完成速度提升3倍\n" +
-  "NVIDIA推出AI工厂解决方案，生物制药企业利用生成式AI缩短药物发现周期\n"; // 保持原有内容
+
+
 </script>
 
 <style scoped>

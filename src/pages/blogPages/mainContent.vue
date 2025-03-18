@@ -70,37 +70,86 @@ const islandId = ref(route.query.islandId?.toString() || "50005");
 const followLoading = ref(false);
 
 // 获取关注文章
+/*
+const loadFollowArticles = async () => {
+  followLoading.value = true;
+  const followData = await getFollowList({
+    page: 1
+  })
+  console.log(followData)
+  const res = await getArticleList({
+    page: 1,
+    pageSize: 20
+  });
+  console.log(res)
+  res.data.list.forEach(item=>{
+    console.log(item.user_id);
+    followData.data.list.forEach(followItem=>{
+      if(followItem.user_id === item.user_id){
+        console.log(item);
+        followList.value.push(item)
+      }
+    })
+  })
+  console.log(followList.value);
+*/
 const loadFollowArticles = async () => {
   followLoading.value = true;
   try {
-    // 先获取关注列表
-    const { data: followData } = await getFollowList({
+    // 获取关注列表
+    const { data: followData } = await getFollowList({ page: 1 });
+    const { data: articleData } = await getArticleList({
       page: 1,
+      pageSize: 20
     });
 
-    // 获取关注用户的文章
-    const { data } = await getArticleList({
-      page: 1,
-      pageSize: 10,
-      userIds: followData.list.map(u => u.user_id)
-    });
+    // 使用Set优化匹配效率
+    const followUserIds = new Set(followData.list.map(item => item.user_id));
 
-    followList.value = data.list.map(item => ({
-      id: item.id,
-      title: item.title,
-      brief: item.abstract,
-      cover: item.cover || 'https://api.yimian.xyz/img',
-      likes: item.digg_count,
-      comments: item.collect_count,
-      author: item.username,
-      timestamp: formatTime(new Date(item.created_at))
-    }));
-  }
-  catch (error) {
+    // 数据转换（保持与推荐列表一致）
+    followList.value = articleData.list
+        .filter(item => followUserIds.has(item.user_id))
+        .map((item): ContentItem => ({
+          id: item.id.toString(),
+          title: item.title,
+          abstract: item.abstract,
+          cover: item.cover || 'https://api.yimian.xyz/img',
+          likes: Number(item.digg_count),
+          comments: Number(item.collect_count),
+          author: item.username,
+          timestamp: formatTime(new Date(item.created_at))
+        }));
+
+  } catch (error) {
     console.error("加载关注文章失败:", error);
-  }finally {
+  } finally {
     followLoading.value = false;
   }
+  // try {
+  //   // 先获取关注列表
+  //   const { data: followData } = await getFollowList({
+  //     page: 1,
+  //   });
+  //   console.log(followData);
+  //   // 获取关注用户的文章
+
+  // //
+  //   followList.value = data.list.map(item => ({
+  //     id: item.id,
+  //     title: item.title,
+  //     brief: item.abstract,
+  //     cover: item.cover || 'https://api.yimian.xyz/img',
+  //     likes: item.digg_count,
+  //     comments: item.collect_count,
+  //     author: item.username,
+  //     timestamp: formatTime(new Date(item.created_at))
+  //   }));
+  // }
+  // catch (error) {
+  //   console.error("加载关注文章失败:", error);
+  // }finally {
+  //   followLoading.value = false;
+  // }
 };
 
 const loadRecommendArticles = async () => {
@@ -154,7 +203,6 @@ onMounted(async () => {
     loadRecommendArticles(),  // 使用新的加载方法
     loadFollowArticles(),
     loadHotArticles(),
-    fetchData()
   ]);
 });
 
@@ -170,49 +218,6 @@ const activeTab = ref("recommend");
 
 
 
-// 模拟数据（使用用户提供的图片链接）
-const mockFollowData: ContentItem[] = [
-  {
-    id: 2,
-    title: "如何评价2023年人工智能发展趋势？",
-    cover: "https://api.yimian.xyz/img",
-    clickCount: 256,
-    likes: 1500,
-    author: "AI研究员",
-    brief: "人工智能的未来将如何影响我们的生活？",
-    authorID: 1,
-    timestamp: "2小时前",
-  },
-];
-
-const mockRecommendData: ContentItem[] = [
-  {
-    id: 12,
-    title: "如何评价2023年人工智能发展趋势？",
-    cover: "https://api.yimian.xyz/img",
-    brief: "人工智能的未来将如何影响我们的生活22？",
-    clickCount: 256,
-    likes: 1500,
-    author: "AI研究员",
-    authorID: 2,
-    timestamp: "2小时前",
-  },
-];
-
-const mockHotData: HotItem[] = [
-  {
-    rank: 1,
-    title: "如何理解量子计算的最新突破？",
-    heat: 15000,
-    url: "#",
-    contentItemID: 1,
-  },
-];
-async function fetchData() {
-  followList.value.push(...mockFollowData);
-  recommendList.value.push(...mockRecommendData);
-  hotList.value.push(...mockHotData);
-}
 
 
 </script>

@@ -34,6 +34,7 @@ const routes: Array<RouteRecordRaw> = [
         path: "article/:id",
         name: "article",
         component: () => import("../pages/blogPages/ArticleDetail.vue"),
+        props: true,
       },
       {
         path: "personalCenter",

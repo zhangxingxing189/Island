@@ -73,7 +73,16 @@
               <div class="article-content">
                 <h3 class="article-title">{{ article.title }}</h3>
                 <p class="article-abstract">{{ article.abstract }}</p>
+
                 <div class="article-meta">
+                  <el-button
+                      type="danger"
+                      size="mini"
+                      @click.stop="handleDelete(article.id)"
+                      class="delete-btn"
+                  >
+                    删除
+                  </el-button>
                   <span class="digg-count">❤️ {{ article.digg_count }}</span>
                   <span class="collect-count">⭐ {{ article.collect_count }}</span>
                   <time class="create-time">{{ formatDate(article.created_at) }}</time>
@@ -146,7 +155,14 @@
 import {ref, computed, reactive, watchEffect} from "vue";
 import { useUserStore } from "@/stores/user";
 import { useRouter } from 'vue-router';
-import {ArticleListItem, getArticleList, getOwnerArticleList, getOwnerCollectArticles} from "@/api/articleApi";
+import {
+  ArticleListItem,
+  deleteArticle,
+  getArticleList,
+  getOwnerArticleList,
+  getOwnerCollectArticles
+} from "@/api/articleApi";
+import { ElMessage, ElMessageBox } from 'element-plus';
 import {FollowItem, getFollowList} from "@/api/focusApi";
 const router = useRouter();
 const userStore = useUserStore();
@@ -288,6 +304,25 @@ const dynamics = reactive<DynamicItem[]>([
 const filteredDynamics = computed(() => {
   return dynamics.filter((item) => item.type === activeTab.value);
 });
+const handleDelete = async (id: string) => {
+  try {
+    await ElMessageBox.confirm('此操作将永久删除该文章，是否继续？', '删除确认', {
+      confirmButtonText: '确定删除',
+      cancelButtonText: '取消',
+      customClass: 'delete-confirm-box', // 添加自定义样式类
+      confirmButtonClass: 'confirm-delete-btn', // 确认按钮样式
+      cancelButtonClass: 'cancel-delete-btn' // 取消按钮样式
+    });
+
+    await deleteArticle(id);
+    articleList.value = articleList.value.filter(article => article.id !== id);
+    ElMessage.success('删除成功');
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('删除失败，请稍后重试');
+    }
+  }
+};
 </script>
 
 <style>
@@ -575,7 +610,35 @@ const filteredDynamics = computed(() => {
   font-size: 16px;
   color: var(--text-primary);
 }
+.article-title {
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: color 0.2s;
 
+  &:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+  }
+}
+.delete-confirm-box {
+  max-width: 400px;
+  border-radius: 8px;
+}
+
+.confirm-delete-btn {
+  background-color: #f56c6c !important;
+  border-color: #f56c6c !important;
+}
+
+.cancel-delete-btn {
+  background-color: #fff !important;
+  color: #606266 !important;
+}
+.delete-btn {
+  margin-left: auto;
+  padding: 4px 8px;
+  font-size: 12px;
+}
 .article-abstract {
   margin: 0 0 8px;
   font-size: 14px;

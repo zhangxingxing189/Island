@@ -1,12 +1,13 @@
 export interface ContentItem{
   id: string;
   title: string;
-  brief: string;
+  abstract: string;
   cover: string;
   likes: number;
   comments: number;
   author: string;
   timestamp: string;
+  content: string;
 }
 
 export type HotItem = {

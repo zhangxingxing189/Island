@@ -1,12 +1,12 @@
 <template>
-  <div class="content-card" @click="navigateToArticle">
+  <div class="content-card" @click="handleClick">
     <div class="cover">
       <img :src="data.cover" :alt="data.title" />
     </div>
     <div class="content">
       <h3 class="title">{{ data.title }}</h3>
       <div class="meta">
-        <div class="brief">{{ data.brief || '暂无简介' }}</div>
+        <div class="brief">{{ data.abstract || '暂无简介' }}</div>
       </div>
       <div class="stats">
         <button class="like-btn" @click.stop="handleLike">
@@ -33,17 +33,13 @@ const props = defineProps<{
 const emit = defineEmits(["like"]);
 
 const router = useRouter();
-
+const handleClick = () => {
+  router.push(`/article/${props.data.id}`);
+}
 const handleLike = () => {
   emit("like");
 };
 
-const navigateToArticle = () => {
-  router.push({
-    name: "article",
-    params: { id: props.data.id },
-  });
-};
 </script>
 
 <style scoped>
