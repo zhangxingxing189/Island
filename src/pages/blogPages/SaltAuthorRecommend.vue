@@ -56,9 +56,10 @@
     <!-- Markdown 富文本编辑器 -->
     <label>内容</label>
     <mavon-editor
+        ref="mdEditor"
       v-model="formData.content"
       :toolbars="markdownToolbars"
-      :imgUpload="handleEditorImageUpload"
+        @imgAdd="handleImgAdd"
     />
 
     <!-- 提交按钮 -->
@@ -123,7 +124,7 @@ const handleCoverUpload = async (event) => {
   }
 };
 
-// 添加图片上传处理器
+/*// 添加图片上传处理器
 const handleEditorImageUpload = async (file, insertImage) => {
   const formData = new FormData();
   formData.append("file", file);
@@ -136,8 +137,29 @@ const handleEditorImageUpload = async (file, insertImage) => {
   } catch (error) {
     console.error("图片上传失败:", error);
   }
-};
+};*/
+const mdEditor = ref();
 
+// 替换原有的handleEditorImageUpload方法
+const handleImgAdd = async (pos: number, file: File) => {
+  try {
+    // 显示临时本地预览
+    const blobUrl = URL.createObjectURL(file);
+    mdEditor.value.$img2Url(pos, blobUrl); // 先显示本地预览
+
+    // 异步上传到服务器
+    const { data } = await uploadImage(file);
+    console.log(data);
+    // 用服务器URL替换临时URL
+    mdEditor.value.$img2Url(pos, data.url);
+    console.log(pos);
+  } catch (error) {
+    console.error("图片上传失败:", error);
+    message.error("图片上传失败");
+    // 上传失败时移除临时图片
+    mdEditor.value.$imgDel(pos);
+  }
+};
 // 提交方法
 const handleSubmit = async () => {
   try {
@@ -147,7 +169,6 @@ const handleSubmit = async () => {
       formData.value.cover = data; // 替换为服务器URL
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
-       console.log(formData.value);
        const res = await createArticle({
          title: formData.value.title,
          content: formData.value.content,

@@ -25,15 +25,27 @@
         </div>
       </header>
 
-      <!-- 内容区域 --> 
+      <!-- 内容区域 -->
       <section class="content-section">
-        <mavon-editor
+<!--        <mavon-editor
             v-model="article.content"
+            :key="article.content"
+            :value="article.content"
             :editable="false"
             :subfield="false"
             :toolbarsFlag="false"
             defaultOpen="preview"
             style="min-height: 500px; border: none;"
+        />-->
+        <mavon-editor
+            v-model="article.content"
+            :editable="false"
+            :subfield="false"
+            :toolbarsFlag="false"
+            :boxShadow="false"
+            previewBackground="#ffffff"
+            defaultOpen="preview"
+            style="min-height: 10px; border: 0; padding: 0; margin: 0; margin-bottom: -12px"
         />
         <template v-for="(para, index) in formattedContent" :key="index">
           <p v-if="!para.startsWith('#')" class="content-para">{{ para }}</p>
@@ -77,7 +89,6 @@ import type { ContentItem } from "./blogInterface";
 import {ArticleListItem, getArticleDetail, getArticleList} from "@/api/articleApi";
 import {formatTime} from "@/utils/formatters";
 import { useRoute } from 'vue-router';
-import {ElMessage} from "element-plus";
 
 /*const props = defineProps<{ id: string }>();
 const articleData = ref<ContentItem>();*/
@@ -129,7 +140,7 @@ onMounted(async () => {
       title: data.title,
       abstract: data.abstract,
       content: data.content,
-      cover: data.cover,
+      cover: data.cover  ,
       author: data.username,
       id: data.id.toString(),
       timestamp: formatTime(new Date(data.created_at)),
