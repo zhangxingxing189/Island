@@ -48,7 +48,7 @@
           <!-- 在此处添加关注列表模板 -->
           <template v-if="activeTab === 'focus'">
             <div v-if="isLoading" class="loading">加载中...</div>
-            <div v-else-if="!followList.length" class="empty">暂无关注用户</div>
+            <div v-else-if="!followList?.length" class="empty">暂无关注用户</div>
             <div v-for="item in followList" :key="item.user_id" class="follow-item">
               <img
                   :src="item.avatar || '/default-avatar.png'"
@@ -65,7 +65,7 @@
           </template>
           <template v-else-if="activeTab === 'article'">
             <div v-if="isLoading" class="loading">加载中...</div>
-            <div v-else-if="articleList.length === 0" class="empty">暂无发表文章</div>
+            <div v-else-if="articleList?.length === 0" class="empty">暂无发表文章</div>
             <div v-for="article in articleList" :key="article.id" class="article-item">
               <div class="article-cover" v-if="article.cover">
                 <img :src="article.cover" alt="文章封面" />
@@ -204,6 +204,7 @@ interface UserInfo {
   atoken: string;
   rtoken: string;
   user_id: string;
+  ipLocation: string;
 }
 
 interface DynamicItem {
@@ -230,7 +231,10 @@ const loadFollows = async () => {
       limit: 10
     });
     console.log(res);
-    followList.value = res.data.list;
+    followList.value = res.data?.list?.length ? res.data.list : [];
+  }  catch (error) {
+    ElNotification.error({title: '错误', message: '关注列表加载失败'});
+    followList.value = [];
   } finally {
     isLoading.value = false;
   }
@@ -282,8 +286,8 @@ watchEffect(() => {
 // 用户信息
 const user = useUserStore();
 const userInfo = reactive<UserInfo>({
-  avatar: user.currentUser.avatar,
-  username: user.currentUser.username,
+  avatar: user.currentUser?.avatar || require('@/assets/QQ.svg'),
+  username: user.currentUser?.username || '未登录用户',
   ipLocation: "东莞",
   following: 234,
   followers: 4567,
