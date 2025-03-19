@@ -20,6 +20,13 @@
           <div class="author-info">
             <i class="icon-user"></i>
             <span>{{ article.author }}</span>
+            <button
+                class="follow-btn"
+                :class="{ 'followed': isFollowing }"
+                @click="handleFollow"
+            >
+              {{ isFollowing ? '已关注' : '+ 关注' }}
+            </button>
           </div>
           <time class="publish-time">{{ article.timestamp }}</time>
         </div>
@@ -84,11 +91,15 @@
 </template>
 
 <script setup lang="ts">
-import {ref, computed, onMounted, reactive, onBeforeMount} from "vue";
+import {ref, computed, onMounted, reactive, onBeforeMount,watch} from "vue";
 import type { ContentItem } from "./blogInterface";
 import {ArticleListItem, getArticleDetail, getArticleList} from "@/api/articleApi";
 import {formatTime} from "@/utils/formatters";
 import { useRoute } from 'vue-router';
+import {followUser, getFollowList} from "@/api/focusApi";
+import {ElMessage} from "element-plus";
+import {useUserStore} from "@/stores/user";
+import router from "@/router";
 
 /*const props = defineProps<{ id: string }>();
 const articleData = ref<ContentItem>();*/
@@ -131,7 +142,6 @@ const loading = ref(true);
   }
 });*/
 onMounted(async () => {
-  console.log(111);
   try {
     loading.value = true;
     const { data } = await getArticleDetail(route.params.id.toString());
@@ -146,8 +156,9 @@ onMounted(async () => {
       timestamp: formatTime(new Date(data.created_at)),
       likes: data.digg_count,
       comments: data.collect_count,
+      authorId: data.user_id,
     };
-    console.log(data);
+    console.log(article.value);
   } catch (error) {
     console.error('加载文章失败:', error);
   } finally {
@@ -202,6 +213,7 @@ const handleLike = () => {
   // 这里可以添加API调用
 };
 
+/*
 // 分页参数
 const pagination = reactive({
   page: 1,
@@ -226,12 +238,80 @@ const loadArticles = async () => {
     console.error("加载文章失败:", error);
   }
 };
+*/
 
+const isFollowing = ref(false);
+const currentAuthorId = ref('');
+const userStore = useUserStore();
+watch(() => article.value, (newVal) => {
+  console.log(111);
+  console.log(newVal);
+  if (newVal) {
+    console.log(newVal);
+    currentAuthorId.value = newVal.authorId; // 确保使用正确字段
+    checkFollowingStatus(); // 这里已经调用
+    console.log(currentAuthorId.value);
+  }
+});
+// 修改后的检查关注状态逻辑
+const checkFollowingStatus = async () => {
+  try {
+    // 获取当前用户的关注列表
+    const { data } = await getFollowList({
+      user_id: userStore.currentUser?.user_id
+    });
+
+    // 判断是否已关注当前作者
+    isFollowing.value = data.list.some(
+        item => item.user_id === currentAuthorId.value
+    );
+  } catch (error) {
+    console.error('获取关注状态失败:', error);
+  }
+};
+
+// 修改后的关注操作处理
+const handleFollow = async () => {
+  try {
+    if (!userStore.currentUser) {
+      ElMessage.warning('请先登录');
+      return router.push('/login');
+    }
+
+    await followUser({ focus_id: currentAuthorId.value });
+    isFollowing.value = !isFollowing.value;
+    ElMessage.success(isFollowing.value ? '关注成功' : '已取消关注');
+  } catch (error) {
+    ElMessage.error('操作失败: ' + error.response?.data?.message || error.message);
+  }
+};
 
 
 </script>
 
 <style scoped>
+
+.follow-btn {
+  margin-left: 12px;
+  padding: 4px 12px;
+  border-radius: 15px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+
+  &.followed {
+    background: #f4f4f5;
+    border: 1px solid #e4e4e7;
+    color: #71717a;
+    cursor: not-allowed;
+
+    &:hover {
+      background: #f4f4f5;
+    }
+  }
+}
 .article-container {
   --primary: #2563eb;
   --primary-50: #eff6ff;

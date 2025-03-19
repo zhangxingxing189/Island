@@ -8,6 +8,7 @@ export interface ContentItem{
   author: string;
   timestamp: string;
   content: string;
+  authorId?: string;
 }
 
 export type HotItem = {

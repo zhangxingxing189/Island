@@ -59,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref, reactive, onMounted, watch} from "vue";
+import {ref, reactive, onMounted, watch, onUnmounted} from "vue";
 import ContentCard from "./ContentCard.vue";
 import HotList from "./HotList.vue";
 import { HotItem, ContentItem } from "./blogInterface";
@@ -170,37 +170,73 @@ const loadFollowArticles = async () => {
   //   followLoading.value = false;
   // }
 };
-
+const recommendPagination = reactive({
+  page: 1,
+  pageSize: 10,
+  total: 0,
+  loading: false,
+  finished: false
+});
 const loadRecommendArticles = async () => {
-  loading.value = true;
+  if (recommendPagination.loading || recommendPagination.finished) return;
+
+  recommendPagination.loading = true;
   try {
     const { data } = await getArticleList({
-      page: 1,
-      pageSize: 15,
-      order: "",
-      islandId: islandId.value,
-      islandName: route.query.islandName?.toString()
+      page: recommendPagination.page,
+      pageSize: recommendPagination.pageSize,
+      order: "created_at desc"
     });
 
-    recommendList.value = data.list.map(
-      (item): ContentItem => ({
-        id: item.id.toString(),
-        title: item.title,
-        abstract: item.abstract,
-        content: item.content,
-        cover: item.cover || "https://api.yimian.xyz/img",
-        likes: Number(item.digg_count),
-        comments: Number(item.collect_count),
-        author: item.username,
-        timestamp: formatTime(new Date(item.created_at)),
-      })
-    );
+    if (data.list.length) {
+      // 合并新旧数据
+      recommendList.value = [
+        ...recommendList.value,
+        ...data.list.map((item): ContentItem => ({
+          id: item.id.toString(),
+          title: item.title,
+          content: item.content,
+          abstract: item.abstract,
+          cover: item.cover || 'https://api.yimian.xyz/img',
+          likes: Number(item.digg_count),
+          comments: Number(item.collect_count),
+          author: item.username,
+          timestamp: formatTime(new Date(item.created_at))
+        }))
+      ];
+
+      recommendPagination.total += data.list.length;
+      recommendPagination.page++;
+
+      // 判断是否加载完毕
+      if (data.list.length < recommendPagination.pageSize) {
+        recommendPagination.finished = true;
+      }
+    } else {
+      recommendPagination.finished = true;
+    }
   } catch (error) {
     console.error("加载推荐文章失败:", error);
   } finally {
-    loading.value = false;
+    recommendPagination.loading = false;
   }
 };
+
+// 添加滚动监听
+const onScroll = () => {
+  const { scrollTop, clientHeight, scrollHeight } = document.documentElement;
+  if (scrollHeight - scrollTop - clientHeight < 100) {
+    loadRecommendArticles();
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('scroll', onScroll);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', onScroll);
+});
 //热点
 const loadHotArticles = async () => {
   try {

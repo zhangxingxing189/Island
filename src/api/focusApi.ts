@@ -35,7 +35,7 @@ export const getUserDetail = (params: {
 
 // 关注/取消关注用户
 export const followUser = (params: FollowParams): Promise<baseResponse<null>> => {
-    return useAxios.post("/api/user/focus", params);
+    return useAxios.get("/api/user/focus", {params});
 };
 
 // 获取关注列表（保持与文章列表一致的风格）
