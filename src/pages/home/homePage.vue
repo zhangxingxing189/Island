@@ -75,9 +75,9 @@ function intoIsland(islandId: string) {
   });
 }
 onMounted(async () => {
-  console.log("start");
+  // console.log("start");
   await preLoad(); //这里start比preload快导致没加载到
-  console.log(islandStore.islandData);
+  // console.log(islandStore.islandData);
   const resImages = {
     tiles: {
       id: "1901154962285531136",
@@ -202,25 +202,43 @@ onMounted(async () => {
       player: Phaser.Types.Physics.Arcade.GameObjectWithBody,
       islandGroup: Phaser.Types.Physics.Arcade.GameObjectWithBody
     ) {
-      console.log(islandGroup);
-      // 阻止穿透
-      // this.physics.world.collide(player, islandGroup);
+      // 添加安全校验
+      if (!player || !player.body) {
+        console.warn("Player not initialized");
+        return;
+      }
 
-      // 添加碰撞效果
-      (islandGroup as Phaser.Physics.Arcade.Image).setTint(0xff0000);
+      // 添加岛屿对象校验
+      if (!islandGroup.body) {
+        console.warn("Invalid island collision");
+        return;
+      }
 
-      // // 碰撞后反弹
-      // if (player.body.touching.right) {
-      //   player.setVelocityX(-this.moveSpeed);
-      // } else if (player.body.touching.left) {
-      //   player.setVelocityX(this.moveSpeed);
-      // }
-      //
-      // if (player.body.touching.down) {
-      //   player.setVelocityY(-this.moveSpeed);
-      // } else if (player.body.touching.up) {
-      //   player.setVelocityY(this.moveSpeed);
-      // }
+      // 类型断言确保物理属性存在
+      const playerBody = player.body as Phaser.Physics.Arcade.Body;
+      const islandBody = islandGroup.body as Phaser.Physics.Arcade.StaticBody;
+
+      // 调试输出碰撞信息
+      // console.log("Collision between:", {
+      //   player: { x: player.x, y: player.y },
+      //   island: { x: islandGroup.x, y: islandGroup.y },
+      //   touching: playerBody.touching,
+      // });
+
+      // 修改碰撞响应逻辑
+      if (playerBody.touching.right) {
+        playerBody.velocity.x = -this.moveSpeed;
+      } else if (playerBody.touching.left) {
+        playerBody.velocity.x = this.moveSpeed;
+      }
+
+      if (playerBody.touching.down) {
+        playerBody.velocity.y = -this.moveSpeed;
+      } else if (playerBody.touching.up) {
+        playerBody.velocity.y = this.moveSpeed;
+      }
+
+      // 延迟路由跳转避免物理引擎冲突
       router.push({
         path: "/island/",
         query: {
@@ -228,8 +246,6 @@ onMounted(async () => {
           form: "home",
         },
       });
-      // 播放音效（需要先加载音频）
-      // this.sound.play('collision-sound');
     }
     create() {
       // 初始化地图
@@ -257,9 +273,12 @@ onMounted(async () => {
 
       // 创建角色
       this.PlayerAnim();
+      // 启用相机跟随（核心修改）
+      this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+      this.cameras.main.setDeadzone(10, 10); // 设置跟随缓冲区域
 
       // 添加鼠标滚轮缩放功能
-      // this.cameraZoom(); //待修复
+      this.cameraZoom(); //待修复
       // this.add.image(0, 0, "logo");
       this.islandGroup = this.physics.add.staticGroup();
       for (const key in this.Islands.islandMsg) {
@@ -269,14 +288,28 @@ onMounted(async () => {
           island.x,
           island.y,
           island.islandName
-        );
+        ) as Phaser.Physics.Arcade.Image;
         islandStatic.setInteractive();
         islandStatic.setData("id", key);
         islandStatic.setDepth(20);
         islandStatic.on("pointerdown", () => {
           intoIsland(key);
         });
-        islandStatic.body?.setSize(island.imageWidth, island.imageHeight, true);
+        // islandStatic.body?.setSize(island.imageWidth, island.imageHeight, true);
+        // 设置碰撞体（仅下半部分）
+        islandStatic.body
+          .setSize(0, 0, true)
+          .setOffset(0, island.imageHeight / 2);
+
+        islandStatic.setImmovable(false);
+        this.time.delayedCall(0, () => {
+          islandStatic.refreshBody();
+          console.log("碰撞体参数", {
+            // size: islandStatic.body!.size,
+            offset: islandStatic.body!.offset,
+            center: islandStatic.body!.center,
+          });
+        });
       }
       // 添加碰撞检测器
       this.physics.add.collider(
@@ -296,12 +329,20 @@ onMounted(async () => {
       };
       // console.log(this.NowPoint);
       this.updateCameraBounds();
+      console.log(
+        `Camera Bounds: ${this.cameras.main.getBounds().toString()}`,
+        `Player Position: ${this.player.x.toFixed(1)}, ${this.player.y.toFixed(
+          1
+        )}`
+      );
     }
 
     generateMap(offsetX, offsetY) {
       if (this.isMapLoaded(offsetX, offsetY)) {
         return;
       }
+
+      // 生成随机地图数据
       const mapData = [];
       for (let y = 0; y < this.mapHeight; y++) {
         const row = [];
@@ -311,88 +352,136 @@ onMounted(async () => {
         }
         mapData.push(row);
       }
+
+      // 创建地图并计算实际坐标（关键修改点）
+      const actualX = offsetX * this.mapWidth * this.tileWidth;
+      const actualY = offsetY * this.mapHeight * this.tileHeight;
+
       const map = this.make.tilemap({
         data: mapData,
         tileWidth: this.tileWidth,
         tileHeight: this.tileHeight,
       });
+
       const tileset = map.addTilesetImage("tiles");
       const layer = map.createLayer(
         0,
         tileset,
-        offsetX * this.mapWidth * this.tileWidth,
-        offsetY * this.mapHeight * this.tileHeight
+        actualX, // 使用计算后的实际X坐标
+        actualY // 使用计算后的实际Y坐标
       );
+
       layer.setVisible(true);
-      this.maps.push({ map, layer, offsetX, offsetY });
+
+      // 记录已生成的地图块
+      this.maps.push({
+        map,
+        layer,
+        offsetX,
+        offsetY,
+        actualX, // 新增实际坐标记录
+        actualY,
+      });
+
       this.markMapAsLoaded(offsetX, offsetY);
+      this.updateCameraBounds(); // 生成后立即更新边界
     }
 
     updateCameraBounds() {
-      const globalMinX =
-        Math.min(...this.maps.map((m) => m.offsetX)) *
-        this.mapWidth *
-        this.tileWidth;
-      const globalMaxX =
-        Math.max(...this.maps.map((m) => m.offsetX + 1)) *
-        this.mapWidth *
-        this.tileWidth;
-      const minY =
-        Math.min(...this.maps.map((m) => m.offsetY)) *
-        this.mapHeight *
-        this.tileHeight;
-      const maxY =
-        Math.max(...this.maps.map((m) => m.offsetY + 1)) *
-        this.mapHeight *
-        this.tileHeight;
-      this.cameraBounds = {
-        left: globalMinX,
-        right: globalMaxX,
-        top: minY,
-        bottom: maxY,
-      };
-      // console.log(this.cameraBounds.left, this.cameraBounds.top);
-      this.cameras.main.setBounds(
-        this.cameraBounds.left,
-        this.cameraBounds.top,
-        this.cameraBounds.right - this.cameraBounds.left,
-        this.cameraBounds.bottom - this.cameraBounds.top
+      if (this.maps.length === 0) return;
+
+      // 计算实际边界
+      const bounds = this.maps.reduce(
+        (acc, map) => ({
+          minX: Math.min(acc.minX, map.actualX),
+          maxX: Math.max(acc.maxX, map.actualX + map.layer.width),
+          minY: Math.min(acc.minY, map.actualY),
+          maxY: Math.max(acc.maxY, map.actualY + map.layer.height),
+        }),
+        { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity }
       );
+
+      // 设置30%动态缓冲
+      const bufferRatio = 0.3;
+      const bufferX = (bounds.maxX - bounds.minX) * bufferRatio;
+      const bufferY = (bounds.maxY - bounds.minY) * bufferRatio;
+
+      // 计算最终边界
+      const worldBounds = {
+        x: bounds.minX - bufferX,
+        y: bounds.minY - bufferY,
+        width: bounds.maxX - bounds.minX + bufferX * 2,
+        height: bounds.maxY - bounds.minY + bufferY * 2,
+      };
+
+      // 同时设置物理世界边界和相机边界（关键！）
+      this.physics.world.setBounds(
+        worldBounds.x,
+        worldBounds.y,
+        worldBounds.width,
+        worldBounds.height
+      );
+
+      this.cameras.main.setBounds(
+        worldBounds.x,
+        worldBounds.y,
+        worldBounds.width,
+        worldBounds.height
+      );
+
+      // 调试输出
+      // console.log(
+      //   "Updated Camera Bounds:",
+      //   `X: ${globalBounds.minX - bufferX} ~ ${globalBounds.maxX + bufferX}`,
+      //   `Y: ${globalBounds.minY - bufferY} ~ ${globalBounds.maxY + bufferY}`
+      // );
+      // console.log(
+      //   minChunkX * this.mapWidth * this.tileWidth,
+      //   minChunkY * this.mapHeight * this.tileHeight,
+      //   (maxChunkX - minChunkX + 1) * this.mapWidth * this.tileWidth,
+      //   (maxChunkY - minChunkY + 1) * this.mapHeight * this.tileHeight
+      // );
+      // console.log(
+      //   this.cameraBounds.left,
+      //   this.cameraBounds.top,
+      //   this.cameraBounds.right - this.cameraBounds.left,
+      //   this.cameraBounds.bottom - this.cameraBounds.top
+      // );
     }
 
     checkAndGenerateMaps() {
-      const cam = this.cameras.main;
-      const buffer = 0;
-      let offsetX;
-      let offsetY;
-      const y = cam.scrollY / (this.mapHeight * this.tileHeight);
-      const x = cam.scrollX / (this.mapWidth * this.tileWidth);
-      point.value.x = x;
-      point.value.y = y;
-      // console.log(point.value);
-      if (y < 0) {
-        offsetY = Math.ceil(-y);
-        offsetY = -offsetY - buffer;
-      } else {
-        offsetY = Math.ceil(y) + buffer;
-      }
-      if (x < 0) {
-        offsetX = Math.ceil(-x);
-        offsetX = -offsetX - buffer;
-      } else {
-        offsetX = Math.ceil(x) + buffer;
-      }
+      // 获取相机可见区域
+      const cameraView = this.cameras.main.worldView;
 
-      for (let dx = -1; dx <= 1; dx++) {
-        for (let dy = -1; dy <= 1; dy++) {
-          const xCoord = offsetX + dx;
-          const yCoord = offsetY + dy;
-          if (!this.isMapLoaded(xCoord, yCoord)) {
-            this.generateMap(xCoord, yCoord);
+      // 计算需要加载的区块范围
+      const startX = Math.floor(
+        (cameraView.x - cameraView.width * 0.5) /
+          (this.mapWidth * this.tileWidth)
+      );
+      const endX = Math.ceil(
+        (cameraView.x + cameraView.width * 1.5) /
+          (this.mapWidth * this.tileWidth)
+      );
+      const startY = Math.floor(
+        (cameraView.y - cameraView.height * 0.5) /
+          (this.mapHeight * this.tileHeight)
+      );
+      const endY = Math.ceil(
+        (cameraView.y + cameraView.height * 1.5) /
+          (this.mapHeight * this.tileHeight)
+      );
+
+      // 生成所有可见和相邻区块
+      for (let x = startX; x <= endX; x++) {
+        for (let y = startY; y <= endY; y++) {
+          if (!this.isMapLoaded(x, y)) {
+            this.generateMap(x, y);
           }
         }
       }
-      this.updateCameraBounds();
+
+      // 延迟更新确保所有地图块加载
+      this.time.delayedCall(100, () => this.updateCameraBounds());
     }
 
     isMapLoaded(offsetX, offsetY) {
@@ -404,34 +493,27 @@ onMounted(async () => {
     }
 
     PlayerMove() {
-      //更新玩家位置,60是帧数
-      const moveAmount = this.moveSpeed / 60;
-      this.player.setVelocity(this.VectorXLast, this.VectorYLast);
-      this.VectorX = 0;
-      this.VectorY = 0;
+      // 仅控制玩家移动，不再操作相机
+      const speed = this.moveSpeed;
+      this.player.setVelocity(0);
+
       if (this.cursors.left.isDown) {
-        this.uiLayer.x -= moveAmount;
-        this.VectorX -= this.moveSpeed;
-        this.cameras.main.scrollX -= moveAmount;
+        this.player.setVelocityX(-speed);
+      } else if (this.cursors.right.isDown) {
+        this.player.setVelocityX(speed);
       }
-      if (this.cursors.right.isDown) {
-        this.uiLayer.x += moveAmount;
-        this.VectorX += this.moveSpeed;
-        this.cameras.main.scrollX += moveAmount;
-      }
+
       if (this.cursors.up.isDown) {
-        this.uiLayer.y -= moveAmount;
-        this.VectorY -= this.moveSpeed;
-        this.cameras.main.scrollY -= moveAmount;
+        this.player.setVelocityY(-speed);
+      } else if (this.cursors.down.isDown) {
+        this.player.setVelocityY(speed);
       }
-      if (this.cursors.down.isDown) {
-        this.uiLayer.y += moveAmount;
-        this.VectorY += this.moveSpeed;
-        this.cameras.main.scrollY += moveAmount;
-      }
-      this.VectorXLast = this.VectorX;
-      this.VectorYLast = this.VectorY;
-      this.player.setVelocity(this.VectorX, this.VectorY);
+
+      // UI层跟随逻辑需要调整
+      // this.uiLayer.setPosition(
+      //   this.cameras.main.scrollX + window.innerWidth - 20,
+      //   this.cameras.main.scrollY + 20
+      // );
     }
 
     PlayerAnim() {
@@ -442,7 +524,7 @@ onMounted(async () => {
       );
 
       this.player.setDepth(10);
-      this.player.setCollideWorldBounds(true);
+      // this.player.setCollideWorldBounds(true);
       this.player.body?.setSize(32, 48).setOffset(16, 16);
       // 设置角色动画
       this.anims.create({
@@ -501,41 +583,48 @@ onMounted(async () => {
         }),
         frameRate: 1,
       });
+      // this.player.body!.collideWorldBounds = true;
     }
 
     async createUILayer() {
-      let uiX = this.NowPoint.X + window.innerWidth;
-      let uiY = this.NowPoint.Y;
-      let uiborder = 10;
-      //面板
+      // 使用相机中心坐标作为基准点
+      const cameraCenterX =
+        this.cameras.main.worldView.x + this.cameras.main.width / 2;
+      const cameraCenterY =
+        this.cameras.main.worldView.y + this.cameras.main.height / 2;
+
+      // 创建UI容器并定位到屏幕右上角
       this.uiLayer = this.add.container();
-      this.uiLayer.setDepth(10);
+      this.uiLayer.setDepth(1000); // 提升层级确保在最上层
+      this.uiLayer.setScrollFactor(0); // 关键！禁止随相机滚动
+
       try {
         module = await import("@/pages/home/UIFunction");
       } catch (error) {
         console.error("Failed to load component:", error);
       }
+
+      // 从右向左排列UI元素
+      let currentX = window.innerWidth - this.uiPadding.x - this.uiPadding.x;
+      const startY = this.uiPadding.y + this.uiPadding.y;
+
       for (const uiMapKey in uiMap) {
-        let uiImage = this.add.image(
-          uiX - this.uiPadding.x,
-          uiY + this.uiPadding.y,
-          uiMapKey
-        );
-        // 启用交互功能
-        uiImage.setInteractive();
-        // 获取原始宽高
-        const originalWidth = uiImage.width;
-        const originalHeight = uiImage.height;
+        const uiImage = this.add
+          .image(currentX, startY, uiMapKey)
+          .setInteractive()
+          .setDepth(1001) // 单独设置更高层级
+          .setScrollFactor(0); // 禁止随相机滚动
 
-        // 计算目标宽度和高度，保持宽高比
-        const targetWidth = 50; // 目标宽度
-        const targetHeight = (originalHeight / originalWidth) * targetWidth;
+        // 动态调整尺寸
+        const scaleRatio = 50 / uiImage.width;
+        uiImage.setScale(scaleRatio);
 
-        // 设置显示大小
-        uiImage.setDisplaySize(targetWidth, targetHeight);
-        uiImage.setOrigin(1, 0);
         this.uiLayer.add(uiImage);
-        uiX = uiX - targetWidth - uiborder;
+
+        // 调整间距计算方式
+        currentX -= uiImage.displayWidth + 15; // 使用显示宽度计算间距
+
+        // 绑定交互事件
         const component = module[uiMapKey];
         uiImage.on("pointerdown", component);
       }
@@ -598,7 +687,9 @@ onMounted(async () => {
       default: "arcade",
       arcade: {
         gravity: { x: 0, y: 0 }, // 如果需要重力可以设置
-        debug: false, // 调试模式
+        debug: true, // 调试模式
+        debugShowBody: true,
+        debugShowStaticBody: true,
       },
     },
   };
