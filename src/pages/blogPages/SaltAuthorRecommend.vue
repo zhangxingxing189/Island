@@ -178,7 +178,7 @@ const handleSubmit = async () => {
        });
     console.log(res);
    message.success("文章创建成功");
-    router.push(`/article/${res.data.id}`);
+    router.go(-1);
   } catch (error) {
     console.error("提交错误:", error);
     message.error("文章提交失败");

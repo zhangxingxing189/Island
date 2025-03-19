@@ -30,14 +30,15 @@ export interface ArticleListResponse {
 
 // 获取文章列表
 export const getArticleList = (params: {
-    page: number;
-    pageSize: number;
+    page?: number;
+    pageSize?: number;
     userIds?: string[];
     order?: string;
     content?: string;
     key?: string;
     islandId?: string;
     islandName?: string;
+    limit?: number;
 }): Promise<baseResponse<ArticleListResponse>> => {
     return useAxios.get("/api/article", { params });
 };

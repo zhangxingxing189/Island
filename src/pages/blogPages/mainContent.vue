@@ -26,6 +26,14 @@
             <div v-if="!followList.length" class="empty">
               暂无关注内容，快去关注你感兴趣的作者吧！
             </div>
+<!--            <div v-if="activeTab === 'follow'" class="pagination-container">
+              <a-pagination
+                  v-model:current="pagination.page"
+                  :pageSize="pagination.pageSize"
+                  :total="pagination.total"
+                  show-less-items
+              />
+            </div>-->
           </template>
 
           <!-- 推荐内容 -->
@@ -51,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from "vue";
+import {ref, reactive, onMounted, watch} from "vue";
 import ContentCard from "./ContentCard.vue";
 import HotList from "./HotList.vue";
 import { HotItem, ContentItem } from "./blogInterface";
@@ -93,21 +101,31 @@ const loadFollowArticles = async () => {
   })
   console.log(followList.value);
 */
+
 const loadFollowArticles = async () => {
   followLoading.value = true;
   try {
     // 获取关注列表
-    const { data: followData } = await getFollowList({ page: 1 });
-    const { data: articleData } = await getArticleList({
-      page: 1,
-      pageSize: 20
-    });
+    const { data: followData } = await getFollowList({ page: 1, limit: 2000 });
+    let currentPage = 1;
+    let allArticles = []
+    while(true){
+      const { data } = await getArticleList({
+        pageSize: 10,
+        page: currentPage,
+      });
+      if (!data.list.length) break;
+      allArticles = [...allArticles, ...data.list];
+      currentPage++;
+      if (data.list.length < 10) break;
+    }
 
+    console.log(allArticles);
     // 使用Set优化匹配效率
     const followUserIds = new Set(followData.list.map(item => item.user_id));
 
     // 数据转换（保持与推荐列表一致）
-    followList.value = articleData.list
+    followList.value = allArticles
         .filter(item => followUserIds.has(item.user_id))
         .map((item): ContentItem => ({
           id: item.id.toString(),
@@ -125,6 +143,7 @@ const loadFollowArticles = async () => {
   } finally {
     followLoading.value = false;
   }
+
   // try {
   //   // 先获取关注列表
   //   const { data: followData } = await getFollowList({
