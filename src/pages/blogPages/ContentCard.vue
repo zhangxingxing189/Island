@@ -34,7 +34,7 @@ const emit = defineEmits(["like"]);
 
 const router = useRouter();
 const handleClick = () => {
-  router.push(`/article/${props.data.id}`);
+  router.push(`/island/article/${props.data.id}`);
 }
 const handleLike = () => {
   emit("like");

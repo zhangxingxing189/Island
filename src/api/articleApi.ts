@@ -14,8 +14,14 @@ export interface ArticleListItem {
     avatar: string;
     digg_count: number;
     collect_count: number;
+    island?:string;
 }
 
+interface BaseResponse<T> {
+    code: number;
+    message: string;
+    data: T;
+}
 // 文章列表响应类型
 export interface ArticleListResponse {
     count: number;
@@ -35,10 +41,20 @@ export const getArticleList = (params: {
 }): Promise<baseResponse<ArticleListResponse>> => {
     return useAxios.get("/api/article", { params });
 };
+
 // 获取文章详情
 export const getArticleDetail = (id: string) => {
-    return useAxios.get<baseResponse<ArticleListItem>>(`/api/article/${id}`);
+    console.log(id);
+    return useAxios.get<BaseResponse<ArticleListItem>>("/api/article/detail", {
+        params: {
+            id: id, // 将id作为查询参数
+        },
+        headers: {
+            Authorization: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE0OTg1MDA0OTc2MDUwMDMyMTYsIm5hbWUiOiLmnKvmuKvmnKvmvSIsImVtYWlsIjoiIiwicGhvbmUiOiIiLCJpc1Rva2VuU3RhdHVzIjoiVXNlcl9BRE1JTiIsInVzZXJUeXBlIjoiVXNlciIsImV4cCI6MTY4NzE3NzYwMCwiaWF0IjoxNjg3MTc0MDAwfQ.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE0OTg1MDA0OTc2MDUwMDMyMTYsIm5hbWUiOiLmnKvmuKvmnKvmvSIsImVtYWlsIjoiIiwicGhvbmUiOiIiLCJpc1Rva2VuU3RhdHVzIjoiVXNlcl9BRE1JTiIsInVzZXJUeXBlIjoiVXNlciIsImV4cCI6MTY4NzE3NzYwMCwiaWF0IjoxNjg3MTc0MDAwfQ.EYnG5rJyq2DdZc2Q6i00rL33P0nZkY86H5uVg9Yq5PQ', // 设置Authorization头
+        },
+    });
 };
+
 
 export interface OwnerArticleListResponse {
     count: number;

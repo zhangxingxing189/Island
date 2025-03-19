@@ -1,7 +1,13 @@
 <template>
+  <div v-if="loading" class="loading-overlay">
+    <el-icon class="is-loading">
+      <Loading />
+    </el-icon>
+    正在加载文章...
+  </div>
   <div class="article-container">
     <!-- 封面图区域 -->
-    <div class="cover-container">
+    <div class="cover-container" v-if="article?.cover">
       <img :src="article.cover" :alt="article.title" class="cover-image" />
     </div>
 
@@ -19,7 +25,7 @@
         </div>
       </header>
 
-      <!-- 内容区域 -->
+      <!-- 内容区域 --> 
       <section class="content-section">
         <mavon-editor
             v-model="article.content"
@@ -66,29 +72,71 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, reactive } from "vue";
+import {ref, computed, onMounted, reactive, onBeforeMount} from "vue";
 import type { ContentItem } from "./blogInterface";
 import {ArticleListItem, getArticleDetail, getArticleList} from "@/api/articleApi";
 import {formatTime} from "@/utils/formatters";
 import { useRoute } from 'vue-router';
+import {ElMessage} from "element-plus";
 
 /*const props = defineProps<{ id: string }>();
 const articleData = ref<ContentItem>();*/
 const route = useRoute();
-const article = ref<ContentItem>();
+const article = ref<ContentItem>({
+  title: '111',
+  abstract: '',
+  content: '' +
+      '',
+  cover: require('@/assets/background.png'), // 添加默认封面图
+  id: '',
+  timestamp: '',
+  likes: 0,
+  comments: 0,
+  author: ''
+});
 const loading = ref(true);
-onMounted(async () => {
+/*onMounted(async () => {
   try {
+    loading.value = true;
     const { data } = await getArticleDetail(route.params.id.toString());
+    console.log('接口响应数据:', data);
+    // 添加数据校验
+      article.value = {
+        ...article.value, // 保留默认值
+        title: data.data.title || '无标题',
+        abstract: data.data.abstract || '暂无摘要',
+        content: data.data.content,
+        cover: data.data.cover || require('@/assets/background.png'),
+        likes: Number(data.data.digg_count) || 0,
+        comments: Number(data.data.collect_count) || 0,
+        author: data.data.username || '匿名作者'
+      console.log(132);
+    }
+  } catch (error) {
+    console.error('加载文章失败:', error);
+    ElMessage.error('文章加载失败');
+  } finally {
+    loading.value = false;
+  }
+});*/
+onMounted(async () => {
+  console.log(111);
+  try {
+    loading.value = true;
+    const { data } = await getArticleDetail(route.params.id.toString());
+    console.log(data);
     article.value = {
-      title: data.data.title,
-      abstract: data.data.abstract,
-      content: data.data.content,
-      id: data.data.id.toString(),
-      timestamp: formatTime(new Date(data.data.created_at)),
-      likes: Number(data.data.digg_count),
-      comments: Number(data.data.collect_count)
+      title: data.title,
+      abstract: data.abstract,
+      content: data.content,
+      cover: data.cover,
+      author: data.username,
+      id: data.id.toString(),
+      timestamp: formatTime(new Date(data.created_at)),
+      likes: data.digg_count,
+      comments: data.collect_count,
     };
+    console.log(data);
   } catch (error) {
     console.error('加载文章失败:', error);
   } finally {
