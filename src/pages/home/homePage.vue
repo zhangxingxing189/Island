@@ -179,6 +179,10 @@ onMounted(async () => {
       }
       for (let key in this.Islands.islandMsg) {
         console.log(this.Islands.islandMsg[key].islandName);
+        if (!this.Islands.islandMsg[key].imageUrl) {
+          continue;
+        }
+        console.log(this.Islands.islandMsg[key]);
         this.load.image(
           this.Islands.islandMsg[key].islandName,
           this.Islands.islandMsg[key].imageUrl
