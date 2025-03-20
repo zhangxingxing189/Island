@@ -82,7 +82,8 @@ onMounted(async () => {
     tiles: {
       id: "1901154962285531136",
       wedPath:
-        "http://118.31.119.216:8080/uploads/ae470b42fe2e49655227fc11303e95e1.png",
+        // "http://118.31.119.216:8080/uploads/ae470b42fe2e49655227fc11303e95e1.png",
+        "http://118.31.119.216:8080/uploads/f84d510985fcbfc72942a93ac99452c3.png",
     },
   };
   const uiMap = {
@@ -493,22 +494,93 @@ onMounted(async () => {
     }
 
     PlayerMove() {
-      // 仅控制玩家移动，不再操作相机
       const speed = this.moveSpeed;
       this.player.setVelocity(0);
+      let movingDirection = null;
 
+      // 方向检测优先顺序：组合方向 -> 水平方向 -> 垂直方向
       if (this.cursors.left.isDown) {
         this.player.setVelocityX(-speed);
+        movingDirection = "left";
+
+        if (this.cursors.up.isDown) {
+          this.player.setVelocityY(-speed);
+          movingDirection = "left-up";
+        } else if (this.cursors.down.isDown) {
+          this.player.setVelocityY(speed);
+          movingDirection = "left-down";
+        }
       } else if (this.cursors.right.isDown) {
         this.player.setVelocityX(speed);
-      }
+        movingDirection = "right";
 
-      if (this.cursors.up.isDown) {
+        if (this.cursors.up.isDown) {
+          this.player.setVelocityY(-speed);
+          movingDirection = "right-up";
+        } else if (this.cursors.down.isDown) {
+          this.player.setVelocityY(speed);
+          movingDirection = "right-down";
+        }
+      } else if (this.cursors.up.isDown) {
         this.player.setVelocityY(-speed);
+        movingDirection = "up";
       } else if (this.cursors.down.isDown) {
         this.player.setVelocityY(speed);
+        movingDirection = "down";
       }
 
+      // 动画控制逻辑
+      let targetAnim = "stop";
+      let needFlip = false;
+
+      switch (movingDirection) {
+        case "left":
+          targetAnim = "left";
+          needFlip = false;
+          break;
+        case "right":
+          targetAnim = "left"; // 使用left动画配合翻转
+          needFlip = true;
+          break;
+        case "up":
+          targetAnim = "up";
+          break;
+        case "down":
+          targetAnim = "down";
+          break;
+        case "left-up":
+          targetAnim = "left-up";
+          break;
+        case "left-down":
+          targetAnim = "left-down";
+          break;
+        case "right-up":
+          targetAnim = "left-up"; // 使用left-up配合翻转
+          needFlip = true;
+          break;
+        case "right-down":
+          targetAnim = "left-down"; // 使用left-down配合翻转
+          needFlip = true;
+          break;
+      }
+
+      // 设置精灵翻转和播放动画
+      this.player.setFlipX(needFlip);
+
+      if (this.player.anims.currentAnim?.key !== targetAnim) {
+        console.log("into");
+        if (targetAnim === "stop") {
+          this.player.anims.playAfterRepeat("stop"); // 更自然的停止过渡
+        } else {
+          console.log("start");
+          this.player.anims.play(targetAnim, true);
+        }
+      }
+
+      // 特殊处理完全停止状态
+      if (!movingDirection && this.player.anims.currentAnim?.key !== "stop") {
+        this.player.anims.play("stop", true);
+      }
       // UI层跟随逻辑需要调整
       // this.uiLayer.setPosition(
       //   this.cameras.main.scrollX + window.innerWidth - 20,
@@ -546,7 +618,7 @@ onMounted(async () => {
       this.anims.create({
         key: "up",
         frames: this.anims.generateFrameNumbers("player", {
-          frames: [10, 20, 30],
+          frames: [10, 21, 32],
         }),
         frameRate: 10,
         repeat: -1,
@@ -554,7 +626,7 @@ onMounted(async () => {
       this.anims.create({
         key: "left",
         frames: this.anims.generateFrameNumbers("player", {
-          frames: [9, 19, 29],
+          frames: [9, 20, 31],
         }),
         frameRate: 10,
         repeat: -1,
@@ -562,7 +634,7 @@ onMounted(async () => {
       this.anims.create({
         key: "left-up",
         frames: this.anims.generateFrameNumbers("player", {
-          frames: [7, 17, 27],
+          frames: [7, 18, 29],
         }),
         frameRate: 10,
         repeat: -1,
@@ -570,7 +642,7 @@ onMounted(async () => {
       this.anims.create({
         key: "left-down",
         frames: this.anims.generateFrameNumbers("player", {
-          frames: [2, 12, 22],
+          frames: [1, 12, 23],
         }),
         frameRate: 10,
         repeat: -1,
