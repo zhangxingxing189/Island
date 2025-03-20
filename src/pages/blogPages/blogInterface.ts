@@ -9,6 +9,7 @@ export interface ContentItem{
   timestamp: string;
   content: string;
   authorId?: string;
+  collect_count?: number;
 }
 
 export type HotItem = {

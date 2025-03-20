@@ -12,6 +12,13 @@
         <button class="like-btn" @click.stop="handleLike">
           <i class="icon-like"></i>点赞 <i class="iconfont icon-dianzan"></i> {{ data.likes }}
         </button>
+        <button
+            class="collect-btn"
+            :class="{ collected: isCollected }"
+            @click.stop="handleCollect"
+        >
+          <i class="iconfont icon-shoucang"></i> {{ data.collect_count }}
+        </button>
         <span class="comments">
 <!--          <i class="icon-comment"></i> 浏览:{{ data.comments }}-->
           <span class="author">作者: {{ data.author }}</span>
@@ -23,9 +30,11 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from "vue";
+import {defineProps, ref} from "vue";
 import { useRouter } from "vue-router";
 import { ContentItem } from "@/pages/blogPages/blogInterface";
+import {collectArticle} from "@/api/articleApi";
+import {ElMessage} from "element-plus";
 const props = defineProps<{
   data: ContentItem;
 }>();
@@ -39,10 +48,31 @@ const handleClick = () => {
 const handleLike = () => {
   emit("like");
 };
-
+//收藏
+const isCollected = ref(false);
+const handleCollect = async () => {
+  try {
+    await collectArticle({ article_id: props.data.id });
+    isCollected.value = !isCollected.value;
+  } catch (error) {
+    ElMessage.error('操作失败');
+  }
+};
 </script>
 
 <style scoped>
+.collect-btn {
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+
+  &.collected {
+    color: var(--primary);
+    .icon-shoucang {
+      color: var(--primary);
+    }
+  }
+}
 .content-card {
   display: flex;
   margin-bottom: 16px;

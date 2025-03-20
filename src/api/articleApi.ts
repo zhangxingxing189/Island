@@ -1,5 +1,6 @@
 import { useAxios, baseResponse } from "@/api/index";
 import { IslandType } from "./islandApi";
+import {FollowParams} from "@/api/focusApi";
 
 //文章列表项类型
 export interface ArticleListItem {
@@ -81,8 +82,8 @@ export interface CollectArticleListResponse {
 
 //获取用户收藏文章
 export const getOwnerCollectArticles = (params: {
-    page: number;
-    pageSize: number;
+    page?: number;
+    user_id?: string;
 }): Promise<baseResponse<CollectArticleListResponse>> => {
     return useAxios.get("/api/article/collect/owner", { params });
 };
@@ -111,4 +112,11 @@ export const deleteArticle = (ids: string[]) => {
 
         }
     });
+};
+
+export interface CollectArticleParams  {
+    article_id: string;
+}
+export const collectArticle = (params: CollectArticleParams): Promise<baseResponse<null>> => {
+    return useAxios.get("/api/article/collect", {params});
 };

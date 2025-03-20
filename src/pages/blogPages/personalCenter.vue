@@ -83,6 +83,25 @@
               </div>
             </div>
           </template>
+          <template v-else-if="activeTab === 'collection'">
+            <div v-if="isLoading" class="loading">加载中...</div>
+            <div v-else-if="collectList?.length === 0" class="empty">暂无收藏内容</div>
+            <div v-for="item in collectList" :key="item.id" class="article-item">
+              <div class="article-cover" v-if="item.cover">
+                <img :src="item.cover" alt="文章封面" />
+              </div>
+              <div class="article-content">
+                <h3 class="article-title">{{ item.title }}</h3>
+                <p class="article-abstract">{{ item.abstract }}</p>
+                <div class="article-meta">
+                  <el-button @click.stop="showUncollectDialog(item.id)">取消收藏</el-button>
+                  <span class="digg-count">❤️ {{ item.digg_count }}</span>
+                  <span class="collect-count">⭐ {{ item.collect_count }}</span>
+                  <time class="create-time">{{ formatDate(item.created_at) }}</time>
+                </div>
+              </div>
+            </div>
+          </template>
           <div
             v-for="(item, index) in filteredDynamics"
             :key="index"
@@ -151,7 +170,7 @@
       </div>
     </div>
   </div>
-  <div v-if="showCustomDialog" class="custom-dialog-mask">
+<!--  <div v-if="showCustomDialog" class="custom-dialog-mask">
     <div class="custom-dialog" :class="dialogType">
       <div class="dialog-header">
         <h3>{{ dialogTitle }}</h3>
@@ -167,15 +186,30 @@
         <button v-else class="btn confirm-btn" @click="showCustomDialog = false">确定</button>
       </div>
     </div>
+  </div>-->
+  <<div v-if="showCustomDialog" class="custom-dialog-mask">
+  <div class="custom-dialog" :class="dialogType">
+    <div class="dialog-body">
+      <p>{{ dialogMessage }}</p>
+    </div>
+    <div class="dialog-footer">
+      <template v-if="dialogType === 'error'">
+        <button class="btn cancel-btn" @click="showCustomDialog = false">取消</button>
+        <button class="btn confirm-btn" @click="handleUncollect">确认</button>
+      </template>
+      <button v-else class="btn confirm-btn" @click="showCustomDialog = false">确定</button>
+    </div>
   </div>
+</div>
+
 </template>
 
 <script setup lang="ts">
-import {ref, computed, reactive, watchEffect} from "vue";
+import {ref, computed, reactive, watchEffect, onMounted} from "vue";
 import { useUserStore } from "@/stores/user";
 import { useRouter } from 'vue-router';
 import {
-  ArticleListItem,
+  ArticleListItem, collectArticle,
   deleteArticle,
   getArticleList,
   getOwnerArticleList,
@@ -183,6 +217,8 @@ import {
 } from "@/api/articleApi";
 import { ElNotification } from 'element-plus';
 import {FollowItem, getFollowList} from "@/api/focusApi";
+import {ContentItem} from "@/pages/blogPages/blogInterface";
+import {formatTime} from "@/utils/formatters";
 const router = useRouter();
 const userStore = useUserStore();
 console.log( userStore.currentUser);
@@ -365,9 +401,97 @@ const cancelDelete = () => {
   deletingArticleId.value = null
 }
 
+const collectedList = ref<ContentItem[]>([]);
+const currentPage = ref(1);
+const loadingCollect = ref(false);
+
+// 加载收藏文章
+const loadCollections = async () => {
+  try {
+    loadingCollect.value = true;
+    const { data } = await getOwnerCollectArticles({
+      page: currentPage.value,
+    });
+    collectedList.value = data.list.map(item => ({
+      id: item.id,
+      title: item.title,
+      abstract: item.abstract,
+      cover: item.cover || require('@/assets/background.png'),
+      likes: item.digg_count,
+      comments: item.collect_count,
+      author: item.username,
+      timestamp: formatTime(new Date(item.created_at)),
+    }));
+  } catch (error) {
+   console.error('加载收藏失败');
+  } finally {
+    loadingCollect.value = false;
+  }
+};
+
+const deletingCollectId = ref<string | null>(null);
+
+const showUncollectDialog = (id: string) => {
+  dialogMessage.value = '确定要取消收藏该文章吗？';
+  dialogType.value = 'error';
+  showCustomDialog.value = true;
+  deletingCollectId.value = id;
+};
+// 取消收藏（仿照取消关注逻辑）
+const handleUncollect = async () => {
+  if (!deletingCollectId.value) return;
+
+  try {
+    await collectArticle({ article_id: deletingCollectId.value });
+    collectList.value = collectList.value.filter(a => a.id !== deletingCollectId.value);
+
+    dialogTitle.value = '操作成功';
+    dialogMessage.value = '已取消收藏';
+    dialogType.value = 'success';
+    showCustomDialog.value = true;
+  } catch (error) {
+    dialogTitle.value = '操作失败';
+    dialogMessage.value = '取消收藏失败，请稍后重试';
+    dialogType.value = 'error';
+    showCustomDialog.value = true;
+  } finally {
+    deletingCollectId.value = null;
+  }
+};
+
+// 初始化加载
+onMounted(() => {
+  loadCollections();
+});
+
+
 </script>
 
 <style>
+.collection-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.uncollect-btn {
+  color: var(--text-secondary);
+  padding: 4px 12px;
+  border-radius: 15px;
+  background: transparent;
+  border: 1px solid var(--gray-100);
+  transition: all 0.3s;
+
+  &:hover {
+    color: var(--primary);
+    border-color: var(--primary);
+  }
+}
+
+.icon-shoucang-filled {
+  margin-right: 4px;
+}
 .custom-dialog-mask {
   position: fixed;
   top: 0;

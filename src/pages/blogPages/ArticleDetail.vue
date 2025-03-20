@@ -71,7 +71,15 @@
           <i class="icon-heart"></i>
           <span class="count">{{ article.likes + (isLiked ? 1 : 0) }}</span>
         </button>
-
+        <button
+            class="action-btn collect-btn"
+            :class="{ collected: isCollected }"
+            @click="handleCollect"
+        >
+          <i class="iconfont icon-shoucang"></i>
+          {{ isCollected ? '已收藏' : '收藏' }}
+          <span class="count">{{  displayCollectCount }}</span>
+        </button>
 <!--        <div class="comment-info">-->
 <!--          <i class="icon-eye"></i>-->
 <!--          <span>{{ article.comments }}次浏览</span>-->
@@ -93,7 +101,13 @@
 <script setup lang="ts">
 import {ref, computed, onMounted, reactive, onBeforeMount,watch} from "vue";
 import type { ContentItem } from "./blogInterface";
-import {ArticleListItem, getArticleDetail, getArticleList} from "@/api/articleApi";
+import {
+  ArticleListItem,
+  collectArticle,
+  getArticleDetail,
+  getArticleList,
+  getOwnerCollectArticles
+} from "@/api/articleApi";
 import {formatTime} from "@/utils/formatters";
 import { useRoute } from 'vue-router';
 import {followUser, getFollowList} from "@/api/focusApi";
@@ -141,6 +155,7 @@ const loading = ref(true);
     loading.value = false;
   }
 });*/
+const displayCollectCount = ref(0);
 onMounted(async () => {
   try {
     loading.value = true;
@@ -157,8 +172,11 @@ onMounted(async () => {
       likes: data.digg_count,
       comments: data.collect_count,
       authorId: data.user_id,
+      collect_count: data.collect_count,
     };
     console.log(article.value);
+    displayCollectCount.value = data.collect_count;
+    await checkCollectStatus();
   } catch (error) {
     console.error('加载文章失败:', error);
   } finally {
@@ -280,17 +298,76 @@ const handleFollow = async () => {
 
     await followUser({ focus_id: currentAuthorId.value });
     isFollowing.value = !isFollowing.value;
-    ElMessage.success(isFollowing.value ? '关注成功' : '已取消关注');
+
+    console.log(isFollowing.value);
   } catch (error) {
-    ElMessage.error('操作失败: ' + error.response?.data?.message || error.message);
+    console.error('操作失败: ' + error.response?.data?.message || error.message);
   }
 };
 
+const isCollected = ref(false);
 
+const checkCollectStatus = async () => {
+  try {
+    if (!userStore.currentUser?.user_id) return;
+
+    let currentPage = 1;
+    let collectedArticles=[]
+
+    while(true) {
+      const { data } = await getOwnerCollectArticles({
+        page: currentPage,
+      });
+
+      if (!data.list.length) break;
+
+      collectedArticles.push(...data.list);
+      currentPage++;
+
+      // 当返回数量小于请求数量时终止循环
+      if (data.list.length < 10) break;
+    }
+    isCollected.value = collectedArticles.some(
+        item => item.id === article.value.id
+    );
+  } catch (error) {
+    console.error('获取收藏状态失败:', error);
+  }
+  console.log(6666);
+};
+// 收藏处理逻辑
+const handleCollect = async () => {
+  try {
+    if (!userStore.currentUser) {
+      ElMessage.warning('请先登录');
+      return router.push('/login');
+    }
+    if (isCollected.value) {
+      displayCollectCount.value -= 1;
+    } else {
+      displayCollectCount.value += 1;
+    }
+    await collectArticle({ article_id: article.value.id });
+    isCollected.value = !isCollected.value;
+  } catch (error) {
+    ElMessage.error('操作失败');
+  }
+};
 </script>
 
 <style scoped>
 
+.action-btn {
+  &.collect-btn {
+    background: var(--primary-50);
+    color: var(--primary);
+
+    &.collected {
+      background: var(--primary);
+      color: white;
+    }
+  }
+}
 .follow-btn {
   margin-left: 12px;
   padding: 4px 12px;
