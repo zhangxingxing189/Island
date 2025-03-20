@@ -115,8 +115,25 @@ export const deleteArticle = (ids: string[]) => {
 };
 
 export interface CollectArticleParams  {
-    article_id: string;
+    article_id?: string;
 }
 export const collectArticle = (params: CollectArticleParams): Promise<baseResponse<null>> => {
     return useAxios.get("/api/article/collect", {params});
 };
+
+export interface DiggArticleParams {
+    article_id: string;
+}
+
+export const diggArticle = (params: DiggArticleParams): Promise<baseResponse<{
+    digg_count: number;
+}>> => {
+    return useAxios.get("/api/article/digg", {params});
+};
+
+export const getOwnerDiggArticles = (params: {
+    page?: number;
+}): Promise<baseResponse<ArticleListResponse>> => {
+    return useAxios.get("/api/article/digg/owner", { params });
+};
+

@@ -69,7 +69,7 @@
         >
           点赞
           <i class="icon-heart"></i>
-          <span class="count">{{ article.likes + (isLiked ? 1 : 0) }}</span>
+          {{ localDiggCount }}
         </button>
         <button
             class="action-btn collect-btn"
@@ -103,10 +103,10 @@ import {ref, computed, onMounted, reactive, onBeforeMount,watch} from "vue";
 import type { ContentItem } from "./blogInterface";
 import {
   ArticleListItem,
-  collectArticle,
+  collectArticle, diggArticle,
   getArticleDetail,
   getArticleList,
-  getOwnerCollectArticles
+  getOwnerCollectArticles, getOwnerDiggArticles
 } from "@/api/articleApi";
 import {formatTime} from "@/utils/formatters";
 import { useRoute } from 'vue-router';
@@ -175,7 +175,7 @@ onMounted(async () => {
       collect_count: data.collect_count,
     };
     console.log(article.value);
-    displayCollectCount.value = data.collect_count;
+
     await checkCollectStatus();
   } catch (error) {
     console.error('加载文章失败:', error);
@@ -207,8 +207,8 @@ onMounted(async () => {
     console.error("加载文章详情失败:", error);
   }
 });*/
-// 响应式数据
-const isLiked = ref(false);
+/*// 响应式数据
+const isLiked = ref(false);*/
 /*const article = ref<ContentItem>({
   id: 1,
   title: "如何评价2023年人工智能发展趋势？",
@@ -225,11 +225,13 @@ const formattedContent = computed(() =>
   content.split("\n").filter((p) => p.trim())
 );*/
 
+/*
 // 点赞逻辑
 const handleLike = () => {
   isLiked.value = !isLiked.value;
   // 这里可以添加API调用
 };
+*/
 
 /*
 // 分页参数
@@ -292,7 +294,7 @@ const checkFollowingStatus = async () => {
 const handleFollow = async () => {
   try {
     if (!userStore.currentUser) {
-      ElMessage.warning('请先登录');
+      console.log('请先登录');
       return router.push('/login');
     }
 
@@ -339,7 +341,7 @@ const checkCollectStatus = async () => {
 const handleCollect = async () => {
   try {
     if (!userStore.currentUser) {
-      ElMessage.warning('请先登录');
+      console.log('请先登录');
       return router.push('/login');
     }
     if (isCollected.value) {
@@ -347,12 +349,59 @@ const handleCollect = async () => {
     } else {
       displayCollectCount.value += 1;
     }
+
     await collectArticle({ article_id: article.value.id });
     isCollected.value = !isCollected.value;
   } catch (error) {
-    ElMessage.error('操作失败');
+    console.error('操作失败');
   }
 };
+
+const likedIds = ref<Set<string>>(new Set());
+const localDiggCount = ref(article.value.likes);
+const isLiked = ref(false);
+
+// 分页加载所有点赞文章
+const loadAllLikedArticles = async () => {
+  try {
+    let page = 1;
+    while (true) {
+      const { data } = await getOwnerDiggArticles({
+        page,
+      });
+      data.list.forEach(item => likedIds.value.add(item.id));
+      if (data.list.length < 10) break;
+      page++;
+    }
+    isLiked.value = likedIds.value.has(article.value.id);
+    localDiggCount.value = article.value.likes;
+  } catch (error) {
+    console.error('获取点赞数据失败:', error);
+  }
+};
+
+onMounted(loadAllLikedArticles);
+
+const handleLike = async () => {
+  const originalCount = localDiggCount.value;
+  try {
+    const newLikeStatus = !isLiked.value;
+    localDiggCount.value = newLikeStatus ? originalCount + 1 : originalCount - 1;
+    isLiked.value = newLikeStatus;
+
+    const { data: res } = await diggArticle({ article_id: article.value.id });
+
+    if (typeof res?.digg_count === 'number' && res.digg_count >= 0) {
+      localDiggCount.value = res.digg_count;
+      article.value.likes = res.digg_count;
+    }
+  } catch (error) {
+    isLiked.value = !isLiked.value;
+    localDiggCount.value = originalCount;
+    console.error('操作失败');
+  }
+};
+
 </script>
 
 <style scoped>
