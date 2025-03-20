@@ -115,7 +115,7 @@ const handleQuizClick = async () => {
   // await nextTick(); // 等待DOM更新
 
   await router.push({
-    path: "/quiz",
+    path: "/quiz/list/" + String(islandId),
     query: { islandId: islandId },
   });
 };
