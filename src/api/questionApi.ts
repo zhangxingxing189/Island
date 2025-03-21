@@ -28,7 +28,11 @@ export function get_question(data: { question_id: string }) {
 }
 
 export function get_island(data: { island_id: string }) {
-
+    return useAxios.get("/api/island/detail", {
+        params: {
+            id: data.island_id,
+        },
+    });
 }
 
 export function get_question_bank_list(data: { island_id: string }) {
