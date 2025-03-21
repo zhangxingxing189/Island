@@ -99,11 +99,11 @@ const handleCollect = async () => {
     // 立即反馈
     isCollected.value = !isCollected.value;
     localCollectCount.value += isCollected.value ? 1 : -1;
-
+    await collectArticle({ article_id: props.data.id });
     const { data: detailRes } = await getArticleDetail(props.data.id);
 
     if (detailRes?.data?.collect_count !== undefined) {
-      localCollectCount.value = detailRes.data.collect_count;
+      localCollectCount.value = detailRes.collect_count;
     }
   } catch (error) {
     // 回滚状态
@@ -144,11 +144,11 @@ const handleLike = async () => {
     isLiked.value = !isLiked.value;
     localDiggCount.value += isLiked.value ? 1 : -1;
 
-    const { data: res } = await diggArticle({ article_id: props.data.id });
-
+    await diggArticle({ article_id: props.data.id });
+    const { data: desRes } = await getArticleDetail(props.data.id);
     // 同步全局状态
-    if (res?.digg_count !== undefined) {
-      localDiggCount.value = res.digg_count;
+    if (desRes?.data?.digg_count !== undefined) {
+      localDiggCount.value = desRes.digg_count;
     }
   } catch (error) {
     // 回滚状态

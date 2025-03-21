@@ -330,14 +330,14 @@ const loadCollectStatus = async () => {
   }
 };
 
-// 修改后的收藏处理函数（与ContentCard一致）
 const handleCollect = async () => {
   const originalStatus = isCollected.value;
+  const originalCount = localCollectCount.value;
   try {
     // 立即更新本地状态
     isCollected.value = !isCollected.value;
+    localCollectCount.value += isCollected.value ? 1 : -1;
 
-    // API调用
     const { data: res } = await collectArticle({ article_id: article.value.id });
 
     // 强制刷新收藏状态
@@ -350,6 +350,7 @@ const handleCollect = async () => {
   } catch (error) {
     // 回滚状态
     isCollected.value = originalStatus;
+    localCollectCount.value = originalCount;
     ElMessage.error('收藏操作失败');
   }
 };
@@ -365,13 +366,13 @@ onMounted(async () => {
 
     // 加载收藏状态
     await loadCollectStatus();
+
   } catch (error) {
     console.error('加载文章失败:', error);
   } finally {
     loading.value = false;
   }
 });
-
 const likedIds = ref<Set<string>>(new Set());
 const localDiggCount = ref(article.value.likes);
 const isLiked = ref(false);
@@ -405,7 +406,6 @@ const handleLike = async () => {
     isLiked.value = newLikeStatus;
 
     const { data: res } = await diggArticle({ article_id: article.value.id });
-
     if (typeof res?.digg_count === 'number' && res.digg_count >= 0) {
       localDiggCount.value = res.digg_count;
       article.value.likes = res.digg_count;
