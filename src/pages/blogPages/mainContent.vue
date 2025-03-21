@@ -140,13 +140,8 @@ const loadFollowArticles = async () => {
           comments: Number(item.collect_count),
           author: item.username,
           timestamp: formatTime(new Date(item.created_at)),
-<<<<<<< HEAD
           collect_count: Number(item.collect_count),
         }));
-=======
-        })
-      );
->>>>>>> 03ca1a484397ccce9d17460e3d4dbd140dbaba25
   } catch (error) {
     console.error("加载关注文章失败:", error);
   } finally {
@@ -201,7 +196,6 @@ const loadRecommendArticles = async () => {
       // 合并新旧数据
       recommendList.value = [
         ...recommendList.value,
-<<<<<<< HEAD
         ...data.list.map((item): ContentItem => ({
           id: item.id.toString(),
           title: item.title,
@@ -214,22 +208,7 @@ const loadRecommendArticles = async () => {
           timestamp: formatTime(new Date(item.created_at)),
           collect_count: Number(item.collect_count),
         }))
-=======
-        ...data.list.map(
-          (item): ContentItem => ({
-            id: item.id.toString(),
-            title: item.title,
-            content: item.content,
-            abstract: item.abstract,
-            cover: item.cover || "https://api.yimian.xyz/img",
-            likes: Number(item.digg_count),
-            comments: Number(item.collect_count),
-            author: item.username,
-            timestamp: formatTime(new Date(item.created_at)),
-          })
-        ),
->>>>>>> 03ca1a484397ccce9d17460e3d4dbd140dbaba25
-      ];
+      ]
 
       recommendPagination.total += data.list.length;
       recommendPagination.page++;
