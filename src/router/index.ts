@@ -56,6 +56,11 @@ const routes: Array<RouteRecordRaw> = [
         name: "publish",
         component: () => import("../pages/blogPages/SaltAuthorRecommend.vue"),
       },
+      {
+        path: "search",
+        name: "search",
+        component: () => import("../pages/blogPages/SearchVue.vue"),
+      },
     ],
   },
   {

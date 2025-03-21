@@ -47,8 +47,14 @@ export interface List {
   xPoint: number;
   yPoint: number;
 }
+export interface Params {
+  page?: number;
+  limit?: number;
+  order?: string;
+  key?: string;
+}
 export async function getIslandMessages() {
-  let res = await useAxios.get("/api/island"); // 指定响应类型为 Response
+  let res = await useAxios.get("/api/island", { params: { limit: 99 } }); // 指定响应类型为 Response
   console.log(res.data);
   const islands: IslandType = {
     islandPosition: [],
@@ -115,7 +121,7 @@ export async function delIsland(id: string) {
   return res;
 }
 export async function getIslands() {
-  const res = await useAxios.get("/api/island");
+  const res = await useAxios.get("/api/island", { params: { limit: 99 } });
   console.log(res.data);
   return res.data.list;
 }

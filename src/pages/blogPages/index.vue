@@ -85,7 +85,13 @@ login();
 const searchText = ref("");
 const handleSearch = useDebounceFn((e: Event) => {
   console.log("Search:", searchText.value);
-}, 300);
+  router.push({
+    path: "/island/search",
+    query: {
+      key: searchText.value,
+    },
+  });
+}, 1000);
 
 // 导航操作
 const goHome = () => {
