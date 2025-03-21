@@ -280,30 +280,30 @@ const loadFollows = async () => {
 const loadArticles = async () => {
   try {
     isLoading.value = true;
-    const res = await getOwnerArticleList({
-      user_id: user_id.value,
-      page: 1
-    });
-    console.log(res);
-    articleList.value = res.data.list;
+    let page = 1;
+    let allArticles = [];
+
+    while (true) {
+      const res = await getOwnerArticleList({
+        user_id: user_id.value,
+        page,
+      });
+
+      if (res.data.list.length === 0) break;
+
+      allArticles = [...allArticles, ...res.data.list];
+      page++;
+
+      if (res.data.list.length < 10) break;
+    }
+
+    articleList.value = allArticles;
   } finally {
     isLoading.value = false;
   }
 };
 
-// 加载收藏文章
-const loadCollects = async () => {
-  try {
-    isLoading.value = true;
-    const res = await getOwnerCollectArticles({
-      page: 1,
-      pageSize: 10
-    });
-    collectList.value = res.data.list;
-  } finally {
-    isLoading.value = false;
-  }
-};
+
 
 // 监听标签切换
 watchEffect(() => {
@@ -315,7 +315,7 @@ watchEffect(() => {
       loadArticles();
       break;
     case 'collection':
-      loadCollects();
+      loadCollections();
       break;
   }
 });
@@ -409,21 +409,36 @@ const loadingCollect = ref(false);
 const loadCollections = async () => {
   try {
     loadingCollect.value = true;
-    const { data } = await getOwnerCollectArticles({
-      page: currentPage.value,
-    });
-    collectedList.value = data.list.map(item => ({
+    let page = 1;
+    let allCollects = [];
+
+    while (true) {
+      const { data } = await getOwnerCollectArticles({
+        page,
+      });
+      console.log(data.list.length);
+      if (data.list.length === 0) break;
+
+      allCollects = [...allCollects, ...data.list];
+      page++;
+
+      if (data.list.length < 10) break;
+    }
+
+    collectList.value = allCollects.map(item => ({
       id: item.id,
       title: item.title,
       abstract: item.abstract,
       cover: item.cover || require('@/assets/background.png'),
-      likes: item.digg_count,
-      comments: item.collect_count,
-      author: item.username,
-      timestamp: formatTime(new Date(item.created_at)),
+      digg_count: item.digg_count,
+      collect_count: item.collect_count,
+      created_at: item.created_at,
+      username: item.username,
+      userid: item.user_id,
+      avatar: item.avatar,
+      content: item.content,
     }));
-  } catch (error) {
-   console.error('加载收藏失败');
+    console.log("222",collectedList.value);
   } finally {
     loadingCollect.value = false;
   }

@@ -186,14 +186,14 @@ const loadRecommendArticles = async () => {
 
   recommendPagination.loading = true;
   try {
+    while(!recommendPagination.finished){
     const { data } = await getArticleList({
       page: recommendPagination.page,
       pageSize: recommendPagination.pageSize,
-      order: "created_at desc",
+      order: "",
     });
 
     if (data.list.length) {
-      // 合并新旧数据
       recommendList.value = [
         ...recommendList.value,
         ...data.list.map((item): ContentItem => ({
@@ -219,6 +219,7 @@ const loadRecommendArticles = async () => {
       }
     } else {
       recommendPagination.finished = true;
+    }
     }
   } catch (error) {
     console.error("加载推荐文章失败:", error);
@@ -251,7 +252,10 @@ const loadHotArticles = async () => {
       order: "digg_count desc",
     });
 
-    hotList.value = data.list.map((item, index) => ({
+    // 添加二次排序保证顺序
+    const sortedList = data.list.sort((a, b) => b.digg_count - a.digg_count);
+
+    hotList.value = sortedList.map((item, index) => ({
       rank: index + 1,
       title: item.title,
       heat: item.digg_count,
