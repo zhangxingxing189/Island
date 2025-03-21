@@ -136,7 +136,8 @@ const loadFollowArticles = async () => {
           likes: Number(item.digg_count),
           comments: Number(item.collect_count),
           author: item.username,
-          timestamp: formatTime(new Date(item.created_at))
+          timestamp: formatTime(new Date(item.created_at)),
+          collect_count: Number(item.collect_count),
         }));
   } catch (error) {
     console.error("加载关注文章失败:", error);
@@ -201,7 +202,8 @@ const loadRecommendArticles = async () => {
           likes: Number(item.digg_count),
           comments: Number(item.collect_count),
           author: item.username,
-          timestamp: formatTime(new Date(item.created_at))
+          timestamp: formatTime(new Date(item.created_at)),
+          collect_count: Number(item.collect_count),
         }))
       ];
 

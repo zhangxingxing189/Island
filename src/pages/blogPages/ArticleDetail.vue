@@ -78,7 +78,7 @@
         >
           <i class="iconfont icon-shoucang"></i>
           {{ isCollected ? '已收藏' : '收藏' }}
-          <span class="count">{{  displayCollectCount }}</span>
+          <span class="count">{{  localCollectCount }}</span>
         </button>
 <!--        <div class="comment-info">-->
 <!--          <i class="icon-eye"></i>-->
@@ -307,55 +307,70 @@ const handleFollow = async () => {
   }
 };
 
+const collectedIds = ref<Set<string>>(new Set());
+const localCollectCount = ref(0);
 const isCollected = ref(false);
 
-const checkCollectStatus = async () => {
+// 加载收藏状态（与ContentCard相同方法）
+const loadCollectStatus = async () => {
   try {
-    if (!userStore.currentUser?.user_id) return;
+    let page = 1;
+    collectedIds.value.clear();
 
-    let currentPage = 1;
-    let collectedArticles=[]
-
-    while(true) {
-      const { data } = await getOwnerCollectArticles({
-        page: currentPage,
-      });
-
-      if (!data.list.length) break;
-
-      collectedArticles.push(...data.list);
-      currentPage++;
-
-      // 当返回数量小于请求数量时终止循环
-      if (data.list.length < 10) break;
+    while (true) {
+      const { data } = await getOwnerCollectArticles({ page });
+      data.list.forEach(item => collectedIds.value.add(item.id));
+      if(data.list.length < 10) break;
+      page++;
     }
-    isCollected.value = collectedArticles.some(
-        item => item.id === article.value.id
-    );
+
+    isCollected.value = collectedIds.value.has(article.value.id);
   } catch (error) {
-    console.error('获取收藏状态失败:', error);
+    console.error('加载收藏状态失败:', error);
   }
-  console.log(6666);
 };
-// 收藏处理逻辑
+
+// 修改后的收藏处理函数（与ContentCard一致）
 const handleCollect = async () => {
+  const originalStatus = isCollected.value;
   try {
-    if (!userStore.currentUser) {
-      console.log('请先登录');
-      return router.push('/login');
-    }
-    if (isCollected.value) {
-      displayCollectCount.value -= 1;
-    } else {
-      displayCollectCount.value += 1;
-    }
-
-    await collectArticle({ article_id: article.value.id });
+    // 立即更新本地状态
     isCollected.value = !isCollected.value;
+
+    // API调用
+    const { data: res } = await collectArticle({ article_id: article.value.id });
+
+    // 强制刷新收藏状态
+    await loadCollectStatus();
+
+    // 同步最新收藏数
+    if (typeof res?.collect_count === 'number') {
+      localCollectCount.value = res.collect_count;
+    }
   } catch (error) {
-    console.error('操作失败');
+    // 回滚状态
+    isCollected.value = originalStatus;
+    ElMessage.error('收藏操作失败');
   }
 };
+
+// 初始化时加载（添加collect_count初始化）
+onMounted(async () => {
+  try {
+    loading.value = true;
+    const { data } = await getArticleDetail(route.params.id.toString());
+
+    // 保持与ContentCard相同的初始化逻辑
+    localCollectCount.value = data.collect_count || 0;
+
+    // 加载收藏状态
+    await loadCollectStatus();
+  } catch (error) {
+    console.error('加载文章失败:', error);
+  } finally {
+    loading.value = false;
+  }
+});
 
 const likedIds = ref<Set<string>>(new Set());
 const localDiggCount = ref(article.value.likes);

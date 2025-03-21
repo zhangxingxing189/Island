@@ -18,10 +18,10 @@
         </button>
         <button
             class="collect-btn"
-            :class="{ collected: isCollected }"
-            @click.stop="handleCollect"
+            :class="{ 'has-collected': isCollected }"
+        @click.stop="handleCollect"
         >
-          <i class="iconfont icon-shoucang"></i> {{ localCollectCount  }}
+        <i class="iconfont icon-shoucang"></i> {{ localCollectCount }}
         </button>
         <span class="comments">
 <!--          <i class="icon-comment"></i> 浏览:{{ data.comments }}-->
@@ -37,7 +37,13 @@
 import {defineProps, onMounted, ref} from "vue";
 import { useRouter } from "vue-router";
 import { ContentItem } from "@/pages/blogPages/blogInterface";
-import {collectArticle, diggArticle, getOwnerCollectArticles, getOwnerDiggArticles} from "@/api/articleApi";
+import {
+  collectArticle,
+  diggArticle,
+  getArticleDetail,
+  getOwnerCollectArticles,
+  getOwnerDiggArticles
+} from "@/api/articleApi";
 import {ElMessage} from "element-plus";
 import {compileString} from "sass";
 const props = defineProps<{
@@ -51,51 +57,61 @@ const handleClick = () => {
 }
 
 //收藏
-const localCollectCount = ref(props.data.collect_count);
+
 const isCollected = ref(false);
 const collectedIds = ref<Set<string>>(new Set());
+const localCollectCount = ref(
+    typeof props.data.collect_count === 'number'
+        ? props.data.collect_count
+        : Number(props.data.collect_count) || 0
+);
 
-// 加载收藏状态
+
 const loadCollectStatus = async () => {
   try {
     let page = 1;
+    collectedIds.value.clear();
+
     while (true) {
       const { data } = await getOwnerCollectArticles({ page });
-      data.list.forEach(item => collectedIds.value.add(item.id));
+      data.list.forEach(item => {
+        collectedIds.value.add(item.id);
+        if(item.id === props.data.id) {
+          localCollectCount.value = item.collect_count;
+        }
+      });
+
       if(data.list.length < 10) break;
       page++;
     }
+
     isCollected.value = collectedIds.value.has(props.data.id);
-    console.log(13124);
-    console.log(isCollected);
   } catch (error) {
     console.error('加载收藏状态失败:', error);
   }
 };
 
+
 const handleCollect = async () => {
-const originalStatus = isCollected.value;
-try {
-  // 立即更新本地状态
-  isCollected.value = !isCollected.value;
-  localCollectCount.value += isCollected.value ? 1 : -1;
+  const originalStatus = isCollected.value;
+  const originalCount = localCollectCount.value;
+  try {
+    // 立即反馈
+    isCollected.value = !isCollected.value;
+    localCollectCount.value += isCollected.value ? 1 : -1;
 
-  await collectArticle({ article_id: props.data.id });
+    const { data: detailRes } = await getArticleDetail(props.data.id);
 
-  // 同步全局状态
-  if (isCollected.value) {
-    collectedIds.value.add(props.data.id);
-  } else {
-    collectedIds.value.delete(props.data.id);
+    if (detailRes?.data?.collect_count !== undefined) {
+      localCollectCount.value = detailRes.data.collect_count;
+    }
+  } catch (error) {
+    // 回滚状态
+    isCollected.value = originalStatus;
+    localCollectCount.value = originalCount;
+    ElMessage.error('收藏操作失败');
   }
-} catch (error) {
-  // 操作失败时回滚状态
-  isCollected.value = originalStatus;
-  localCollectCount.value = Number(props.data.collect_count) || 0;
-  ElMessage.error('操作失败');
-}
 };
-
 
 
 const localDiggCount = ref(props.data.likes);
@@ -120,7 +136,7 @@ const loadLikeStatus = async () => {
   }
 };
 
-// 修改点赞处理逻辑（约40行）
+// 修改点赞处理逻辑
 const handleLike = async () => {
   const originalStatus = isLiked.value;
   try {
@@ -167,15 +183,18 @@ onMounted(() => {
   }
 }
 .collect-btn {
-  color: var(--text-secondary);
-  background: transparent;
+  color: #8590a6;
+  background: none;
   border: none;
+  cursor: pointer;
+  transition: color 0.3s;
 
-  &.collected {
-    color: var(--primary);
-    .icon-shoucang {
-      color: var(--primary);
-    }
+  &.has-collected {
+    color: #2563eb;
+  }
+
+  &:hover {
+    color: #2563eb;
   }
 }
 .content-card {
