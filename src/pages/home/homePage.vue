@@ -140,7 +140,8 @@ onMounted(async () => {
       this.load.image("tiles", resImages["tiles"].wedPath);
       this.load.spritesheet(
         "player",
-        "http://118.31.119.216:8080/uploads/df1902b874775ccefa26b4433871f8c0.png",
+        "http://118.31.119.216:8080/uploads/674530a944f56ff563eca43a8d97d41c.png",
+        // "http://118.31.119.216:8080/uploads/df1902b874775ccefa26b4433871f8c0.png",
         {
           frameWidth: 65, // 单帧宽度
           frameHeight: 96, // 单帧高度

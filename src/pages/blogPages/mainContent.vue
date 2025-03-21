@@ -26,7 +26,7 @@
             <div v-if="!followList.length" class="empty">
               暂无关注内容，快去关注你感兴趣的作者吧！
             </div>
-<!--            <div v-if="activeTab === 'follow'" class="pagination-container">
+            <!--            <div v-if="activeTab === 'follow'" class="pagination-container">
               <a-pagination
                   v-model:current="pagination.page"
                   :pageSize="pagination.pageSize"
@@ -54,12 +54,13 @@
           </template>
         </section>
       </div>
+      <show-island></show-island>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {ref, reactive, onMounted, watch, onUnmounted} from "vue";
+import { ref, reactive, onMounted, watch, onUnmounted } from "vue";
 import ContentCard from "./ContentCard.vue";
 import HotList from "./HotList.vue";
 import { HotItem, ContentItem } from "./blogInterface";
@@ -67,6 +68,7 @@ import { useRoute } from "vue-router";
 import { getArticleList } from "@/api/articleApi";
 import { formatTime } from "@/utils/formatters";
 import { getFollowList } from "@/api/focusApi";
+import ShowIsland from "@/pages/blogPages/showIsland.vue";
 
 // 内容数据
 const followList = ref<ContentItem[]>([]);
@@ -108,8 +110,8 @@ const loadFollowArticles = async () => {
     // 获取关注列表
     const { data: followData } = await getFollowList({ page: 1, limit: 2000 });
     let currentPage = 1;
-    let allArticles = []
-    while(true){
+    let allArticles = [];
+    while (true) {
       const { data } = await getArticleList({
         pageSize: 10,
         page: currentPage,
@@ -122,23 +124,29 @@ const loadFollowArticles = async () => {
 
     console.log(allArticles);
     // 使用Set优化匹配效率
-    const followUserIds = new Set(followData.list.map(item => item.user_id));
+    const followUserIds = new Set(followData.list.map((item) => item.user_id));
 
     // 数据转换（保持与推荐列表一致）
     followList.value = allArticles
-        .filter(item => followUserIds.has(item.user_id))
-        .map((item): ContentItem => ({
+      .filter((item) => followUserIds.has(item.user_id))
+      .map(
+        (item): ContentItem => ({
           id: item.id.toString(),
           title: item.title,
           content: item.content,
           abstract: item.abstract,
-          cover: item.cover || 'https://api.yimian.xyz/img',
+          cover: item.cover || "https://api.yimian.xyz/img",
           likes: Number(item.digg_count),
           comments: Number(item.collect_count),
           author: item.username,
           timestamp: formatTime(new Date(item.created_at)),
+<<<<<<< HEAD
           collect_count: Number(item.collect_count),
         }));
+=======
+        })
+      );
+>>>>>>> 03ca1a484397ccce9d17460e3d4dbd140dbaba25
   } catch (error) {
     console.error("加载关注文章失败:", error);
   } finally {
@@ -176,7 +184,7 @@ const recommendPagination = reactive({
   pageSize: 10,
   total: 0,
   loading: false,
-  finished: false
+  finished: false,
 });
 const loadRecommendArticles = async () => {
   if (recommendPagination.loading || recommendPagination.finished) return;
@@ -186,13 +194,14 @@ const loadRecommendArticles = async () => {
     const { data } = await getArticleList({
       page: recommendPagination.page,
       pageSize: recommendPagination.pageSize,
-      order: "created_at desc"
+      order: "created_at desc",
     });
 
     if (data.list.length) {
       // 合并新旧数据
       recommendList.value = [
         ...recommendList.value,
+<<<<<<< HEAD
         ...data.list.map((item): ContentItem => ({
           id: item.id.toString(),
           title: item.title,
@@ -205,6 +214,21 @@ const loadRecommendArticles = async () => {
           timestamp: formatTime(new Date(item.created_at)),
           collect_count: Number(item.collect_count),
         }))
+=======
+        ...data.list.map(
+          (item): ContentItem => ({
+            id: item.id.toString(),
+            title: item.title,
+            content: item.content,
+            abstract: item.abstract,
+            cover: item.cover || "https://api.yimian.xyz/img",
+            likes: Number(item.digg_count),
+            comments: Number(item.collect_count),
+            author: item.username,
+            timestamp: formatTime(new Date(item.created_at)),
+          })
+        ),
+>>>>>>> 03ca1a484397ccce9d17460e3d4dbd140dbaba25
       ];
 
       recommendPagination.total += data.list.length;
@@ -233,11 +257,11 @@ const onScroll = () => {
 };
 
 onMounted(() => {
-  window.addEventListener('scroll', onScroll);
+  window.addEventListener("scroll", onScroll);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', onScroll);
+  window.removeEventListener("scroll", onScroll);
 });
 //热点
 const loadHotArticles = async () => {
@@ -264,7 +288,6 @@ onMounted(async () => {
     loadRecommendArticles(), // 使用新的加载方法
     loadFollowArticles(),
     loadHotArticles(),
-
   ]);
 });
 
@@ -274,8 +297,6 @@ const tabs = [
   { id: "hot", title: "热榜" },
 ];
 const activeTab = ref("recommend");
-
-
 </script>
 
 <style scoped>

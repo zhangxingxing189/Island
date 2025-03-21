@@ -7,7 +7,7 @@
     <main class="pt-24 pb-12 px-4">
       <div class="max-w-4xl mx-auto space-y-6">
         <div class="rounded-lg p-6 shadow-sm transition-shadow duration-300 cursor-pointer bg-gradient-to-r from-purple-600 to-blue-500">
-          <h2 class="text-2xl font-bold text-white">数学题库</h2>
+          <h2 class="text-2xl font-bold text-white">{{ islandName }} 题库</h2>
         </div>
         <div
             v-for="(item, index) in questionBanks"
@@ -53,13 +53,24 @@
 import { ref, onMounted } from "vue";
 import Head from "@/pages/blogPages/index.vue";
 import {useRoute} from "vue-router";
-import {get_question_bank_list} from "@/api/questionApi";
+import {get_island, get_question_bank_list} from "@/api/questionApi";
 import router from "@/router";
 
 const route = useRoute()
 
 // 获取题库信息
 let islandName = ref("岛屿名")
+onMounted(async () => {
+  try {
+    const data = await get_island({island_id: String(route.params.id)})
+    islandName.value = data.data.name
+    console.log(islandName.value);
+  } catch (error) {
+    console.error("获取岛屿名失败:", error);
+  }
+});
+
+
 
 let questionBanks = ref([{
   question_bank_id: 0,
