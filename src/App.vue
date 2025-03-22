@@ -60,6 +60,7 @@ import AiChat from "@/components/aiChat.vue";
 <template>
   <div id="app">
     <router-view />
+    <AiChat></AiChat>
   </div>
 </template>
 

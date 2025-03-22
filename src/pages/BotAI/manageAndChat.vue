@@ -324,6 +324,9 @@ const messageHandler = (event: MessageEvent) => {
 };
 
 onMounted(() => {
+  message.info(
+    "开始教学前需要上传书籍的pdf或者txt文件并且填写书名或者这次对话主题,若已上传文档则输入:开始教学,来开始教学活动,在学习过程中可以问问题,若已学会则输入:我学会了"
+  );
   window.addEventListener("message", messageHandler);
   sessionStore.initFromLocal();
   currentSessionId.value = localStorage.getItem("dify_session") || "";

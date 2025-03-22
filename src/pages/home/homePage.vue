@@ -244,7 +244,16 @@ onMounted(async () => {
       } else if (playerBody.touching.up) {
         playerBody.velocity.y = this.moveSpeed;
       }
-
+      localStorage.setItem(
+        "tj",
+        JSON.stringify({
+          user: userStore.currentUser,
+          island: {
+            id: islandGroup.getData("id"),
+            name: islandGroup.getData("name"),
+          },
+        })
+      );
       // 延迟路由跳转避免物理引擎冲突
       router.push({
         path: "/island/",
@@ -298,6 +307,7 @@ onMounted(async () => {
         ) as Phaser.Physics.Arcade.Image;
         islandStatic.setInteractive();
         islandStatic.setData("id", key);
+        islandStatic.setData("name", island.islandName);
         islandStatic.setDepth(20);
         islandStatic.on("pointerdown", () => {
           intoIsland(key);

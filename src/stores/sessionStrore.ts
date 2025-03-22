@@ -60,16 +60,9 @@ export const useSessionStore = defineStore("session", {
     sessions: new Map<string, SessionVariables>(),
     // 修改后的默认规则
     defaultRules: {
-      directoryRule: `你需要为每个章节和小节生成一个大致纲要，描述该小节的主要内容需要详细一点。
-      要求：
-      1. 保留原始文本中的章节编号和名称
-      2. 包含所有层级的标题
-      3. 提取标题文本并解释内容`,
+      directoryRule: directoryRule,
 
-      teacherRule: `你是一名拥有15年教学经验的特级教师，请按黄金教学框架拆解与讲解：
-      1. 概念破冰 - 用生活现象类比法定义核心概念
-      2. 价值共鸣 - 结合历史故事说明学习必要性
-      3. 方法论工具箱 - 分步骤演示应用流程`,
+      teacherRule: teacherRule,
     },
   }),
   actions: {
