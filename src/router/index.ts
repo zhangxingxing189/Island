@@ -98,6 +98,16 @@ const routes: Array<RouteRecordRaw> = [
     name: "create-question",
     component: () => import("../pages/quiz/create-question.vue"),
   },
+  {
+    path: "/bot",
+    name: "bot",
+    component: () => import("../pages/BotAI/RobotDashboard.vue"),
+  },
+  {
+    path: "/bot/detail",
+    name: "detail",
+    component: () => import("../pages/BotAI/manageAndChat.vue"),
+  },
 ];
 
 const router = createRouter({

@@ -27,6 +27,14 @@
         />
         <button class="icon-search-btn iconfont icon-sousuo"></button>
       </div>
+      <div class="bot logo">
+        <img
+          class="bot-img logo-img"
+          src="@/assets/bot.png"
+          alt="Bot"
+          @click="goBot"
+        />
+      </div>
       <div class="action-buttons">
         <div
           class="publish-btn"
@@ -94,6 +102,9 @@ const handleSearch = useDebounceFn((e: Event) => {
 }, 1000);
 
 // 导航操作
+const goBot = () => {
+  router.push("/bot");
+};
 const goHome = () => {
   isSelect.value = true;
   router.push({

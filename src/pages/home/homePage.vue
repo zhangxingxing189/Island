@@ -140,7 +140,8 @@ onMounted(async () => {
       this.load.image("tiles", resImages["tiles"].wedPath);
       this.load.spritesheet(
         "player",
-        "http://118.31.119.216:8080/uploads/674530a944f56ff563eca43a8d97d41c.png",
+        "http://118.31.119.216:8080/uploads/83c62f3f41dc3e6f2bbe4fe0cbdc822e.png",
+        // "http://118.31.119.216:8080/uploads/674530a944f56ff563eca43a8d97d41c.png",
         // "http://118.31.119.216:8080/uploads/df1902b874775ccefa26b4433871f8c0.png",
         {
           frameWidth: 65, // 单帧宽度
@@ -764,7 +765,7 @@ onMounted(async () => {
       default: "arcade",
       arcade: {
         gravity: { x: 0, y: 0 }, // 如果需要重力可以设置
-        debug: true, // 调试模式
+        debug: false, // 调试模式
         debugShowBody: true,
         debugShowStaticBody: true,
       },
