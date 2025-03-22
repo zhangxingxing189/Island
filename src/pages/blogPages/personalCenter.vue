@@ -216,7 +216,7 @@ import {
   getOwnerCollectArticles
 } from "@/api/articleApi";
 import { ElNotification } from 'element-plus';
-import {FollowItem, getFollowList} from "@/api/focusApi";
+import {FollowItem, getFansCount, getFollowList} from "@/api/focusApi";
 import {ContentItem} from "@/pages/blogPages/blogInterface";
 import {formatTime} from "@/utils/formatters";
 const router = useRouter();
@@ -326,8 +326,8 @@ const userInfo = reactive<UserInfo>({
   avatar: user.currentUser?.avatar || require('@/assets/QQ.svg'),
   username: user.currentUser?.username || '未登录用户',
   ipLocation: "东莞",
-  following: followList.value.length,
-  followers: 4567,
+  following:  followList.value.length,
+  followers: 0,
 });
 
 // 导航标签
@@ -475,9 +475,19 @@ const handleUncollect = async () => {
   }
 };
 
+const loadFansCount = async () => {
+  try {
+    const res = await getFansCount({ user_id: user_id.value });
+    console.log("111222",res.data);
+    userInfo.followers = res.data;
+  } catch (error) {
+    ElNotification.error({ title: '错误', message: '粉丝数加载失败' });
+  }
+};
 // 初始化加载
 onMounted(() => {
   loadCollections();
+  loadFansCount();
 });
 
 

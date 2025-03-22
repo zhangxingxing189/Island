@@ -51,3 +51,7 @@ export const getFollowList = (params?: {
 }>> => {
     return useAxios.get("/api/user/focus/list", { params });
 };
+
+export const getFansCount = (params?: { user_id?: string }): Promise<baseResponse<{ fans_count: number }>> => {
+    return useAxios.get("/api/user/fans", { params });
+}
