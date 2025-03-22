@@ -71,7 +71,12 @@
                 <img :src="article.cover" alt="文章封面" />
               </div>
               <div class="article-content">
-                <h3 class="article-title">{{ article.title }}</h3>
+                <router-link
+                    :to="`/island/article/${article.id}`"
+                    class="article-title"
+                >
+                  {{ article.title }}
+                </router-link>
                 <p class="article-abstract">{{ article.abstract }}</p>
 
                 <div class="article-meta">
@@ -91,7 +96,9 @@
                 <img :src="item.cover" alt="文章封面" />
               </div>
               <div class="article-content">
-                <h3 class="article-title">{{ item.title }}</h3>
+                <router-link :to="`/island/article/${item.id}`" class="article-title">
+                  {{ item.title }}
+                </router-link>
                 <p class="article-abstract">{{ item.abstract }}</p>
                 <div class="article-meta">
                   <el-button @click.stop="showUncollectDialog(item.id)">取消收藏</el-button>
