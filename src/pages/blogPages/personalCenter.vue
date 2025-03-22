@@ -268,6 +268,7 @@ const loadFollows = async () => {
     });
     console.log(res);
     followList.value = res.data?.list?.length ? res.data.list : [];
+    userInfo.following = followList.value.length;
   }  catch (error) {
     ElNotification.error({title: '错误', message: '关注列表加载失败'});
     followList.value = [];
@@ -325,7 +326,7 @@ const userInfo = reactive<UserInfo>({
   avatar: user.currentUser?.avatar || require('@/assets/QQ.svg'),
   username: user.currentUser?.username || '未登录用户',
   ipLocation: "东莞",
-  following: 234,
+  following: followList.value.length,
   followers: 4567,
 });
 
