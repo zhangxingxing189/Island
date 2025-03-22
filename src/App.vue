@@ -59,7 +59,7 @@ import AiChat from "@/components/aiChat.vue";
 </script>
 <template>
   <div id="app">
-    <router-view />
+    <router-view :key="$route.fullPath" />
     <AiChat></AiChat>
   </div>
 </template>

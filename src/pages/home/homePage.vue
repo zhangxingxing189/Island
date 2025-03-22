@@ -245,7 +245,7 @@ onMounted(async () => {
         playerBody.velocity.y = this.moveSpeed;
       }
       localStorage.setItem(
-        "tj",
+        "data",
         JSON.stringify({
           user: userStore.currentUser,
           island: {

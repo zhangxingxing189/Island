@@ -25,7 +25,11 @@
           @mouseenter="hoverCardId = island.id"
           @mouseleave="hoverCardId = null"
         >
-          <div class="card-inner" :class="{ hover: hoverCardId === island.id }">
+          <div
+            class="card-inner"
+            :class="{ hover: hoverCardId === island.id }"
+            @click="islandRouter(userStore.currentUser, island.id, island.name)"
+          >
             <!-- 岛屿图片 -->
             <div class="image-container">
               <img
@@ -72,7 +76,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { islandType, getIslands } from "@/api/islandApi";
-
+import { islandRouter } from "@/components/islandRouter";
+import { useUserStore } from "@/stores/user";
+const userStore = useUserStore();
 // 响应式数据
 const islands = ref<islandType[]>([]);
 const loading = ref(true);
