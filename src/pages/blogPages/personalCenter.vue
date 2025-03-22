@@ -424,13 +424,13 @@ const loadCollections = async () => {
       const { data } = await getOwnerCollectArticles({
         page,
       });
-      console.log(data.list.length);
-      if (data.list.length === 0) break;
+      const currentList = data?.list || [];
+      if (currentList.length === 0) break;
 
       allCollects = [...allCollects, ...data.list];
       page++;
 
-      if (data.list.length < 10) break;
+      if (currentList.length < 10) break;
     }
 
     collectList.value = allCollects.map(item => ({
