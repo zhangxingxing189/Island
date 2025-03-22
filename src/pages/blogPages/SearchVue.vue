@@ -3,22 +3,19 @@
     <div class="main-content">
       <div class="center-content">
         <section class="content-section">
-          <template>
             <div v-if="recommendPagination.loading" class="loading-text">
               加载中...
             </div>
-            <div
-              v-if="recommendPagination.finished && !recommendList.length"
-              class="empty-tip"
-            >
-              未找到相关结果
+            <div v-else-if="!recommendList.length" class="empty-tip">
+              未找到与 "{{ searchKeyword }}" 相关的结果
             </div>
-            <div v-else>
+            <template v-else>
               <h3 class="section-title">
                 {{
                   searchKeyword ? `搜索"${searchKeyword}"的结果` : "推荐内容"
                 }}
               </h3>
+              <div class="result-list">
               <content-card
                 v-for="item in recommendList"
                 :key="item.id"
@@ -101,12 +98,14 @@ const loadRecommendArticles = async () => {
             likes: Number(item?.digg_count) || 0,
             comments: Number(item?.collect_count) || 0,
             author: item?.username || "匿名用户",
+            authorId: item.userid?.toString() || "",
             timestamp: item?.created_at
               ? formatTime(new Date(item.created_at))
               : "未知时间",
           })
         ),
       ];
+      console.log("123123",recommendList);
 
       recommendPagination.total += data.list.length;
       recommendPagination.page++;

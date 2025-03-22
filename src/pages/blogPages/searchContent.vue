@@ -16,7 +16,7 @@
       <a-tabs v-model:activeKey="activeTab" @change="handleTabChange">
         <a-tab-pane key="all" tab="全部"></a-tab-pane>
         <a-tab-pane key="articles" tab="文章"></a-tab-pane>
-        <a-tab-pane key="users" tab="用户"></a-tab-pane>
+<!--        <a-tab-pane key="users" tab="用户"></a-tab-pane>-->
       </a-tabs>
 
       <!-- 加载状态 -->
@@ -90,8 +90,9 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import { searchContent } from "@/api/searchApi";
-import type { SearchResultItem } from "@/types/search";
+import {getArticleList} from "@/api/articleApi";
+import {formatTime} from "@/utils/formatters";
+import {SearchResultItem} from "@/pages/blogPages/blogInterface";
 
 interface Pagination {
   current: number;
@@ -127,15 +128,29 @@ onMounted(() => {
 const handleSearch = async () => {
   try {
     loading.value = true;
-    const { data } = await searchContent({
-      keyword: searchKeyword.value,
-      type: activeTab.value,
+    // 改用文章列表接口，添加搜索参数
+    const { data } = await getArticleList({
       page: pagination.current,
       pageSize: pagination.pageSize,
+      key: searchKeyword.value
     });
-
-    searchResults.value = data.list;
-    pagination.total = data.total;
+    console.log(data);
+    // 转换数据结构适配搜索结果
+    searchResults.value = data.list.map(item => ({
+      id: item.id,
+      type: "article",
+      title: item.title,
+      description: item.abstract,
+      likes: item.digg_count,
+      comments: item.collect_count,
+      timestamp: formatTime(new Date(item.created_at)),
+      author: {
+        id: item.userid,
+        name: item.username,
+        avatar: item.avatar || 'https://api.yimian.xyz/img'
+      }
+    }));
+    pagination.total = data.count;
   } catch (error) {
     console.error("搜索失败:", error);
     searchResults.value = [];
