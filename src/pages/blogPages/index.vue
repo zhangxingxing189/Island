@@ -103,7 +103,12 @@ const handleSearch = useDebounceFn((e: Event) => {
 
 // 导航操作
 const goBot = () => {
-  router.push("/bot");
+  router.push({
+    path: "/bot",
+    query: {
+      islandId: islandId,
+    },
+  });
 };
 const goHome = () => {
   isSelect.value = true;
@@ -119,12 +124,22 @@ const goWorld = () => {
 };
 const handlePublishClick = () => {
   isSelect.value = true;
-  router.push("/island/publish");
+  router.push({
+    path: "/island/publish",
+    query: {
+      islandId: islandId,
+    },
+  });
 };
 
 const navigateToPersonalCenter = () => {
   isSelect.value = true;
-  router.push("/island/personalCenter");
+  router.push({
+    path: "/island/personalCenter",
+    query: {
+      islandId: islandId,
+    },
+  });
 };
 
 const handleQuizClick = async () => {
