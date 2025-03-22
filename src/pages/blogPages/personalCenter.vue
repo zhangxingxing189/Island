@@ -18,10 +18,10 @@
             <span class="ip">属地：{{ userInfo.ipLocation }}</span>
           </div>
         </div>
-        <div class="actions">
+<!--        <div class="actions">
           <button class="btn edit-btn">编辑资料</button>
           <a href="#" class="detail-link">查看详细资料</a>
-        </div>
+        </div>-->
       </div>
     </header>
 

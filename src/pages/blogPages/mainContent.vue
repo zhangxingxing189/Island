@@ -69,6 +69,8 @@ import { getArticleList } from "@/api/articleApi";
 import { formatTime } from "@/utils/formatters";
 import { getFollowList } from "@/api/focusApi";
 import ShowIsland from "@/pages/blogPages/showIsland.vue";
+import {getIslands} from "@/api/islandApi";
+import {get_island} from "@/api/questionApi";
 
 // 内容数据
 const followList = ref<ContentItem[]>([]);
@@ -191,6 +193,7 @@ const loadRecommendArticles = async () => {
       page: recommendPagination.page,
       pageSize: recommendPagination.pageSize,
       order: "",
+      key: islandName.value,
     });
 
     if (data.list.length) {
@@ -250,6 +253,7 @@ const loadHotArticles = async () => {
       page: 1,
       pageSize: 10,
       order: "digg_count desc",
+      key: islandName.value,
     });
 
     // 添加二次排序保证顺序
@@ -266,7 +270,22 @@ const loadHotArticles = async () => {
     console.error("加载热榜数据失败:", error);
   }
 };
+const islandName = ref(route.query.islandId?.toString() || "");
+const islandIds = ref("");
+
+const getIslandName = async () => {
+  try {
+    if (!islandId.value) return;
+    const { data } = await get_island({ island_id: islandId.value });
+    islandName.value = data?.name || "";
+    console.log("当前岛屿名称:", islandName.value);
+  } catch (error) {
+    console.error("获取岛屿名称失败:", error);
+    islandName.value = "";
+  }
+};
 onMounted(async () => {
+  await  getIslandName();
   await Promise.all([
     loadRecommendArticles(), // 使用新的加载方法
     loadFollowArticles(),
