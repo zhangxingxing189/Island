@@ -1,5 +1,5 @@
 <template>
-  <div class="zhihu-container">
+  <div class="main-container">
     <div class="main-content">
       <div class="center-content">
         <div class="tab-nav">
@@ -24,15 +24,15 @@
               正在加载关注内容...
             </div>
             <template v-else>
-            <content-card
-              v-for="item in followList"
-              :key="item.id"
-              :data="item"
-              @like="handleLike"
-            />
-            <div v-if="!followList.length" class="empty">
-              暂无关注内容，快去关注你感兴趣的作者吧！
-            </div>
+              <content-card
+                v-for="item in followList"
+                :key="item.id"
+                :data="item"
+                @like="handleLike"
+              />
+              <div v-if="!followList.length" class="empty">
+                暂无关注内容，快去关注你感兴趣的作者吧！
+              </div>
             </template>
             <!--            <div v-if="activeTab === 'follow'" class="pagination-container">
               <a-pagination
@@ -77,8 +77,8 @@ import { getArticleList } from "@/api/articleApi";
 import { formatTime } from "@/utils/formatters";
 import { getFollowList } from "@/api/focusApi";
 import ShowIsland from "@/pages/blogPages/showIsland.vue";
-import {getIslands} from "@/api/islandApi";
-import {get_island} from "@/api/questionApi";
+import { getIslands } from "@/api/islandApi";
+import { get_island } from "@/api/questionApi";
 
 // 内容数据
 const followList = ref<ContentItem[]>([]);
@@ -151,7 +151,8 @@ const loadFollowArticles = async () => {
           author: item.username,
           timestamp: formatTime(new Date(item.created_at)),
           collect_count: Number(item.collect_count),
-        }));
+        })
+      );
   } catch (error) {
     console.error("加载关注文章失败:", error);
   } finally {
@@ -196,41 +197,43 @@ const loadRecommendArticles = async () => {
 
   recommendPagination.loading = true;
   try {
-    while(!recommendPagination.finished){
-    const { data } = await getArticleList({
-      page: recommendPagination.page,
-      pageSize: recommendPagination.pageSize,
-      order: "",
-      key: islandName.value,
-    });
+    while (!recommendPagination.finished) {
+      const { data } = await getArticleList({
+        page: recommendPagination.page,
+        pageSize: recommendPagination.pageSize,
+        order: "",
+        key: islandName.value,
+      });
 
-    if (data.list.length) {
-      recommendList.value = [
-        ...recommendList.value,
-        ...data.list.map((item): ContentItem => ({
-          id: item.id.toString(),
-          title: item.title,
-          content: item.content,
-          abstract: item.abstract,
-          cover: item.cover || 'https://api.yimian.xyz/img',
-          likes: Number(item.digg_count),
-          comments: Number(item.collect_count),
-          author: item.username,
-          timestamp: formatTime(new Date(item.created_at)),
-          collect_count: Number(item.collect_count),
-        }))
-      ]
+      if (data.list.length) {
+        recommendList.value = [
+          ...recommendList.value,
+          ...data.list.map(
+            (item): ContentItem => ({
+              id: item.id.toString(),
+              title: item.title,
+              content: item.content,
+              abstract: item.abstract,
+              cover: item.cover || "https://api.yimian.xyz/img",
+              likes: Number(item.digg_count),
+              comments: Number(item.collect_count),
+              author: item.username,
+              timestamp: formatTime(new Date(item.created_at)),
+              collect_count: Number(item.collect_count),
+            })
+          ),
+        ];
 
-      recommendPagination.total += data.list.length;
-      recommendPagination.page++;
+        recommendPagination.total += data.list.length;
+        recommendPagination.page++;
 
-      // 判断是否加载完毕
-      if (data.list.length < recommendPagination.pageSize) {
+        // 判断是否加载完毕
+        if (data.list.length < recommendPagination.pageSize) {
+          recommendPagination.finished = true;
+        }
+      } else {
         recommendPagination.finished = true;
       }
-    } else {
-      recommendPagination.finished = true;
-    }
     }
   } catch (error) {
     console.error("加载推荐文章失败:", error);
@@ -293,7 +296,7 @@ const getIslandName = async () => {
   }
 };
 onMounted(async () => {
-  await  getIslandName();
+  await getIslandName();
   await Promise.all([
     loadRecommendArticles(), // 使用新的加载方法
     loadFollowArticles(),
@@ -309,22 +312,22 @@ const tabs = [
 const activeTab = ref("recommend");
 watch(activeTab, (newVal) => {
   switch (newVal) {
-    case 'follow':
-      followList.value = []
-      loadFollowArticles()
-      break
-    case 'recommend':
-      recommendList.value = []
-      recommendPagination.page = 1
-      recommendPagination.finished = false
-      loadRecommendArticles()
-      break
-    case 'hot':
-      hotList.value = []
-      loadHotArticles()
-      break
+    case "follow":
+      followList.value = [];
+      loadFollowArticles();
+      break;
+    case "recommend":
+      recommendList.value = [];
+      recommendPagination.page = 1;
+      recommendPagination.finished = false;
+      loadRecommendArticles();
+      break;
+    case "hot":
+      hotList.value = [];
+      loadHotArticles();
+      break;
   }
-})
+});
 </script>
 
 <style scoped>
@@ -349,97 +352,98 @@ watch(activeTab, (newVal) => {
     transform: rotate(360deg);
   }
 }
-.zhihu-container {
+.main-container {
   --primary-color: #0084ff;
   --text-primary: #1a1a1a;
   --text-secondary: #8590a6;
   --border-color: #ebebeb;
-  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  max-width: 1440px;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  display: flex;
+  justify-content: center;
   margin: 0 auto;
   background: #f8f9fa;
   overflow: auto;
-}
-
-.main-content {
-  display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 32px;
-  padding: 32px;
-}
-
-.center-content {
-  background: white;
-  border-radius: 12px;
-  box-shadow: var(--card-shadow);
-  padding: 24px;
-}
-
-.tab-nav {
-  display: flex;
-  gap: 32px;
-  margin-bottom: 24px;
-  border-bottom: 2px solid var(--border-color);
-}
-
-.tab-nav .tab-item {
-  padding: 12px 0;
-  font-size: 16px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  position: relative;
-  border: none;
-  background: none;
-}
-
-.tab-nav .tab-item::after {
-  content: "";
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: var(--primary-color);
-  transition: width 0.3s ease;
-}
-
-.tab-nav .tab-item.active {
-  color: var(--primary-color);
-  font-weight: 500;
-}
-
-.tab-nav .tab-item.active::after {
-  width: 100%;
-}
-
-.tab-nav .tab-item:hover {
-  color: var(--primary-color);
-}
-
-.content-section .section-title {
-  font-size: 20px;
-  margin-bottom: 24px;
-  color: var(--text-primary);
-}
-
-@media (max-width: 1024px) {
   .main-content {
-    grid-template-columns: 1fr;
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 32px;
+    padding: 32px;
+    width: 1440px;
   }
-}
 
-@media (max-width: 768px) {
-  .main-content {
-    padding: 16px;
+  .center-content {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    padding: 24px;
   }
 
   .tab-nav {
-    gap: 16px;
+    display: flex;
+    gap: 32px;
+    margin-bottom: 24px;
+    border-bottom: 2px solid var(--border-color);
   }
 
   .tab-nav .tab-item {
-    font-size: 14px;
-    padding: 8px 0;
+    padding: 12px 0;
+    font-size: 16px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    position: relative;
+    border: none;
+    background: none;
+  }
+
+  .tab-nav .tab-item::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--primary-color);
+    transition: width 0.3s ease;
+  }
+
+  .tab-nav .tab-item.active {
+    color: var(--primary-color);
+    font-weight: 500;
+  }
+
+  .tab-nav .tab-item.active::after {
+    width: 100%;
+  }
+
+  .tab-nav .tab-item:hover {
+    color: var(--primary-color);
+  }
+
+  .content-section .section-title {
+    font-size: 20px;
+    margin-bottom: 24px;
+    color: var(--text-primary);
+  }
+
+  @media (max-width: 1024px) {
+    .main-content {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .main-content {
+      padding: 16px;
+    }
+
+    .tab-nav {
+      gap: 16px;
+    }
+
+    .tab-nav .tab-item {
+      font-size: 14px;
+      padding: 8px 0;
+    }
   }
 }
 </style>

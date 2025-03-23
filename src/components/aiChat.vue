@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, nextTick, onMounted, onUnmounted } from "vue";
 import { CloseOutlined } from "@ant-design/icons-vue";
-
+import { useRoute } from "vue-router";
+import { useUserStore } from "@/stores/user";
 interface Message {
   id: number;
   content: string;
@@ -9,15 +10,21 @@ interface Message {
   timestamp: number;
   streaming?: boolean; // 新增流式状态
 }
-
+const userStore = useUserStore();
 const STORAGE_KEY = "chat_history_v1";
-const API_URL = "http://10.61.28.40:8080/api/ai/chat";
-
+const API_URL = "http://118.31.119.216:8080/api/ai/chat";
+const apiToken = ref(userStore.currentUser?.atoken); // 用户在此填写自己的token
 const isFold = ref(false);
 const value = ref("");
 const history = ref<Message[]>([]);
-const sseEventSource = ref<EventSource | null>(null);
+const sseEventSource = ref<AbortController | null>(null);
 let messageId = 0;
+// 新增模型状态
+const modelType = ref(0); // 默认选中GPT-3.5
+const modelOptions = ref([
+  { value: 0, label: "GPT-3.5" },
+  { value: 1, label: "DeepSeek V3" },
+]);
 
 // 加载历史记录
 const loadHistory = () => {
@@ -49,7 +56,6 @@ const saveHistory = () => {
 // 流式响应处理
 const handleStreamResponse = (question: string) => {
   return new Promise<void>((resolve) => {
-    // 添加临时流式消息
     const tempMessage: Message = {
       id: messageId++,
       content: "",
@@ -59,46 +65,63 @@ const handleStreamResponse = (question: string) => {
     };
     history.value = [...history.value, tempMessage];
 
-    // 创建SSE连接
-    const eventSource = new EventSource(
-      `${API_URL}?content=${encodeURIComponent(question)}`
-    );
-
-    eventSource.onmessage = (event) => {
-      const data = event.data;
-      if (data === "[DONE]") {
-        eventSource.close();
-        resolve();
-        return;
+    // 使用fetch代替EventSource以支持自定义header
+    const controller = new AbortController();
+    fetch(
+      `${API_URL}?content=${encodeURIComponent(question)}&type=${
+        modelType.value
+      }`,
+      {
+        headers: {
+          Authorization: `${apiToken.value}`,
+          "Content-Type": "text/event-stream",
+        },
+        signal: controller.signal,
       }
+    )
+      .then((response) => {
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
 
-      // 更新最后一条消息内容
-      history.value = history.value.map((msg) => {
-        if (msg.id === tempMessage.id) {
-          return { ...msg, content: msg.content + data };
-        }
-        return msg;
+        const readChunk = async () => {
+          while (true) {
+            const { done, value } = await reader!.read();
+            if (done) {
+              controller.abort();
+              resolve();
+              return;
+            }
+
+            const chunk = decoder.decode(value);
+            // const result = await JSON.parse(jsonStr);
+            // console.log(jsonStr);
+            history.value = history.value.map((msg) => {
+              if (msg.id === tempMessage.id) {
+                return { ...msg, content: msg.content + chunk };
+              }
+              return msg;
+            });
+            scrollToBottom();
+          }
+        };
+        readChunk();
+      })
+      .catch((error) => {
+        console.error("请求失败:", error);
+        history.value = history.value.map((msg) => {
+          if (msg.id === tempMessage.id) {
+            return {
+              ...msg,
+              content: "请求失败: " + error.message,
+              streaming: false,
+            };
+          }
+          return msg;
+        });
+        resolve();
       });
-      scrollToBottom();
-    };
 
-    eventSource.onerror = (error) => {
-      console.error("SSE Error:", error);
-      history.value = history.value.map((msg) => {
-        if (msg.id === tempMessage.id) {
-          return {
-            ...msg,
-            content: "服务暂时不可用，请稍后重试",
-            streaming: false,
-          };
-        }
-        return msg;
-      });
-      eventSource.close();
-      resolve();
-    };
-
-    sseEventSource.value = eventSource;
+    sseEventSource.value = controller; // 保存控制器以便后续操作
   });
 };
 
@@ -152,12 +175,13 @@ const closeChat = () => {
 
 onMounted(loadHistory);
 onUnmounted(() => {
-  sseEventSource.value?.close();
+  sseEventSource.value?.abort();
 });
 </script>
 
 <template>
   <div
+    id="aiChat"
     :class="['fold', { unfold: isFold }]"
     @click="!isFold && (isFold = true)"
   >
@@ -199,6 +223,12 @@ onUnmounted(() => {
         @pressEnter="handleSubmit"
         :disabled="history.some((m) => m.streaming)"
       />
+      <a-select
+        v-model:value="modelType"
+        class="model-select"
+        :options="modelOptions"
+        :disabled="history.some((m) => m.streaming)"
+      />
       <a-button
         type="primary"
         class="submit-btn"
@@ -220,12 +250,14 @@ onUnmounted(() => {
   right: 5vw;
   width: 80px;
   height: 80px;
-  background-color: rgba(0, 255, 254, 0.44);
   border-radius: 50%;
   transition: all 0.5s ease;
   cursor: pointer;
   overflow: hidden; /* 新增 */
-
+  background-image: url("@/assets/botImage.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
   /* 折叠状态隐藏内部元素 */
   .chat,
   .input-container {
@@ -383,5 +415,44 @@ onUnmounted(() => {
 .message-bubble.streaming {
   background: rgba(240, 242, 245, 0.8);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+/* 新增样式调整 */
+.input-container {
+  position: relative;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+
+  .model-select {
+    width: 120px;
+    flex-shrink: 0;
+  }
+
+  .input {
+    flex: 1;
+    padding-right: 80px;
+  }
+
+  .submit-btn {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    height: auto;
+    padding: 6px 20px;
+    border-radius: 18px;
+  }
+}
+
+/* 调整原有样式 */
+.fold.unfold {
+  .input-container {
+    width: 90%;
+    height: 20%;
+    margin: 0 auto 10px;
+  }
+
+  :deep(.ant-select-selector) {
+    border-radius: 18px !important;
+  }
 }
 </style>

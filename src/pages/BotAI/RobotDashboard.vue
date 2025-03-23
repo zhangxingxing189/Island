@@ -39,12 +39,16 @@ import RobotCard from "./RobotCard.vue";
 import CreateRobotDialog from "./CreateRobotDialog.vue";
 import draggable from "vuedraggable";
 import router from "@/router";
-
+import { useRoute } from "vue-router";
+const route = useRoute();
 const store = useBotStore();
 const { robots } = storeToRefs(store);
 const showCreateDialog = ref(false);
 const selectedRobot = ref<Robot | null>(null);
-
+const islandId = ref<string | null>(null);
+islandId.value = Array.isArray(route.query.islandId)
+  ? route.query.islandId[0]
+  : route.query.islandId;
 onMounted(() => {
   store.initLocalData();
 });
@@ -57,7 +61,7 @@ const selectRobot = (robot: Robot) => {
   selectedRobot.value = robot;
   router.push({
     path: "/bot/detail",
-    query: { id: robot.id },
+    query: { id: robot.id, islandId: islandId.value },
   });
 };
 
@@ -70,10 +74,12 @@ const onDragEnd = () => {
 .dashboard {
   position: relative; /* 添加定位上下文 */
   min-height: 100vh; /* 保证容器高度 */
-  overflow: visible; /* 允许对话框溢出 */
+  overflow: auto; /* 允许对话框溢出 */
   padding: 2rem;
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 20px auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+  border-radius: 10px;
 }
 
 .create-btn {

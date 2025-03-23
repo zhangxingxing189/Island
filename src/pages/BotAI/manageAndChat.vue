@@ -156,10 +156,19 @@ import { useUserStore } from "@/stores/user";
 const botStore = useBotStore();
 
 const useUser = useUserStore();
+const islandId = ref<string | null>(null);
+islandId.value = Array.isArray(route.query.islandId)
+  ? route.query.islandId[0]
+  : route.query.islandId;
 // 2. 点击事件处理
 const handleClick = () => {
   console.log("图标被点击");
-  router.push("/bot");
+  router.push({
+    path: "/bot",
+    query: {
+      islandId: islandId.value,
+    },
+  });
 };
 // 状态管理
 const activeTab = ref<"chat" | "settings">("chat");

@@ -1,156 +1,192 @@
 <template>
-  <div class="personal-homepage">
-    <!-- 头部区域 -->
-    <header class="header">
-      <div class="banner-container">
-        <!--        <div class="cover-upload">点击上传封面</div>-->
-        <img
-          class="adaptive-image"
-          src="https://api.yimian.xyz/img"
-          alt="点击上传封面"
-        />
-      </div>
-      <div class="profile">
-        <div class="avatar-container">
-          <img :src="userInfo.avatar" class="avatar" alt="用户头像" />
-          <div class="nickname-ip">
-            <h1 class="nickname">{{ userInfo.username }}</h1>
-            <span class="ip">属地：{{ userInfo.ipLocation }}</span>
-          </div>
+  <div id="personalCenter">
+    <div class="personal-homepage">
+      <!-- 头部区域 -->
+      <header class="header">
+        <div class="banner-container">
+          <!--        <div class="cover-upload">点击上传封面</div>-->
+          <img
+            class="adaptive-image"
+            src="https://api.yimian.xyz/img"
+            alt="点击上传封面"
+          />
         </div>
-<!--        <div class="actions">
+        <div class="profile">
+          <div class="avatar-container">
+            <img :src="userInfo.avatar" class="avatar" alt="用户头像" />
+            <div class="nickname-ip">
+              <h1 class="nickname">{{ userInfo.username }}</h1>
+              <span class="ip">属地：{{ userInfo.ipLocation }}</span>
+            </div>
+          </div>
+          <!--        <div class="actions">
           <button class="btn edit-btn">编辑资料</button>
           <a href="#" class="detail-link">查看详细资料</a>
         </div>-->
-      </div>
-    </header>
+        </div>
+      </header>
 
-    <!-- 主体内容 -->
-    <div class="main-container">
-      <!-- 左侧主内容 -->
-      <main class="main-content">
-        <!-- 导航栏 -->
-        <nav class="navigation">
-          <ul class="nav-list">
-            <li
-              v-for="tab in tabs"
-              :key="tab.id"
-              :class="{ active: activeTab === tab.id }"
-              @click="activeTab = tab.id"
-            >
-              {{ tab.name }}
-            </li>
-          </ul>
-        </nav>
+      <!-- 主体内容 -->
+      <div class="main-container">
+        <!-- 左侧主内容 -->
+        <main class="main-content">
+          <!-- 导航栏 -->
+          <nav class="navigation">
+            <ul class="nav-list">
+              <li
+                v-for="tab in tabs"
+                :key="tab.id"
+                :class="{ active: activeTab === tab.id }"
+                @click="activeTab = tab.id"
+              >
+                {{ tab.name }}
+              </li>
+            </ul>
+          </nav>
 
-        <!-- 动态列表 -->
-        <div class="dynamic-list">
-          <!-- 在此处添加关注列表模板 -->
-          <template v-if="activeTab === 'focus'">
-            <div v-if="isLoading" class="loading">加载中...</div>
-            <div v-else-if="!followList?.length" class="empty">暂无关注用户</div>
-            <div v-for="item in followList" :key="item.user_id" class="follow-item">
-              <img
+          <!-- 动态列表 -->
+          <div class="dynamic-list">
+            <!-- 在此处添加关注列表模板 -->
+            <template v-if="activeTab === 'focus'">
+              <div v-if="isLoading" class="loading">加载中...</div>
+              <div v-else-if="!followList?.length" class="empty">
+                暂无关注用户
+              </div>
+              <div
+                v-for="item in followList"
+                :key="item.user_id"
+                class="follow-item"
+              >
+                <img
                   :src="item.avatar || '/default-avatar.png'"
                   class="follow-avatar"
                   alt="用户头像"
-              />
-              <div class="follow-info">
-                <h4 class="follow-name">{{ item.username }}</h4>
-                <p v-if="item.latest_article" class="latest-article">
-                  {{ item.latest_article.title }}
-                </p>
+                />
+                <div class="follow-info">
+                  <h4 class="follow-name">{{ item.username }}</h4>
+                  <p v-if="item.latest_article" class="latest-article">
+                    {{ item.latest_article.title }}
+                  </p>
+                </div>
               </div>
-            </div>
-          </template>
-          <template v-else-if="activeTab === 'article'">
-            <div v-if="isLoading" class="loading">加载中...</div>
-            <div v-else-if="articleList?.length === 0" class="empty">暂无发表文章</div>
-            <div v-for="article in articleList" :key="article.id" class="article-item">
-              <div class="article-cover" v-if="article.cover">
-                <img :src="article.cover" alt="文章封面" />
+            </template>
+            <template v-else-if="activeTab === 'article'">
+              <div v-if="isLoading" class="loading">加载中...</div>
+              <div v-else-if="articleList?.length === 0" class="empty">
+                暂无发表文章
               </div>
-              <div class="article-content">
-                <router-link
+              <div
+                v-for="article in articleList"
+                :key="article.id"
+                class="article-item"
+              >
+                <div class="article-cover" v-if="article.cover">
+                  <img :src="article.cover" alt="文章封面" />
+                </div>
+                <div class="article-content">
+                  <router-link
                     :to="`/island/article/${article.id}`"
                     class="article-title"
-                >
-                  {{ article.title }}
-                </router-link>
-                <p class="article-abstract">{{ article.abstract }}</p>
+                  >
+                    {{ article.title }}
+                  </router-link>
+                  <p class="article-abstract">{{ article.abstract }}</p>
 
-                <div class="article-meta">
-                  <el-button @click.stop="showDeleteDialog(article.id)">删除</el-button>
-                  <span class="digg-count">❤️ {{ article.digg_count }}</span>
-                  <span class="collect-count">⭐ {{ article.collect_count }}</span>
-                  <time class="create-time">{{ formatDate(article.created_at) }}</time>
+                  <div class="article-meta">
+                    <el-button @click.stop="showDeleteDialog(article.id)"
+                      >删除</el-button
+                    >
+                    <span class="digg-count">❤️ {{ article.digg_count }}</span>
+                    <span class="collect-count"
+                      >⭐ {{ article.collect_count }}</span
+                    >
+                    <time class="create-time">{{
+                      formatDate(article.created_at)
+                    }}</time>
+                  </div>
                 </div>
               </div>
-            </div>
-          </template>
-          <template v-else-if="activeTab === 'collection'">
-            <div v-if="isLoading" class="loading">加载中...</div>
-            <div v-else-if="collectList?.length === 0" class="empty">暂无收藏内容</div>
-            <div v-for="item in collectList" :key="item.id" class="article-item">
-              <div class="article-cover" v-if="item.cover">
-                <img :src="item.cover" alt="文章封面" />
+            </template>
+            <template v-else-if="activeTab === 'collection'">
+              <div v-if="isLoading" class="loading">加载中...</div>
+              <div v-else-if="collectList?.length === 0" class="empty">
+                暂无收藏内容
               </div>
-              <div class="article-content">
-                <router-link :to="`/island/article/${item.id}`" class="article-title">
-                  {{ item.title }}
-                </router-link>
-                <p class="article-abstract">{{ item.abstract }}</p>
-                <div class="article-meta">
-                  <el-button @click.stop="showUncollectDialog(item.id)">取消收藏</el-button>
-                  <span class="digg-count">❤️ {{ item.digg_count }}</span>
-                  <span class="collect-count">⭐ {{ item.collect_count }}</span>
-                  <time class="create-time">{{ formatDate(item.created_at) }}</time>
-                </div>
-              </div>
-            </div>
-          </template>
-          <div
-            v-for="(item, index) in filteredDynamics"
-            :key="index"
-            class="dynamic-item"
-          >
-            <div class="dynamic-header">
-              <span class="dynamic-type">{{ item.type }}</span>
-              <time class="dynamic-time">{{ item.time }}</time>
-            </div>
-            <h3 class="dynamic-title">{{ item.title }}</h3>
-            <p class="dynamic-content">
-              {{ item.showMore ? item.content : item.content.slice(0, 100) }}
-              <span
-                v-if="item.content.length > 100"
-                class="toggle-more"
-                @click="item.showMore = !item.showMore"
+              <div
+                v-for="item in collectList"
+                :key="item.id"
+                class="article-item"
               >
-                {{ item.showMore ? "收起" : "展开全文" }}
-              </span>
-            </p>
-          </div>
-        </div>
-      </main>
-
-      <!-- 右侧侧边栏 -->
-      <aside class="sidebar">
-        <div class="stats-card">
-          <h3 class="stats-title">创作中心</h3>
-          <button class="btn create-btn" @click="handlePublish">开始创作</button>
-          <div class="follower-stats">
-            <div class="stat-item">
-              <span class="stat-number">{{ userInfo.following }}</span>
-              <span class="stat-label">关注</span>
+                <div class="article-cover" v-if="item.cover">
+                  <img :src="item.cover" alt="文章封面" />
+                </div>
+                <div class="article-content">
+                  <router-link
+                    :to="`/island/article/${item.id}`"
+                    class="article-title"
+                  >
+                    {{ item.title }}
+                  </router-link>
+                  <p class="article-abstract">{{ item.abstract }}</p>
+                  <div class="article-meta">
+                    <el-button @click.stop="showUncollectDialog(item.id)"
+                      >取消收藏</el-button
+                    >
+                    <span class="digg-count">❤️ {{ item.digg_count }}</span>
+                    <span class="collect-count"
+                      >⭐ {{ item.collect_count }}</span
+                    >
+                    <time class="create-time">{{
+                      formatDate(item.created_at)
+                    }}</time>
+                  </div>
+                </div>
+              </div>
+            </template>
+            <div
+              v-for="(item, index) in filteredDynamics"
+              :key="index"
+              class="dynamic-item"
+            >
+              <div class="dynamic-header">
+                <span class="dynamic-type">{{ item.type }}</span>
+                <time class="dynamic-time">{{ item.time }}</time>
+              </div>
+              <h3 class="dynamic-title">{{ item.title }}</h3>
+              <p class="dynamic-content">
+                {{ item.showMore ? item.content : item.content.slice(0, 100) }}
+                <span
+                  v-if="item.content.length > 100"
+                  class="toggle-more"
+                  @click="item.showMore = !item.showMore"
+                >
+                  {{ item.showMore ? "收起" : "展开全文" }}
+                </span>
+              </p>
             </div>
-            <div class="stat-item">
-              <span class="stat-number">{{ userInfo.followers }}</span>
-              <span class="stat-label">粉丝</span>
+          </div>
+        </main>
+
+        <!-- 右侧侧边栏 -->
+        <aside class="sidebar">
+          <div class="stats-card">
+            <h3 class="stats-title">创作中心</h3>
+            <button class="btn create-btn" @click="handlePublish">
+              开始创作
+            </button>
+            <div class="follower-stats">
+              <div class="stat-item">
+                <span class="stat-number">{{ userInfo.following }}</span>
+                <span class="stat-label">关注</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-number">{{ userInfo.followers }}</span>
+                <span class="stat-label">粉丝</span>
+              </div>
             </div>
           </div>
-        </div>
 
-<!--        <div class="quick-links">
+          <!--        <div class="quick-links">
           <h3 class="links-title">我的关注</h3>
           <div class="link-item">
             <span class="link-name">话题</span>
@@ -165,19 +201,19 @@
             <span class="link-count">8</span>
           </div>
         </div>-->
-      </aside>
-    </div>
-  </div>
-  <div v-if="isDeleteDialogVisible" class="custom-dialog-mask">
-    <div class="custom-dialog">
-      <h3>确认删除文章吗？</h3>
-      <div class="dialog-buttons">
-        <button @click="confirmDelete" class="confirm-btn">确认删除</button>
-        <button @click="cancelDelete" class="cancel-btn">取消操作</button>
+        </aside>
       </div>
     </div>
-  </div>
-<!--  <div v-if="showCustomDialog" class="custom-dialog-mask">
+    <div v-if="isDeleteDialogVisible" class="custom-dialog-mask">
+      <div class="custom-dialog">
+        <h3>确认删除文章吗？</h3>
+        <div class="dialog-buttons">
+          <button @click="confirmDelete" class="confirm-btn">确认删除</button>
+          <button @click="cancelDelete" class="cancel-btn">取消操作</button>
+        </div>
+      </div>
+    </div>
+    <!--  <div v-if="showCustomDialog" class="custom-dialog-mask">
     <div class="custom-dialog" :class="dialogType">
       <div class="dialog-header">
         <h3>{{ dialogTitle }}</h3>
@@ -194,51 +230,65 @@
       </div>
     </div>
   </div>-->
-  <<div v-if="showCustomDialog" class="custom-dialog-mask">
-  <div class="custom-dialog" :class="dialogType">
-    <div class="dialog-body">
-      <p>{{ dialogMessage }}</p>
-    </div>
-    <div class="dialog-footer">
-      <template v-if="dialogType === 'error'">
-        <button class="btn cancel-btn" @click="showCustomDialog = false">取消</button>
-        <button class="btn confirm-btn" @click="handleUncollect">确认</button>
-      </template>
-      <button v-else class="btn confirm-btn" @click="showCustomDialog = false">确定</button>
+    <
+    <div v-if="showCustomDialog" class="custom-dialog-mask">
+      <div class="custom-dialog" :class="dialogType">
+        <div class="dialog-body">
+          <p>{{ dialogMessage }}</p>
+        </div>
+        <div class="dialog-footer">
+          <template v-if="dialogType === 'error'">
+            <button class="btn cancel-btn" @click="showCustomDialog = false">
+              取消
+            </button>
+            <button class="btn confirm-btn" @click="handleUncollect">
+              确认
+            </button>
+          </template>
+          <button
+            v-else
+            class="btn confirm-btn"
+            @click="showCustomDialog = false"
+          >
+            确定
+          </button>
+        </div>
+      </div>
     </div>
   </div>
-</div>
-
 </template>
 
 <script setup lang="ts">
-import {ref, computed, reactive, watchEffect, onMounted} from "vue";
+import { ref, computed, reactive, watchEffect, onMounted } from "vue";
 import { useUserStore } from "@/stores/user";
-import { useRouter } from 'vue-router';
+import { useRouter } from "vue-router";
 import {
-  ArticleListItem, collectArticle,
+  ArticleListItem,
+  collectArticle,
   deleteArticle,
   getArticleList,
   getOwnerArticleList,
-  getOwnerCollectArticles
+  getOwnerCollectArticles,
 } from "@/api/articleApi";
-import { ElNotification } from 'element-plus';
-import {FollowItem, getFansCount, getFollowList} from "@/api/focusApi";
-import {ContentItem} from "@/pages/blogPages/blogInterface";
-import {formatTime} from "@/utils/formatters";
+import { ElNotification } from "element-plus";
+import { FollowItem, getFansCount, getFollowList } from "@/api/focusApi";
+import { ContentItem } from "@/pages/blogPages/blogInterface";
+import { formatTime } from "@/utils/formatters";
 const router = useRouter();
 const userStore = useUserStore();
-console.log( userStore.currentUser);
+console.log(userStore.currentUser);
 
 const user_id = ref(userStore.currentUser.user_id);
-console.log( user_id.value );
+console.log(user_id.value);
 const handlePublish = () => {
-  router.push({ name: 'publish' });
+  router.push({ name: "publish" });
 };
 
 const formatDate = (isoString: string) => {
   const date = new Date(isoString);
-  return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+  return `${date.getFullYear()}-${(date.getMonth() + 1)
+    .toString()
+    .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
 };
 // 类型定义
 interface UserInfo {
@@ -271,13 +321,13 @@ const loadFollows = async () => {
     isLoading.value = true;
     const res = await getFollowList({
       user_id: user_id.value,
-      limit: 10
+      limit: 10,
     });
     console.log(res);
     followList.value = res.data?.list?.length ? res.data.list : [];
     userInfo.following = followList.value.length;
-  }  catch (error) {
-    ElNotification.error({title: '错误', message: '关注列表加载失败'});
+  } catch (error) {
+    ElNotification.error({ title: "错误", message: "关注列表加载失败" });
     followList.value = [];
   } finally {
     isLoading.value = false;
@@ -311,18 +361,16 @@ const loadArticles = async () => {
   }
 };
 
-
-
 // 监听标签切换
 watchEffect(() => {
-  switch(activeTab.value) {
-    case 'focus':
+  switch (activeTab.value) {
+    case "focus":
       loadFollows();
       break;
-    case 'article':
+    case "article":
       loadArticles();
       break;
-    case 'collection':
+    case "collection":
       loadCollections();
       break;
   }
@@ -330,28 +378,26 @@ watchEffect(() => {
 // 用户信息
 const user = useUserStore();
 const userInfo = reactive<UserInfo>({
-  avatar: user.currentUser?.avatar || require('@/assets/QQ.svg'),
-  username: user.currentUser?.username || '未登录用户',
+  avatar: user.currentUser?.avatar || require("@/assets/QQ.svg"),
+  username: user.currentUser?.username || "未登录用户",
   ipLocation: "东莞",
-  following:  followList.value.length,
+  following: followList.value.length,
   followers: 0,
 });
 
 // 导航标签
 const tabs = [
- // { id: "dynamic", name: "动态" },
+  // { id: "dynamic", name: "动态" },
   // { id: "answer", name: "回答" },
   //{ id: "video", name: "视频" },
   // { id: "question", name: "提问" },
-  {id:"focus",name:"我的关注"},
+  { id: "focus", name: "我的关注" },
   { id: "article", name: "我的文章" },
   //{ id: "column", name: "专栏" },
   //{ id: "idea", name: "想法" },
   { id: "collection", name: "收藏" },
   //{ id: "subscription", name: "关注订阅" },
 ];
-
-
 
 // 动态数据
 const dynamics = reactive<DynamicItem[]>([
@@ -360,7 +406,7 @@ const dynamics = reactive<DynamicItem[]>([
     type: "关注了问题",
     title: "如何评价Vue3的Composition API？",
     content:
-        "Vue3的Composition API为开发者提供了更灵活的逻辑组织方式，相比Options API有以下优势...（此处省略200字）",
+      "Vue3的Composition API为开发者提供了更灵活的逻辑组织方式，相比Options API有以下优势...（此处省略200字）",
     time: "2024-02-21 14:30",
     showMore: false,
   },
@@ -371,43 +417,45 @@ const dynamics = reactive<DynamicItem[]>([
 const filteredDynamics = computed(() => {
   return dynamics.filter((item) => item.type === activeTab.value);
 });
-const isDeleteDialogVisible = ref(false)
-const deletingArticleId = ref<string | null>(null)
+const isDeleteDialogVisible = ref(false);
+const deletingArticleId = ref<string | null>(null);
 
 const showDeleteDialog = (id: string) => {
-  isDeleteDialogVisible.value = true
-  deletingArticleId.value = id
-}
+  isDeleteDialogVisible.value = true;
+  deletingArticleId.value = id;
+};
 
 const showCustomDialog = ref(false);
-const dialogTitle = ref('');
-const dialogMessage = ref('');
-const dialogType = ref<'success' | 'error'>('success');
+const dialogTitle = ref("");
+const dialogMessage = ref("");
+const dialogType = ref<"success" | "error">("success");
 
 const confirmDelete = async () => {
-  if (!deletingArticleId.value) return
+  if (!deletingArticleId.value) return;
 
   try {
-    await deleteArticle([deletingArticleId.value])
-    articleList.value = articleList.value.filter(a => a.id !== deletingArticleId.value)
-    dialogTitle.value = '操作成功';
-    dialogMessage.value = '文章已删除';
-    dialogType.value = 'success';
+    await deleteArticle([deletingArticleId.value]);
+    articleList.value = articleList.value.filter(
+      (a) => a.id !== deletingArticleId.value
+    );
+    dialogTitle.value = "操作成功";
+    dialogMessage.value = "文章已删除";
+    dialogType.value = "success";
     showCustomDialog.value = true;
   } catch (error) {
-    dialogTitle.value = '操作失败';
-    dialogMessage.value = '删除文章失败，请稍后重试';
-    dialogType.value = 'error';
+    dialogTitle.value = "操作失败";
+    dialogMessage.value = "删除文章失败，请稍后重试";
+    dialogType.value = "error";
     showCustomDialog.value = true;
   } finally {
-    isDeleteDialogVisible.value = false
+    isDeleteDialogVisible.value = false;
   }
-}
+};
 
 const cancelDelete = () => {
-  isDeleteDialogVisible.value = false
-  deletingArticleId.value = null
-}
+  isDeleteDialogVisible.value = false;
+  deletingArticleId.value = null;
+};
 
 const collectedList = ref<ContentItem[]>([]);
 const currentPage = ref(1);
@@ -433,11 +481,11 @@ const loadCollections = async () => {
       if (currentList.length < 10) break;
     }
 
-    collectList.value = allCollects.map(item => ({
+    collectList.value = allCollects.map((item) => ({
       id: item.id,
       title: item.title,
       abstract: item.abstract,
-      cover: item.cover || require('@/assets/background.png'),
+      cover: item.cover || require("@/assets/background.png"),
       digg_count: item.digg_count,
       collect_count: item.collect_count,
       created_at: item.created_at,
@@ -446,7 +494,7 @@ const loadCollections = async () => {
       avatar: item.avatar,
       content: item.content,
     }));
-    console.log("222",collectedList.value);
+    console.log("222", collectedList.value);
   } finally {
     loadingCollect.value = false;
   }
@@ -455,8 +503,8 @@ const loadCollections = async () => {
 const deletingCollectId = ref<string | null>(null);
 
 const showUncollectDialog = (id: string) => {
-  dialogMessage.value = '确定要取消收藏该文章吗？';
-  dialogType.value = 'error';
+  dialogMessage.value = "确定要取消收藏该文章吗？";
+  dialogType.value = "error";
   showCustomDialog.value = true;
   deletingCollectId.value = id;
 };
@@ -466,16 +514,18 @@ const handleUncollect = async () => {
 
   try {
     await collectArticle({ article_id: deletingCollectId.value });
-    collectList.value = collectList.value.filter(a => a.id !== deletingCollectId.value);
+    collectList.value = collectList.value.filter(
+      (a) => a.id !== deletingCollectId.value
+    );
 
-    dialogTitle.value = '操作成功';
-    dialogMessage.value = '已取消收藏';
-    dialogType.value = 'success';
+    dialogTitle.value = "操作成功";
+    dialogMessage.value = "已取消收藏";
+    dialogType.value = "success";
     showCustomDialog.value = true;
   } catch (error) {
-    dialogTitle.value = '操作失败';
-    dialogMessage.value = '取消收藏失败，请稍后重试';
-    dialogType.value = 'error';
+    dialogTitle.value = "操作失败";
+    dialogMessage.value = "取消收藏失败，请稍后重试";
+    dialogType.value = "error";
     showCustomDialog.value = true;
   } finally {
     deletingCollectId.value = null;
@@ -485,10 +535,10 @@ const handleUncollect = async () => {
 const loadFansCount = async () => {
   try {
     const res = await getFansCount({ user_id: user_id.value });
-    console.log("111222",res.data);
+    console.log("111222", res.data);
     userInfo.followers = res.data;
   } catch (error) {
-    ElNotification.error({ title: '错误', message: '粉丝数加载失败' });
+    ElNotification.error({ title: "错误", message: "粉丝数加载失败" });
   }
 };
 // 初始化加载
@@ -496,11 +546,12 @@ onMounted(() => {
   loadCollections();
   loadFansCount();
 });
-
-
 </script>
 
 <style>
+#personalCenter {
+  height: 100%;
+}
 .collection-item {
   display: flex;
   justify-content: space-between;
@@ -641,23 +692,26 @@ onMounted(() => {
   --text-primary: #1a1a1a;
   --text-secondary: #8590a6;
   --border-color: #f0f2f4;
-  --bg-color: #ffffff;
+  --bg-color: #f4f6f9;
   --hover-bg: #f5f5f5;
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   --radius: 4px;
 }
 
 .personal-homepage {
+  height: 100%;
   overflow-y: auto;
   max-width: 1200px;
-  margin: 0 auto;
-  background: var(--bg-color);
+  margin: 20px auto;
+  //background: var(--bg-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
 }
 
 /* 头部样式 */
 .header {
   position: relative;
   margin-bottom: 20px;
+  box-shadow: 0 2px 8px -3px rgba(0, 0, 0, 0.3);
 }
 
 /* CSS 实现 */

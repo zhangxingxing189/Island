@@ -1,69 +1,75 @@
 <template>
-  <div class="article-editor">
-    <!-- 退出按钮 -->
-    <button class="back-btn" @click="handleBack">
-      <img src="@/assets/images/退出.png" alt="退出" class="exit-icon" />
-    </button>
+  <div class="public-background">
+    <div class="article-editor">
+      <!-- 退出按钮 -->
+      <button class="back-btn" @click="handleBack">
+        <img src="@/assets/images/退出.png" alt="退出" class="exit-icon" />
+      </button>
 
-    <h1 class="editor-title">文章编辑</h1>
-    <!-- 标题输入框 -->
-    <label>标题</label>
-    <input
-      v-model="formData.title"
-      type="text"
-      class="input"
-      placeholder="请输入文章标题"
-    />
-
-    <!-- 简介输入框 -->
-    <div class="optional-field">
-      <label>简介（可选）</label>
-      <textarea
-        v-model="formData.brief"
+      <h1 class="editor-title">文章编辑</h1>
+      <!-- 标题输入框 -->
+      <label>标题</label>
+      <input
+        v-model="formData.title"
+        type="text"
         class="input"
-        placeholder="请输入文章简介，最多200字"
-        rows="3"
-        maxlength="200"
-      ></textarea>
-    </div>
+        placeholder="请输入文章标题"
+      />
 
-    <!-- 分类选择框 -->
-    <label>分类</label>
-    <select v-model="formData.island" class="select">
-      <option
-        v-for="island in islandList"
-        :key="island.id"
-        :value="island.name"
-      >
-        {{ island.name }}
-      </option>
-    </select>
+      <!-- 简介输入框 -->
+      <div class="optional-field">
+        <label>简介（可选）</label>
+        <textarea
+          v-model="formData.brief"
+          class="input"
+          placeholder="请输入文章简介，最多200字"
+          rows="3"
+          maxlength="200"
+        ></textarea>
+      </div>
 
-    <!-- 封面上传 -->
-    <label>封面</label>
-    <div class="cover-upload" @click="triggerFileUpload">
-      <img v-if="formData.cover" :src="formData.cover" class="cover-preview" />
-      <span v-else>+</span>
-    </div>
-    <input
-      type="file"
-      ref="fileInput"
-      accept="image/*"
-      class="hidden"
-      @change="handleCoverUpload"
-    />
+      <!-- 分类选择框 -->
+      <label>分类</label>
+      <select v-model="formData.island" class="select">
+        <option
+          v-for="island in islandList"
+          :key="island.id"
+          :value="island.name"
+        >
+          {{ island.name }}
+        </option>
+      </select>
 
-    <!-- Markdown 富文本编辑器 -->
-    <label>内容</label>
-    <mavon-editor
+      <!-- 封面上传 -->
+      <label>封面</label>
+      <div class="cover-upload" @click="triggerFileUpload">
+        <img
+          v-if="formData.cover"
+          :src="formData.cover"
+          class="cover-preview"
+        />
+        <span v-else>+</span>
+      </div>
+      <input
+        type="file"
+        ref="fileInput"
+        accept="image/*"
+        class="hidden"
+        @change="handleCoverUpload"
+      />
+
+      <!-- Markdown 富文本编辑器 -->
+      <label>内容</label>
+      <mavon-editor
         ref="mdEditor"
-      v-model="formData.content"
-      :toolbars="markdownToolbars"
+        v-model="formData.content"
+        :toolbars="markdownToolbars"
         @imgAdd="handleImgAdd"
-    />
+      />
 
-    <!-- 提交按钮 -->
-    <button class="submit-btn" @click="handleSubmit">提交文章</button>
+      <!-- 提交按钮 -->
+      <button class="submit-btn" @click="handleSubmit">提交文章</button>
+    </div>
   </div>
 </template>
 
@@ -87,7 +93,6 @@ const formData = ref({
 
 const islandList = ref([]);
 
-
 // 获取分类数据
 onMounted(async () => {
   try {
@@ -95,7 +100,7 @@ onMounted(async () => {
     console.log(data);
     islandList.value = Object.values(data.islandMsg).map((item: any) => ({
       id: item.id,
-      name: item.islandName
+      name: item.islandName,
     }));
   } catch (error) {
     console.error("获取分类失败:", error);
@@ -109,7 +114,7 @@ const triggerFileUpload = () => {
   fileInput.value.click();
 };
 
-const coverFile = ref<File | null>(null);  // 新增文件存储
+const coverFile = ref<File | null>(null); // 新增文件存储
 
 const handleCoverUpload = async (event) => {
   const file = event.target.files[0];
@@ -167,17 +172,17 @@ const handleSubmit = async () => {
     if (coverFile.value) {
       const { data } = await uploadImage(coverFile.value);
       formData.value.cover = data; // 替换为服务器URL
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
-       const res = await createArticle({
-         title: formData.value.title,
-         content: formData.value.content,
-         abstract: formData.value.brief,
-         cover: formData.value.cover,
-         island: formData.value.island
-       });
+    const res = await createArticle({
+      title: formData.value.title,
+      content: formData.value.content,
+      abstract: formData.value.brief,
+      cover: formData.value.cover,
+      island: formData.value.island,
+    });
     console.log(res);
-   message.success("文章创建成功");
+    message.success("文章创建成功");
     router.go(-1);
   } catch (error) {
     console.error("提交错误:", error);
@@ -209,7 +214,7 @@ const handleBack = () => {
   padding: 20px;
   background-color: #fff;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
   display: flex;
   flex-direction: column;
   gap: 10px;

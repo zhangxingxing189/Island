@@ -327,8 +327,8 @@ onMounted(async () => {
         // islandStatic.body?.setSize(island.imageWidth, island.imageHeight, true);
         // 设置碰撞体（仅下半部分）
         islandStatic.body
-          .setSize(0, 0, true)
-          .setOffset(0, island.imageHeight / 2);
+          .setSize(10, 10, true)
+          .setOffset(island.imageHeight / 2, island.imageHeight / 2);
 
         islandStatic.setImmovable(false);
         this.time.delayedCall(0, () => {
@@ -340,6 +340,7 @@ onMounted(async () => {
           });
         });
       }
+      // this.islandGroup.body.setSize(100, 100, true);
       // 添加碰撞检测器
       this.physics.add.collider(
         this.player,

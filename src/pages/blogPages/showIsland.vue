@@ -17,6 +17,7 @@
     <!-- 主展示区域 -->
     <div v-else class="gallery-container">
       <h1 class="gallery-title">梦幻岛屿图鉴</h1>
+      <h1 class="h1-title">现在所在岛屿: {{ nowIslandName }}</h1>
       <div class="island-grid">
         <div
           v-for="island in islands"
@@ -78,17 +79,27 @@ import { ref, onMounted } from "vue";
 import { islandType, getIslands } from "@/api/islandApi";
 import { islandRouter } from "@/components/islandRouter";
 import { useUserStore } from "@/stores/user";
+import { useRoute } from "vue-router";
 const userStore = useUserStore();
+const route = useRoute();
 // 响应式数据
 const islands = ref<islandType[]>([]);
 const loading = ref(true);
 const error = ref("");
 const hoverCardId = ref<string | null>(null);
-
+const nowIslandName = ref<string | null>(null);
+const nowIslandId = ref<string | null>(null);
+nowIslandId.value = route.query.islandId as string;
 // 加载数据
 const loadIslands = async () => {
   try {
     const data = await getIslands();
+    for (let item of data) {
+      if (item.id === nowIslandId.value) {
+        nowIslandName.value = item.name;
+        console.log(nowIslandName.value);
+      }
+    }
     islands.value = data.map((item) => ({
       ...item,
       name: item.name || "未命名岛屿",
@@ -116,8 +127,10 @@ onMounted(() => {
 <style scoped>
 .island-gallery {
   padding: 40px 5%;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: white;
   min-height: 100vh;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
 }
 
 .loading-spinner {
@@ -143,9 +156,12 @@ onMounted(() => {
   margin-bottom: 40px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
-
+.h1-title {
+  padding: 20px;
+}
 .island-grid {
   display: grid;
+  justify-content: center;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 30px;
   padding: 20px;
