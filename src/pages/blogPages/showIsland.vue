@@ -92,6 +92,8 @@ const loadIslands = async () => {
     islands.value = data.map((item) => ({
       ...item,
       name: item.name || "未命名岛屿",
+      x: item.xPoint,
+      y: item.yPoint,
     }));
   } catch (err) {
     error.value = "岛屿数据加载失败，请稍后刷新重试";
