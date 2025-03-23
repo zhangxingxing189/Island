@@ -172,7 +172,7 @@ onMounted(async()=>{
 .latest{
     position: fixed;
     left: 50px;
-    bottom: 25px;
+    bottom: 75px;
     width: 320px;
     height: 90px;
     padding: 10px;
