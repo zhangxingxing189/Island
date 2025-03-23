@@ -45,7 +45,7 @@ onMounted(async()=>{
             now[1]=msgs[msgs.length-1].timestamp+1
         }catch(error){}
         const d=JSON.parse(localStorage.getItem('data')as string)
-        if(!isEqual(data.value,d))data.value=d
+        if(d&&!isEqual(data.value,d))data.value=d
     }
 })
 </script>
