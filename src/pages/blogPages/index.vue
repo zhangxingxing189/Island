@@ -75,19 +75,21 @@ const route = useRoute();
 const isSelect = ref(true);
 const isSelectStore = useLayoutStore().isSelect;
 let islandName;
-let islandId = Array.isArray(route.params.id)
-  ? route.params.id[0]
-  : route.params.id;
-
+// let islandId = Array.isArray(route.params.islandId)
+//   ? route.params.islandId[0]
+//   : route.params.islandId;
+let islandId = route.query.islandId;
+console.log(route.params.islandId);
+console.log(islandId);
 if (!islandId) {
-  islandId = "11111111111111";
+  islandId = "2222222222";
   //默认值
 }
 
 const userStore = useUserStore();
 const login = async () => {
   if (!userStore.isLogin()) {
-    if (!userStore.loadUser()) {
+    if (!(await userStore.loadUser())) {
       await router.push("/login");
     }
   }
@@ -143,6 +145,7 @@ const handlePublishClick = () => {
 
 const navigateToPersonalCenter = () => {
   isSelect.value = true;
+  console.log(islandId);
   router.push({
     path: "/island/personalCenter",
     query: {
@@ -176,19 +179,19 @@ const handleQuizClick = async () => {
 //   login();
 // }
 const currentUser = userStore.currentUser;
-// console.log(currentUser);
-const getIslandName = async () => {
-  try {
-    const res = await getIslandDetail(islandId);
-    islandName = res?.name;
-  } catch (err) {
-    console.log(err);
-  }
-};
-onMounted(() => {
-  // getIslandName();
-  // console.log(islandName);
-});
+// // console.log(currentUser);
+// const getIslandName = async () => {
+//   try {
+//     const res = await getIslandDetail(islandId);
+//     islandName = res?.name;
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
+// onMounted(() => {
+//   // getIslandName();
+//   // console.log(islandName);
+// });
 </script>
 
 <style scoped>

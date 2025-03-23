@@ -91,22 +91,21 @@ onMounted(async () => {
   // console.log(islandStore.islandData);
   const resImages = {
     tiles: {
-      id: "1901154962285531136",
+      id: "1903746578976346112",
       wedPath:
-        // "http://118.31.119.216:8080/uploads/ae470b42fe2e49655227fc11303e95e1.png",
         "http://118.31.119.216:8080/uploads/f84d510985fcbfc72942a93ac99452c3.png",
     },
   };
   const uiMap = {
     login: {
-      id: "1900932951768567808",
+      id: "1903746834774364160",
       wedPath: userStore.currentUser.avatar
         ? userStore.currentUser.avatar
         : "http://118.31.119.216:8080/uploads/9d021d52cb27c6db74d4fc845cce98ea.png",
       // ,
     },
     map: {
-      id: "1900933298763337728",
+      id: "1903751006844358656",
       wedPath:
         "http://118.31.119.216:8080/uploads/1705121ad471817d0ac2002626f7c0ba.png",
     },
