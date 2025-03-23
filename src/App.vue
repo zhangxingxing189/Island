@@ -62,7 +62,7 @@ const useUser = useUserStore();
 <template>
   <div id="app">
     <router-view :key="$route.fullPath" />
-    <AiChat></AiChat>
+    <AiChat v-if="useUser.isLogin()"></AiChat>
     <chat v-if="useUser.isLogin()" />
   </div>
 </template>

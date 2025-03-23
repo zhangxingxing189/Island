@@ -22,8 +22,8 @@
           <div class="island-info">
             <h3 class="island-name">{{ island.name }}</h3>
             <div class="coordinates">
-              <span>X: {{ island.x }}</span>
-              <span>Y: {{ island.y }}</span>
+              <span>X: {{ island.xPoint }}</span>
+              <span>Y: {{ island.yPoint }}</span>
             </div>
           </div>
 
@@ -66,7 +66,7 @@
         <!-- 图片上传 -->
         <a-form-item
           label="岛屿图片"
-          name="imageUrl"
+          name="path"
           :rules="[{ required: true, message: '请上传图片' }]"
         >
           <a-upload
@@ -76,12 +76,8 @@
             :before-upload="beforeUpload"
           >
             <div class="upload-area">
-              <div v-if="editForm.imageUrl" class="preview-container">
-                <img
-                  :src="editForm.imageUrl"
-                  alt="preview"
-                  class="preview-image"
-                />
+              <div v-if="editForm.path" class="preview-container">
+                <img :src="editForm.path" alt="preview" class="preview-image" />
                 <div class="reupload-mask">
                   <span>重新上传</span>
                 </div>
@@ -97,24 +93,24 @@
         <!-- 岛屿名称 -->
         <a-form-item
           label="岛屿名称"
-          name="islandName"
+          name="name"
           :rules="[{ required: true, message: '请输入岛屿名称' }]"
         >
-          <a-input v-model:value="editForm.islandName" />
+          <a-input v-model:value="editForm.name" />
         </a-form-item>
 
         <!-- 尺寸显示（只读） -->
         <div class="dimension-inputs">
           <a-form-item label="图片宽度">
             <a-input-number
-              v-model:value="editForm.imageWidth"
+              v-model:value="editForm.width"
               :disabled="true"
               class="coordinate-input"
             />
           </a-form-item>
           <a-form-item label="图片高度">
             <a-input-number
-              v-model:value="editForm.imageHeight"
+              v-model:value="editForm.height"
               :disabled="true"
               class="coordinate-input"
             />
@@ -125,27 +121,27 @@
         <div class="coordinate-inputs">
           <a-form-item
             label="X坐标"
-            name="x"
+            name="xPoint"
             :rules="[
               { required: true, message: '请输入X坐标' },
               { type: 'number', message: '必须为数字' },
             ]"
           >
             <a-input-number
-              v-model:value="editForm.x"
+              v-model:value="editForm.xPoint"
               class="coordinate-input"
             />
           </a-form-item>
           <a-form-item
             label="Y坐标"
-            name="y"
+            name="yPoint"
             :rules="[
               { required: true, message: '请输入Y坐标' },
               { type: 'number', message: '必须为数字' },
             ]"
           >
             <a-input-number
-              v-model:value="editForm.y"
+              v-model:value="editForm.yPoint"
               class="coordinate-input"
             />
           </a-form-item>
@@ -176,8 +172,10 @@ import { getIslands, delIsland } from "@/api/islandApi";
 import { message, UploadProps } from "ant-design-vue";
 import { post_image } from "@/api/image";
 
+import { List } from "@/api/islandApi";
+
 // 响应式数据
-const islands = ref<islandType[]>([]);
+const islands = ref<List[]>([]);
 const loading = ref(true);
 const error = ref("");
 const deletingId = ref<string | null>(null);
@@ -195,9 +193,9 @@ const loadIslands = async () => {
 };
 
 // 图片尺寸样式
-const imageStyle = (island: islandType) => ({
-  width: `${island.imageWidth}px`,
-  height: `${island.imageHeight}px`,
+const imageStyle = (island: List) => ({
+  width: `${island.width}px`,
+  height: `${island.height}px`,
 });
 
 // 修改后的 deleteIsland 函数
@@ -212,6 +210,7 @@ const deleteIsland = async (id: string) => {
       content: `删除成功`,
       duration: 3, // 3秒后自动关闭
     });
+    window.location.reload();
   } catch (err) {
     // ❌ 删除失败时保留卡片
     message.error({
@@ -232,14 +231,15 @@ onMounted(() => {
 // 修改后的脚本部分
 const showEditForm = ref(false);
 const isSubmitting = ref(false);
-const editForm = reactive<Island>({
+const editForm = reactive<List>({
   id: "",
-  imageUrl: "",
-  islandName: "",
-  imageWidth: 0,
-  imageHeight: 0,
-  x: 0,
-  y: 0,
+  path: "",
+  name: "",
+  width: 0,
+  height: 0,
+  xPoint: 0,
+  yPoint: 0,
+  userid: 0,
 });
 
 // 图片上传处理（复用创建逻辑稍作修改）
@@ -255,14 +255,14 @@ const handleEditUpload: UploadProps["customRequest"] = async ({ file }) => {
 
       await new Promise((resolve, reject) => {
         img.onload = () => {
-          editForm.imageWidth = img.naturalWidth;
-          editForm.imageHeight = img.naturalHeight;
+          editForm.width = img.naturalWidth;
+          editForm.height = img.naturalHeight;
           resolve(true);
         };
         img.onerror = reject;
       });
 
-      editForm.imageUrl = response.data;
+      editForm.path = response.data;
       message.success("图片更新成功");
     }
   } catch (error) {
@@ -271,15 +271,15 @@ const handleEditUpload: UploadProps["customRequest"] = async ({ file }) => {
 };
 
 // 打开编辑表单时初始化数据
-const openEditForm = (island: islandType) => {
+const openEditForm = (island: List) => {
   Object.assign(editForm, {
     id: island.id,
-    imageUrl: island.path,
-    islandName: island.name,
-    imageWidth: island.imageWidth,
-    imageHeight: island.imageHeight,
-    x: island.x,
-    y: island.y,
+    path: island.path,
+    name: island.name,
+    width: island.width,
+    height: island.height,
+    xPoint: island.xPoint,
+    yPoint: island.yPoint,
   });
   showEditForm.value = true;
 };
@@ -296,12 +296,13 @@ const submitEdit = async () => {
       islands.value[index] = {
         ...islands.value[index],
         ...editForm,
-        path: editForm.imageUrl,
-        name: editForm.islandName,
+        path: editForm.path,
+        name: editForm.name,
       };
     }
     message.success("修改成功");
     showEditForm.value = false;
+    window.location.reload();
   } catch (error) {
     message.error(`修改失败:${error.message}`);
   } finally {

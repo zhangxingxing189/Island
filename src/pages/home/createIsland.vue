@@ -218,6 +218,7 @@ const handleSubmit = async () => {
       x: undefined,
       y: undefined,
     });
+    window.location.reload();
   } catch (error) {
     message.error("岛屿创建失败");
     console.error("Create island error:", error);

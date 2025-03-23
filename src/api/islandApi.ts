@@ -123,9 +123,10 @@ export async function delIsland(id: string) {
 export async function getIslands() {
   const res = await useAxios.get("/api/island", { params: { limit: 99 } });
   console.log(res.data);
+
   return res.data.list;
 }
-export async function putIsland(island: Island) {
+export async function putIsland(island: List) {
   return await useAxios.put("/api/island", JSON.stringify(island));
 }
 export async function getIslandDetail(id: string) {

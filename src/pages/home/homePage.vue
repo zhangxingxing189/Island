@@ -268,13 +268,13 @@ onMounted(async () => {
       );
       // 延迟路由跳转避免物理引擎冲突
       console.log("碰撞");
-      // router.push({
-      //   path: "/island/",
-      //   query: {
-      //     islandId: islandGroup.getData("id"),
-      //     form: "home",
-      //   },
-      // });
+      router.push({
+        path: "/island/",
+        query: {
+          islandId: islandGroup.getData("id"),
+          form: "home",
+        },
+      });
     }
     create() {
       // 初始化地图
