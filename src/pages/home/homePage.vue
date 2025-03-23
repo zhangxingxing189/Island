@@ -65,7 +65,18 @@ const preLoad = async () => {
   }
 };
 
-function intoIsland(islandId: string) {
+function intoIsland(islandId: string, islandName: string) {
+  console.log("click");
+  localStorage.setItem(
+    "data",
+    JSON.stringify({
+      user: userStore.currentUser,
+      island: {
+        id: islandId,
+        name: islandName,
+      },
+    })
+  );
   router.push({
     path: "/island/",
     query: {
@@ -184,6 +195,7 @@ onMounted(async () => {
         if (!this.Islands.islandMsg[key].imageUrl) {
           continue;
         }
+
         console.log(this.Islands.islandMsg[key]);
         this.load.image(
           this.Islands.islandMsg[key].islandName,
@@ -255,13 +267,14 @@ onMounted(async () => {
         })
       );
       // 延迟路由跳转避免物理引擎冲突
-      router.push({
-        path: "/island/",
-        query: {
-          islandId: islandGroup.getData("id"),
-          form: "home",
-        },
-      });
+      console.log("碰撞");
+      // router.push({
+      //   path: "/island/",
+      //   query: {
+      //     islandId: islandGroup.getData("id"),
+      //     form: "home",
+      //   },
+      // });
     }
     create() {
       // 初始化地图
@@ -310,7 +323,7 @@ onMounted(async () => {
         islandStatic.setData("name", island.islandName);
         islandStatic.setDepth(20);
         islandStatic.on("pointerdown", () => {
-          intoIsland(key);
+          intoIsland(key, island.islandName);
         });
         // islandStatic.body?.setSize(island.imageWidth, island.imageHeight, true);
         // 设置碰撞体（仅下半部分）
@@ -672,6 +685,8 @@ onMounted(async () => {
         frameRate: 1,
       });
       // this.player.body!.collideWorldBounds = true;
+      // this.player.body.x(900);
+      // this.player.body.y(900);
     }
 
     async createUILayer() {

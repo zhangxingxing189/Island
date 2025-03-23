@@ -5,6 +5,7 @@ import { useIslandStore } from "@/stores/getIslands";
 import { User, useUserStore } from "@/stores/user";
 import { post_QQCode } from "@/api/loginApi";
 import router from "@/router";
+import chat from "@/components/chat.vue";
 console.log("here");
 
 onMounted(async () => {
@@ -56,11 +57,13 @@ onMounted(async () => {
 // }
 
 import AiChat from "@/components/aiChat.vue";
+const useUser = useUserStore();
 </script>
 <template>
   <div id="app">
     <router-view :key="$route.fullPath" />
     <AiChat></AiChat>
+    <chat v-if="useUser.isLogin()" />
   </div>
 </template>
 

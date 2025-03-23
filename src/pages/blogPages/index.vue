@@ -62,19 +62,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import { useDebounceFn } from "@vueuse/core";
 import { useLayoutStore } from "@/stores/layoutStore";
+import { getIslandDetail } from "@/api/islandApi";
 
 const router = useRouter();
 const route = useRoute();
 
 const isSelect = ref(true);
 const isSelectStore = useLayoutStore().isSelect;
+let islandName;
+let islandId = Array.isArray(route.params.id)
+  ? route.params.id[0]
+  : route.params.id;
 
-let islandId = route.query.islandId;
 if (!islandId) {
   islandId = "11111111111111";
   //默认值
@@ -120,7 +124,12 @@ const goHome = () => {
   });
 };
 const goWorld = () => {
-  router.push("/");
+  router.push({
+    path: "/",
+    query: {
+      islandId: islandId,
+    },
+  });
 };
 const handlePublishClick = () => {
   isSelect.value = true;
@@ -168,6 +177,18 @@ const handleQuizClick = async () => {
 // }
 const currentUser = userStore.currentUser;
 // console.log(currentUser);
+const getIslandName = async () => {
+  try {
+    const res = await getIslandDetail(islandId);
+    islandName = res?.name;
+  } catch (err) {
+    console.log(err);
+  }
+};
+onMounted(() => {
+  // getIslandName();
+  // console.log(islandName);
+});
 </script>
 
 <style scoped>

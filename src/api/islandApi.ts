@@ -128,3 +128,7 @@ export async function getIslands() {
 export async function putIsland(island: Island) {
   return await useAxios.put("/api/island", JSON.stringify(island));
 }
+export async function getIslandDetail(id: string) {
+  const res = await useAxios.get("/api/island/detail", { params: { id: id } });
+  return res.data;
+}
