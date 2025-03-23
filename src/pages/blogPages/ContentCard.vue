@@ -109,7 +109,7 @@ const handleCollect = async () => {
     // 回滚状态
     isCollected.value = originalStatus;
     localCollectCount.value = originalCount;
-    ElMessage.error('收藏操作失败');
+    console.error('收藏操作失败');
   }
 };
 

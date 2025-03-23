@@ -17,6 +17,13 @@
           <!-- 关注内容 -->
           <template v-if="activeTab === 'follow'">
             <h3 class="section-title">关注动态</h3>
+            <div v-if="followLoading" class="loading-container">
+              <el-icon class="is-loading">
+                <Loading />
+              </el-icon>
+              正在加载关注内容...
+            </div>
+            <template v-else>
             <content-card
               v-for="item in followList"
               :key="item.id"
@@ -26,6 +33,7 @@
             <div v-if="!followList.length" class="empty">
               暂无关注内容，快去关注你感兴趣的作者吧！
             </div>
+            </template>
             <!--            <div v-if="activeTab === 'follow'" class="pagination-container">
               <a-pagination
                   v-model:current="pagination.page"
@@ -299,9 +307,48 @@ const tabs = [
   { id: "hot", title: "热榜" },
 ];
 const activeTab = ref("recommend");
+watch(activeTab, (newVal) => {
+  switch (newVal) {
+    case 'follow':
+      followList.value = []
+      loadFollowArticles()
+      break
+    case 'recommend':
+      recommendList.value = []
+      recommendPagination.page = 1
+      recommendPagination.finished = false
+      loadRecommendArticles()
+      break
+    case 'hot':
+      hotList.value = []
+      loadHotArticles()
+      break
+  }
+})
 </script>
 
 <style scoped>
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+}
+
+.is-loading {
+  margin-right: 8px;
+  animation: rotating 2s linear infinite;
+}
+
+@keyframes rotating {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
 .zhihu-container {
   --primary-color: #0084ff;
   --text-primary: #1a1a1a;
