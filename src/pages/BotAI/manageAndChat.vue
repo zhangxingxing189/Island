@@ -38,7 +38,7 @@
         <div>
           <div class="user-avatar">
             <img
-              src="https://cloud.dify.ai/logo/logo-site.png"
+              :src="useUser?.currentUser?.avatar"
               alt="用户头像"
               class="avatar-img"
             />
@@ -152,8 +152,10 @@ import { useRouter, useRoute } from "vue-router";
 const router = useRouter();
 const route = useRoute();
 import { useBotStore } from "@/stores/botStore";
+import { useUserStore } from "@/stores/user";
 const botStore = useBotStore();
 
+const useUser = useUserStore();
 // 2. 点击事件处理
 const handleClick = () => {
   console.log("图标被点击");
