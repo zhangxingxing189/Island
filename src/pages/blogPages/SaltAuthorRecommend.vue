@@ -148,21 +148,17 @@ const mdEditor = ref();
 // 替换原有的handleEditorImageUpload方法
 const handleImgAdd = async (pos: number, file: File) => {
   try {
-    // 显示临时本地预览
-    const blobUrl = URL.createObjectURL(file);
-    mdEditor.value.$img2Url(pos, blobUrl); // 先显示本地预览
-
-    // 异步上传到服务器
-    const { data } = await uploadImage(file);
+    const  data  = await uploadImage(file);
     console.log(data);
     // 用服务器URL替换临时URL
-    mdEditor.value.$img2Url(pos, data.url);
+    mdEditor.value.$img2Url(pos, data.data);
     console.log(pos);
   } catch (error) {
     console.error("图片上传失败:", error);
     message.error("图片上传失败");
     // 上传失败时移除临时图片
     mdEditor.value.$imgDel(pos);
+
   }
 };
 // 提交方法
