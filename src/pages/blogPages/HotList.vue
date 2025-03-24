@@ -21,8 +21,11 @@
           rel="noopener noreferrer"
         >
           <router-link
-              :to="`/island/article/${item.contentItemID}`"
-              class="title"
+            :to="{
+              path: `/island/article/${item.contentItemID}`,
+              query: { islandId: islandId },
+            }"
+            class="title"
           >
             {{ item.title }}
           </router-link>
@@ -38,6 +41,9 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { HotItem } from "@/pages/blogPages/blogInterface";
+import { useRoute } from "vue-router";
+const route = useRoute();
+let islandId = route.query.islandId;
 
 const props = defineProps<{
   items: HotItem[];

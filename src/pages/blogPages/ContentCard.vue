@@ -6,27 +6,27 @@
     <div class="content">
       <h3 class="title">{{ data.title }}</h3>
       <div class="meta">
-        <div class="brief">{{ data.abstract || '暂无简介' }}</div>
+        <div class="brief">{{ data.abstract || "暂无简介" }}</div>
       </div>
       <div class="stats">
         <button
-            class="like-btn"
-            :class="{ 'has-digged': isLiked }"
-            @click.stop="handleLike"
+          class="like-btn"
+          :class="{ 'has-digged': isLiked }"
+          @click.stop="handleLike"
         >
           <i class="iconfont icon-dianzan"></i> {{ localDiggCount }}
         </button>
         <button
-            class="collect-btn"
-            :class="{ 'has-collected': isCollected }"
-        @click.stop="handleCollect"
+          class="collect-btn"
+          :class="{ 'has-collected': isCollected }"
+          @click.stop="handleCollect"
         >
-        <i class="iconfont icon-shoucang"></i> {{ localCollectCount }}
+          <i class="iconfont icon-shoucang"></i> {{ localCollectCount }}
         </button>
         <span class="comments">
-<!--          <i class="icon-comment"></i> 浏览:{{ data.comments }}-->
+          <!--          <i class="icon-comment"></i> 浏览:{{ data.comments }}-->
           <span class="author">作者: {{ data.author }}</span>
-        <span class="time">{{ data.timestamp }}</span>
+          <span class="time">{{ data.timestamp }}</span>
         </span>
       </div>
     </div>
@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import {defineProps, onMounted, ref} from "vue";
+import { defineProps, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { ContentItem } from "@/pages/blogPages/blogInterface";
 import {
@@ -42,10 +42,14 @@ import {
   diggArticle,
   getArticleDetail,
   getOwnerCollectArticles,
-  getOwnerDiggArticles
+  getOwnerDiggArticles,
 } from "@/api/articleApi";
-import {ElMessage} from "element-plus";
-import {compileString} from "sass";
+import { ElMessage } from "element-plus";
+import { compileString } from "sass";
+import { useRoute } from "vue-router";
+const route = useRoute();
+let islandId = route.query.islandId;
+
 const props = defineProps<{
   data: ContentItem;
 }>();
@@ -53,19 +57,23 @@ const emit = defineEmits(["like"]);
 
 const router = useRouter();
 const handleClick = () => {
-  router.push(`/island/article/${props.data.id}`);
-}
+  router.push({
+    path: `/island/article/${props.data.id}`,
+    query: {
+      islandId: islandId,
+    },
+  });
+};
 
 //收藏
 
 const isCollected = ref(false);
 const collectedIds = ref<Set<string>>(new Set());
 const localCollectCount = ref(
-    typeof props.data.collect_count === 'number'
-        ? props.data.collect_count
-        : Number(props.data.collect_count) || 0
+  typeof props.data.collect_count === "number"
+    ? props.data.collect_count
+    : Number(props.data.collect_count) || 0
 );
-
 
 const loadCollectStatus = async () => {
   try {
@@ -74,23 +82,22 @@ const loadCollectStatus = async () => {
 
     while (true) {
       const { data } = await getOwnerCollectArticles({ page });
-      data.list.forEach(item => {
+      data.list.forEach((item) => {
         collectedIds.value.add(item.id);
-        if(item.id === props.data.id) {
+        if (item.id === props.data.id) {
           localCollectCount.value = item.collect_count;
         }
       });
 
-      if(data.list.length < 10) break;
+      if (data.list.length < 10) break;
       page++;
     }
 
     isCollected.value = collectedIds.value.has(props.data.id);
   } catch (error) {
-    console.error('加载收藏状态失败:', error);
+    console.error("加载收藏状态失败:", error);
   }
 };
-
 
 const handleCollect = async () => {
   const originalStatus = isCollected.value;
@@ -109,13 +116,12 @@ const handleCollect = async () => {
     // 回滚状态
     isCollected.value = originalStatus;
     localCollectCount.value = originalCount;
-    console.error('收藏操作失败');
+    console.error("收藏操作失败");
   }
 };
 
-
 const localDiggCount = ref(props.data.likes);
-const isLiked = ref(false);  // 新增点赞状态
+const isLiked = ref(false); // 新增点赞状态
 
 // 获取所有点赞文章
 const loadLikeStatus = async () => {
@@ -126,13 +132,13 @@ const loadLikeStatus = async () => {
       const { data } = await getOwnerDiggArticles({
         page,
       });
-      data.list.forEach(item => tempIds.add(item.id));
-      if(data.list.length < 10) break;
+      data.list.forEach((item) => tempIds.add(item.id));
+      if (data.list.length < 10) break;
       page++;
     }
     isLiked.value = tempIds.has(props.data.id);
   } catch (error) {
-    console.error('加载失败:', error);
+    console.error("加载失败:", error);
   }
 };
 
@@ -154,7 +160,7 @@ const handleLike = async () => {
     // 回滚状态
     isLiked.value = originalStatus;
     localDiggCount.value = props.data.likes;
-    console.error('操作失败');
+    console.error("操作失败");
   }
   emit("like");
 };
@@ -166,7 +172,6 @@ onMounted(() => {
 });
 </script>
 <style scoped>
-
 .like-btn {
   color: #8590a6;
   background: none;
@@ -239,7 +244,6 @@ onMounted(() => {
     display: flex;
     align-items: center;
     gap: 16px;
-
 
     .comments {
       color: #8590a6;
