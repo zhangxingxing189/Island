@@ -158,7 +158,6 @@ const handleImgAdd = async (pos: number, file: File) => {
     message.error("图片上传失败");
     // 上传失败时移除临时图片
     mdEditor.value.$imgDel(pos);
-
   }
 };
 // 提交方法
