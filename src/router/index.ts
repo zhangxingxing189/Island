@@ -23,6 +23,7 @@ const routes: Array<RouteRecordRaw> = [
       // 添加默认重定向
       {
         path: "",
+        name: "islandIndex",
         redirect: { name: "mainContent" },
       },
       {

@@ -65,6 +65,7 @@
       <show-island></show-island>
     </div>
   </div>
+  <chat />
 </template>
 
 <script setup lang="ts">
@@ -79,6 +80,7 @@ import { getFollowList } from "@/api/focusApi";
 import ShowIsland from "@/pages/blogPages/showIsland.vue";
 import { getIslands } from "@/api/islandApi";
 import { get_island } from "@/api/questionApi";
+import chat from "@/components/chat_xsg.vue";
 
 // 内容数据
 const followList = ref<ContentItem[]>([]);
@@ -257,6 +259,7 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener("scroll", onScroll);
 });
+
 //热点
 const loadHotArticles = async () => {
   try {

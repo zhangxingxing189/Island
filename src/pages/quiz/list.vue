@@ -47,6 +47,7 @@
       </div>
     </main>
   </div>
+  <chat />
 </template>
 
 <script lang="ts" setup>
@@ -55,6 +56,8 @@ import Head from "@/pages/blogPages/index.vue";
 import {useRoute} from "vue-router";
 import {get_island, get_question_bank_list} from "@/api/questionApi";
 import router from "@/router";
+import {get_messages} from "@/api/chat";
+import chat from "@/components/chat_xsg.vue";
 
 const route = useRoute()
 
@@ -70,7 +73,10 @@ onMounted(async () => {
   }
 });
 
-
+onMounted(async () => {
+  const data = await get_messages({island_id: "0", timestamp: 0})
+  console.log('Received messages:', data)
+})
 
 let questionBanks = ref([{
   question_bank_id: 0,
