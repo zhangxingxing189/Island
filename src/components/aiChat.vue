@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, nextTick, onMounted, onUnmounted } from "vue";
+import { nextTick, onMounted, onUnmounted, ref } from "vue";
 import { CloseOutlined } from "@ant-design/icons-vue";
-import { useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user";
+
 interface Message {
   id: number;
   content: string;
@@ -52,8 +52,10 @@ const saveHistory = () => {
     }
   }
 };
-
+// 新增全局缓冲区
+let buffer = "";
 // 流式响应处理
+// 修改后的流式响应处理
 const handleStreamResponse = (question: string) => {
   return new Promise<void>((resolve) => {
     const tempMessage: Message = {
@@ -63,10 +65,13 @@ const handleStreamResponse = (question: string) => {
       timestamp: Date.now(),
       streaming: true,
     };
+
+    // 使用响应式方式更新历史记录
     history.value = [...history.value, tempMessage];
 
-    // 使用fetch代替EventSource以支持自定义header
     const controller = new AbortController();
+    let buffer = "";
+
     fetch(
       `${API_URL}?content=${encodeURIComponent(question)}&type=${
         modelType.value
@@ -78,53 +83,94 @@ const handleStreamResponse = (question: string) => {
         },
         signal: controller.signal,
       }
-    )
-      .then((response) => {
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder();
+    ).then((response) => {
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder("utf-8");
 
-        const readChunk = async () => {
+      const processChunk = async () => {
+        try {
           while (true) {
             const { done, value } = await reader!.read();
             if (done) {
-              controller.abort();
+              // 处理最后残留数据
+              handleRemainingData();
               resolve();
               return;
             }
 
-            const chunk = decoder.decode(value);
-            // const result = await JSON.parse(jsonStr);
-            // console.log(jsonStr);
-            history.value = history.value.map((msg) => {
-              if (msg.id === tempMessage.id) {
-                return { ...msg, content: msg.content + chunk };
-              }
-              return msg;
-            });
-            scrollToBottom();
-          }
-        };
-        readChunk();
-      })
-      .catch((error) => {
-        console.error("请求失败:", error);
-        history.value = history.value.map((msg) => {
-          if (msg.id === tempMessage.id) {
-            return {
-              ...msg,
-              content: "请求失败: " + error.message,
-              streaming: false,
-            };
-          }
-          return msg;
-        });
-        resolve();
-      });
+            // 增强解码处理
+            buffer += decoder.decode(value, { stream: true });
 
-    sseEventSource.value = controller; // 保存控制器以便后续操作
+            // 改进事件分割逻辑
+            const eventParts = buffer.split(/(?<=})\n\ndata:/);
+            if (eventParts.length > 1) {
+              buffer = eventParts.pop() || "";
+
+              eventParts.forEach((rawEvent) => {
+                const event = rawEvent.startsWith("data:")
+                  ? rawEvent
+                  : `data:${rawEvent}`;
+                processEvent(event);
+              });
+            }
+          }
+        } catch (err) {
+          console.error("流处理异常:", err);
+          updateMessageStatus(false);
+        }
+      };
+
+      processChunk();
+    });
+
+    sseEventSource.value = controller;
   });
 };
+// 增强的状态更新方法
+const updateMessageContent = (newContent: string) => {
+  const lastMessage = history.value[history.value.length - 1];
+  if (lastMessage?.streaming) {
+    lastMessage.content += newContent;
+    // 触发响应式更新
+    history.value = [...history.value];
+    nextTick(scrollToBottom);
+  }
+};
+// 优化事件处理逻辑
+const processEvent = (rawEvent: string) => {
+  try {
+    // 清除事件前缀和空格
+    const jsonStr = rawEvent.replace(/^data:\s*/, "").trim();
 
+    if (!jsonStr) return;
+
+    const jsonData = JSON.parse(jsonStr);
+
+    // 严格校验数据结构
+    if (jsonData?.code === 20000 && typeof jsonData.data === "string") {
+      updateMessageContent(jsonData.data);
+    }
+  } catch (err) {
+    console.warn("事件解析失败:", rawEvent);
+  }
+};
+// 修改后的残留数据处理
+const handleRemainingData = () => {
+  if (buffer) {
+    // 处理可能的多余事件分隔符
+    const events = buffer.split(/\n\n/).filter((e) => e);
+    events.forEach((event) => processEvent(event));
+    buffer = "";
+  }
+};
+// 添加状态重置方法
+const updateMessageStatus = (isStreaming: boolean) => {
+  const lastMessage = history.value[history.value.length - 1];
+  if (lastMessage) {
+    lastMessage.streaming = isStreaming;
+    history.value = [...history.value];
+  }
+};
 // 提交处理（修改后）
 const handleSubmit = async () => {
   if (!value.value.trim() || history.value.some((m) => m.streaming)) return; //非空和非忙
