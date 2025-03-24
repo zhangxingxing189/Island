@@ -246,7 +246,7 @@ const startPKMatch = async () => {
 
     // 匹配成功处理...
     // 跳转
-    await router.push({path: "/quiz/pk-room/" + response.data.room_id});
+    await router.push({path: "/quiz/pk-room/" + response.data.room_id, query: {id: route.params.id}});
 
   } catch (error) {
     if (axios.isCancel(error)) {

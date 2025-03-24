@@ -329,6 +329,7 @@ import {get_pk_info, get_user_info , pk_submit} from "@/api/pkApi";
 import JSONbig from 'json-bigint';
 import {get_question} from "@/api/questionApi";
 import { mavonEditor } from 'mavon-editor'
+import router from "@/router";
 
 const showRules = ref(false);
 
@@ -694,6 +695,12 @@ const getTypeName = (type: number) => {
       return "未知";
   }
 }
+
+const handleBack = async () => {
+  // 跳转到题库列表
+  await router.push({path: "/quiz/question-bank/" + String(route.query.id)});
+}
+
 </script>
 
 <style scoped>
