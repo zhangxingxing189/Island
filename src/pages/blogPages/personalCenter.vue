@@ -7,7 +7,7 @@
           <!--        <div class="cover-upload">点击上传封面</div>-->
           <img
             class="adaptive-image"
-            src="https://api.yimian.xyz/img"
+            src="http://118.31.119.216:8080/uploads/ba3f3138bb3d09039baffbd2dc8bab0c.jpeg"
             alt="点击上传封面"
           />
         </div>
@@ -699,11 +699,10 @@ onMounted(() => {
 }
 
 .personal-homepage {
-  height: 100%;
+  min-height: 100%;
   overflow-y: auto;
   max-width: 1200px;
   margin: 20px auto;
-  //background: var(--bg-color);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
 }
 

@@ -148,7 +148,7 @@ const mdEditor = ref();
 // 替换原有的handleEditorImageUpload方法
 const handleImgAdd = async (pos: number, file: File) => {
   try {
-    const  data  = await uploadImage(file);
+    const data = await uploadImage(file);
     console.log(data);
     // 用服务器URL替换临时URL
     mdEditor.value.$img2Url(pos, data.data);
@@ -168,6 +168,7 @@ const handleSubmit = async () => {
       const { data } = await uploadImage(coverFile.value);
       formData.value.cover = data; // 替换为服务器URL
       await new Promise((resolve) => setTimeout(resolve, 1000));
+      message.success("图片上传成功");
     }
     const res = await createArticle({
       title: formData.value.title,

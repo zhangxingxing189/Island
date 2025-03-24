@@ -321,9 +321,9 @@ onMounted(async () => {
         islandStatic.setData("id", key);
         islandStatic.setData("name", island.islandName);
         islandStatic.setDepth(20);
-        islandStatic.on("pointerdown", () => {
-          intoIsland(key, island.islandName);
-        });
+        // islandStatic.on("pointerdown", () => {
+        //   intoIsland(key, island.islandName);
+        // });
         // islandStatic.body?.setSize(island.imageWidth, island.imageHeight, true);
         // 设置碰撞体（仅下半部分）
         islandStatic.body

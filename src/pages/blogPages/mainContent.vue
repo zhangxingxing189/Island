@@ -147,7 +147,9 @@ const loadFollowArticles = async () => {
           title: item.title,
           content: item.content,
           abstract: item.abstract,
-          cover: item.cover || "https://api.yimian.xyz/img",
+          cover:
+            item.cover ||
+            "http://118.31.119.216:8080/uploads/ba3f3138bb3d09039baffbd2dc8bab0c.jpeg",
           likes: Number(item.digg_count),
           comments: Number(item.collect_count),
           author: item.username,
@@ -312,7 +314,7 @@ const tabs = [
   { id: "recommend", title: "推荐" },
   { id: "hot", title: "热榜" },
 ];
-const activeTab = ref("recommend");
+const activeTab = ref("hot");
 watch(activeTab, (newVal) => {
   switch (newVal) {
     case "follow":

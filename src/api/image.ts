@@ -1,5 +1,8 @@
 import { useAxios } from "@/api/index";
+import { message } from "ant-design-vue";
 
-export function post_image(formData: FormData) {
-  return useAxios.post("/api/common/images", formData);
+export async function post_image(formData: FormData) {
+  const res = await useAxios.post("/api/common/images", formData);
+  message.success("图片上传成功");
+  return res;
 }
