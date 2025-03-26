@@ -384,17 +384,19 @@ onBeforeUnmount(() => {
 }
 
 .main-content {
+  margin-right: 5px;
   padding: 24px;
   background: #ffffff;
-  box-shadow: inset 1px 0 2px rgba(0, 0, 0, 0.05);
+  box-shadow: 2px 0 4px 4px rgba(0, 0, 0, 0.15);
 }
 
 .var-sider {
+  margin-left: 20px;
+  background-color: white;
   max-width: 100%;
   min-width: 100%;
   width: 600px;
-  margin-left: auto;
-  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 2px 0 4px 4px rgba(0, 0, 0, 0.15);
 
   .var-panel {
     padding: 16px;
@@ -408,7 +410,7 @@ onBeforeUnmount(() => {
   min-height: 500px;
   border-radius: 8px;
   background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 2px 0 4px 4px rgba(0, 0, 0, 0.15);
 }
 
 .nav-icon-btn {
