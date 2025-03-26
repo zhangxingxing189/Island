@@ -52,48 +52,48 @@
     </a-layout-sider>
 
     <!-- 主内容区 -->
-    <a-layout-content class="main-content">
+    <a-layout-content class="bot-ai-main-content">
       <div v-if="activeTab === 'chat'" class="chat-container">
         <iframe
-          src="http://dify.islandlearning.icu:40800/chatbot/sufcrmIuHGSq49Bw"
+          src="http://dify.islandlearning.icu:40800/chat/oJJN4gtC9EnVJdbe"
           class="chat-iframe"
           allow="microphone"
         />
 
         <!-- 右侧变量设置区 -->
-        <a-layout-sider
-          class="var-sider"
-          collapsible
-          v-model:collapsed="showVariables"
-          :trigger="null"
-        >
-          <div class="var-panel">
-            <a-card title="会话变量设置" :bordered="false">
-              <a-form :model="variablesForm" layout="vertical">
-                <a-form-item label="输入变量 (JSON格式)">
-                  <a-textarea
-                    v-model:value="variablesForm.jsonInput"
-                    :rows="24"
-                    placeholder='示例: {"name": "John", "age": 30}'
-                    class="code-input"
-                  />
-                </a-form-item>
+        <!--        <a-layout-sider-->
+        <!--          class="bot-ai-var-sider"-->
+        <!--          collapsible-->
+        <!--          v-model:collapsed="showVariables"-->
+        <!--          :trigger="null"-->
+        <!--        >-->
+        <!--          <div class="bot-ai-var-panel">-->
+        <!--            <a-card title="会话变量设置" :bordered="false">-->
+        <!--              <a-form :model="variablesForm" layout="vertical">-->
+        <!--                <a-form-item label="输入变量 (JSON格式)">-->
+        <!--                  <a-textarea-->
+        <!--                    v-model:value="variablesForm.jsonInput"-->
+        <!--                    :rows="24"-->
+        <!--                    placeholder='示例: {"directoryRule": "xxxx", "teacherRule": "xxxx"}'-->
+        <!--                    class="code-input"-->
+        <!--                  />-->
+        <!--                </a-form-item>-->
 
-                <a-form-item>
-                  <a-button
-                    type="primary"
-                    @click="submitVariables"
-                    :loading="submitting"
-                    block
-                  >
-                    <template #icon></template>
-                    提交配置
-                  </a-button>
-                </a-form-item>
-              </a-form>
-            </a-card>
-          </div>
-        </a-layout-sider>
+        <!--                <a-form-item>-->
+        <!--                  <a-button-->
+        <!--                    type="primary"-->
+        <!--                    @click="submitVariables"-->
+        <!--                    :loading="submitting"-->
+        <!--                    block-->
+        <!--                  >-->
+        <!--                    <template #icon></template>-->
+        <!--                    提交配置-->
+        <!--                  </a-button>-->
+        <!--                </a-form-item>-->
+        <!--              </a-form>-->
+        <!--            </a-card>-->
+        <!--          </div>-->
+        <!--        </a-layout-sider>-->
       </div>
 
       <!-- 机器人参数设置区 -->
@@ -264,8 +264,8 @@ const configForm = reactive<ConfigForm>({
 const submitVariables = async () => {
   try {
     submitting.value = true;
-
     // 解析JSON输入
+    // console.log(inputs);
     const inputs = JSON.parse(variablesForm.jsonInput);
     const parsed = JSON.parse(variablesForm.jsonInput);
     sessionStore.updateVariables(currentSessionId.value, parsed);
@@ -363,9 +363,9 @@ onBeforeUnmount(() => {
 <style lang="less" scoped>
 .main-containerAI {
   height: 100vh;
-  background: #f0f2f5;
+  background: #ffffff;
   .ant-laout {
-    color: #f0f2f5;
+    color: #ffffff;
   }
 }
 
@@ -383,20 +383,20 @@ onBeforeUnmount(() => {
   }
 }
 
-.main-content {
+.bot-ai-main-content {
   padding: 24px;
   background: #ffffff;
   box-shadow: inset 1px 0 2px rgba(0, 0, 0, 0.05);
 }
 
-.var-sider {
+.bot-ai-var-sider {
   max-width: 100%;
   min-width: 100%;
   width: 600px;
   margin-left: auto;
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.05);
 
-  .var-panel {
+  .bot-ai-var-panel {
     padding: 16px;
     height: 100%;
   }
@@ -408,7 +408,8 @@ onBeforeUnmount(() => {
   min-height: 500px;
   border-radius: 8px;
   background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 5px 5px 10px 6px rgba(0, 0, 0, 0.18);
+  border-color: white;
 }
 
 .nav-icon-btn {
