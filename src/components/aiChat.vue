@@ -290,7 +290,6 @@ onUnmounted(() => {
 <style scoped>
 /* 使用嵌套CSS结构 */
 .fold {
-  z-index: 1;
   position: fixed;
   bottom: 5vh;
   right: 5vw;
