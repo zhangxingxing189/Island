@@ -64,8 +64,8 @@
                     alt="avatar"
                 />
               </div>
-              <div :class="msg.isSelf ? 'mr-2' : 'ml-2'">
-                <div class="text-xs text-gray-500 mb-1 text-right">{{ msg.user_name }}</div>
+              <div :class="msg.isSelf ? 'mr-2 flex flex-col items-end' : 'ml-2'">
+                <div class="text-xs text-gray-500 mb-1">{{ msg.user_name }}</div>
                 <div
                     :class="msg.isSelf ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800'"
                     class="px-4 py-2 rounded-lg max-w-[240px] break-words inline-block"
