@@ -272,6 +272,7 @@ onUnmounted(() => {
       <a-select
         v-model:value="modelType"
         class="model-select"
+        :getPopupContainer="(triggerNode) => triggerNode.parentNode"
         :options="modelOptions"
         :disabled="history.some((m) => m.streaming)"
       />
@@ -290,6 +291,7 @@ onUnmounted(() => {
 <style scoped>
 /* 使用嵌套CSS结构 */
 .fold {
+  z-index: 99990 !important;
   position: fixed;
   bottom: 5vh;
   right: 5vw;
@@ -469,10 +471,13 @@ onUnmounted(() => {
   align-items: flex-start;
 
   .model-select {
+    z-index: 99999 !important;
     width: 120px;
     flex-shrink: 0;
+    :deep(.ant-select-selector) {
+      z-index: 99999 !important;
+    }
   }
-
   .input {
     flex: 1;
     padding-right: 80px;

@@ -400,7 +400,7 @@ onBeforeUnmount(() => {
 
   .var-panel {
     padding: 16px;
-    height: 100%;
+    height: 80%;
   }
 }
 
