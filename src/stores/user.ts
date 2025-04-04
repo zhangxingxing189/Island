@@ -28,13 +28,11 @@ export const useUserStore = defineStore("user", {
       if (this.currentUser) {
         this.currentUser.atoken = atoken;
       }
-      this.setCurrentUser(this.currentUser);
     },
     setRtoken(rtoken: string) {
       if (this.currentUser) {
         this.currentUser.rtoken = rtoken;
       }
-      this.setCurrentUser(this.currentUser);
     },
     logout() {
       this.currentUser = null;

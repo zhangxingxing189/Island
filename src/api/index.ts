@@ -15,9 +15,8 @@ export interface baseResponse<T> {
   data: T;
   msg: string;
 }
-
+const userStores = useUserStore();
 useAxios.interceptors.request.use((config) => {
-  const userStores = useUserStore();
   if (!userStores.currentUser) {
     login();
     return config;
@@ -37,10 +36,20 @@ useAxios.interceptors.response.use(
     // Token 过期处理（兼容 HTTP 401 和业务错误码）
     if (shouldHandleTokenExpired(response)) {
       try {
-        return await handleTokenRefresh(originalRequest);
+        console.log("*******************************");
+        const res = await handleTokenRefresh();
+        console.log("-------------------------------");
+        if (res === false) {
+          await handleTokenExpired(); // 🔴 统一跳转处理
+          return Promise.reject(new Error("token过期,需要重新登陆"));
+        } else {
+          originalRequest.headers.Authorization = `${userStores.currentUser.atoken}`;
+          console.log("newAToken:" + userStores.currentUser.atoken);
+          return await useAxios.request(originalRequest);
+        }
       } catch (refreshError) {
         await handleTokenExpired(); // 🔴 统一跳转处理
-        // return Promise.reject(new Error("token过期,需要重新登陆"));
+        return Promise.reject(new Error("token过期,需要重新登陆"));
       }
     }
 
@@ -49,32 +58,17 @@ useAxios.interceptors.response.use(
     return Promise.reject(error);
   },
   async (error) => {
-    const { response, config: originalRequest } = error;
-
-    // Token 过期处理（兼容 HTTP 401 和业务错误码）
-    if (shouldHandleTokenExpired(response)) {
-      try {
-        return await handleTokenRefresh(originalRequest);
-      } catch (refreshError) {
-        await handleTokenExpired(); // 🔴 统一跳转处理
-        return Promise.reject(refreshError);
-      }
-    }
-
-    // 其他错误处理
     return Promise.reject(error);
   }
 );
 // Token 过期通用处理
 const handleTokenExpired = async () => {
-  const userStore = useUserStore();
-
   // 清空用户状态
-  userStore.logout();
+  userStores.logout();
 
   // 避免重复跳转
   if (router.currentRoute.value.path !== "/login") {
-    await router.replace({
+    await router.push({
       path: "/login",
       query: { redirect: router.currentRoute.value.fullPath }, // 保留跳转前路由
     });
@@ -85,9 +79,8 @@ const handleTokenExpired = async () => {
     message.warning("登录状态已过期，请重新登录");
   }
 };
-const handleTokenRefresh = async (originalRequest: AxiosRequestConfig) => {
+const handleTokenRefresh = async () => {
   const userStore = useUserStore();
-
   try {
     // 标记已重试
     // originalRequest._retry = true;
@@ -96,16 +89,17 @@ const handleTokenRefresh = async (originalRequest: AxiosRequestConfig) => {
     // const { data } = await useAxios.post("/auth/refresh", {
     //   refresh_token: userStore.refreshToken,
     // });
-
     // 1. 尝试刷新 Token
     const newToken = await refreshAToken(userStore.currentUser.rtoken);
-
+    if (newToken.data.code === -20000) {
+      return false;
+    }
     // 2. 更新存储的 Token
     userStore.setRtoken(newToken.data.rtoken);
     userStore.setAtoken(newToken.data.atoken);
+    await userStore.setCurrentUser(userStore.currentUser);
     // 重试原始请求
-    originalRequest.headers.Authorization = `${newToken.data.atoken}`;
-    return useAxios(originalRequest);
+    return true;
   } catch (error) {
     // 刷新失败时强制跳转
     await handleTokenExpired();
@@ -116,7 +110,9 @@ const handleTokenRefresh = async (originalRequest: AxiosRequestConfig) => {
 const shouldHandleTokenExpired = (response: AxiosResponse) => {
   return (
     response.status === 401 || // HTTP 标准状态码
-    (response.data?.code === -20000 && response.data?.message === "token已过期") // 业务自定义状态码
+    (response.data?.code === -20000 &&
+      response.data?.message === "token已过期") ||
+    (response.data?.code === 10001 && response.data?.message === "参数无效") // 业务自定义状态码
   );
 };
 // // 响应拦截器统一处理逻辑
