@@ -323,6 +323,7 @@ onUnmounted(() => {
     height: 86vh;
     width: 25vw;
     background-color: rgb(255, 255, 255);
+    background-image: none;
     border-radius: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 
@@ -331,7 +332,7 @@ onUnmounted(() => {
       width: 90%;
       height: 75%;
       margin: 5% auto;
-      background: white;
+      background-color: rgb(255, 255, 255, 0%);
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);

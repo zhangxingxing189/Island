@@ -2,7 +2,7 @@ import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 // import {useStore} from "@/stores";
 import { message } from "ant-design-vue";
 import { useUserStore } from "@/stores/user";
-import { refreshAToken } from "./loginApi";
+import { refreshAToken, isRefreshRequest } from "./loginApi";
 import router from "@/router";
 import { login } from "@/pages/home/UIFunction";
 export const useAxios = axios.create({
@@ -33,18 +33,23 @@ useAxios.interceptors.response.use(
       return response.data;
     }
     const originalRequest = response.config;
+    console.log(originalRequest.url);
     // Token 过期处理（兼容 HTTP 401 和业务错误码）
-    if (shouldHandleTokenExpired(response)) {
+    if (
+      shouldHandleTokenExpired(response) &&
+      originalRequest.url !== "/api/common/token"
+    ) {
       try {
         console.log("*******************************");
         const res = await handleTokenRefresh();
         console.log("-------------------------------");
+        // console.log(res);
         if (res === false) {
           await handleTokenExpired(); // 🔴 统一跳转处理
           return Promise.reject(new Error("token过期,需要重新登陆"));
         } else {
           originalRequest.headers.Authorization = `${userStores.currentUser.atoken}`;
-          console.log("newAToken:" + userStores.currentUser.atoken);
+          // console.log("newAToken:" + userStores.currentUser.atoken);
           return await useAxios.request(originalRequest);
         }
       } catch (refreshError) {
@@ -91,6 +96,7 @@ const handleTokenRefresh = async () => {
     // });
     // 1. 尝试刷新 Token
     const newToken = await refreshAToken(userStore.currentUser.rtoken);
+    // console.log(newToken);
     if (newToken.data.code === -20000) {
       return false;
     }

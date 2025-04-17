@@ -143,7 +143,9 @@ onMounted(async () => {
     };
     IslandsPoint;
     keys;
-
+    screenWidth = window.innerWidth;
+    screenHeight = window.innerHeight;
+    baseUIScale = 0.2;
     preload() {
       // this.load.image("logo", "/images/login.png");
 
@@ -307,7 +309,7 @@ onMounted(async () => {
 
       // 添加鼠标滚轮缩放功能
       this.cameraZoom(); //待修复
-      // this.add.image(0, 0, "logo");
+
       this.islandGroup = this.physics.add.staticGroup();
       for (const key in this.Islands.islandMsg) {
         console.log(this.Islands.islandMsg[key].islandName);
@@ -731,7 +733,7 @@ onMounted(async () => {
         const component = module[uiMapKey];
         uiImage.on("pointerdown", component);
       }
-
+      // this.scale.on("resize", this.updateUIPosition, this);
       // for (let i = 0; i < this.uiList.length; i++) {
       //   let uiImage = this.add.sprite(
       //     uiX - this.uiPadding.x,
@@ -758,7 +760,24 @@ onMounted(async () => {
       //   uiImage.on("pointerdown", component);
       // }
     }
+    // 新增方法：处理UI位置更新 =========================
+    private updateUIPosition() {
+      // 更新屏幕尺寸记录
+      this.screenWidth = window.innerWidth;
+      this.screenHeight = window.innerHeight;
+      let currentX = window.innerWidth - this.uiPadding.x - this.uiPadding.x;
+      const startY = this.uiPadding.y + this.uiPadding.y;
+      // 重新定位UI层到右上角
+      this.uiLayer.setPosition(currentX, startY);
 
+      // 更新所有UI元素的缩放补偿
+      // this.uiLayer.each((child: Phaser.GameObjects.Image) => {
+      //   child.setScale(
+      //     this.baseUIScale / this.zoomLevel,
+      //     this.baseUIScale / this.zoomLevel
+      //   );
+      // }, this);
+    }
     cameraZoom() {
       this.input.on("wheel", (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
         if (
@@ -775,6 +794,8 @@ onMounted(async () => {
 
           // 应用缩放
           this.cameras.main.setZoom(this.zoomLevel);
+
+          // this.updateUIPosition();
         }
       });
     }

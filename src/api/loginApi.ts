@@ -41,6 +41,9 @@ export async function refreshAToken(rtokens: string) {
     token: rtokens,
   });
 }
+export function isRefreshRequest(config) {
+  return !!config.__isRefreshToken ? config.__isRefreshToken : false;
+}
 export function getUserInfo(id: number) {
   return useAxios.get("/api/common/user", {
     params: {
