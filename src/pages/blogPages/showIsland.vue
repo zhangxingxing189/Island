@@ -17,7 +17,7 @@
     <!-- 主展示区域 -->
     <div v-else class="gallery-container">
       <h1 class="gallery-title">梦幻岛屿图鉴</h1>
-      <h1 class="h1-title">现在所在岛屿: {{ nowIslandName }}</h1>
+      <h1 class="h1-title">所在岛屿: {{ nowIslandName }}</h1>
       <div class="island-grid">
         <div
           v-for="island in islands"
@@ -152,12 +152,14 @@ onMounted(() => {
 .gallery-title {
   text-align: center;
   font-size: 2.5em;
-  color: #1890ff;
+  color: #ff6b6b;
   margin-bottom: 40px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 .h1-title {
-  padding: 20px;
+  font-size: 1.2em;
+  text-align: center;
+  color: #1890ff;
 }
 .island-grid {
   display: grid;
