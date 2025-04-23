@@ -6,9 +6,9 @@
         <div class="banner-container">
           <!--        <div class="cover-upload">点击上传封面</div>-->
           <img
-            class="adaptive-image"
-            src="http://118.31.119.216:8080/uploads/ba3f3138bb3d09039baffbd2dc8bab0c.jpeg"
-            alt="点击上传封面"
+              class="adaptive-image"
+              src="http://118.31.119.216:8080/uploads/ba3f3138bb3d09039baffbd2dc8bab0c.jpeg"
+              alt="点击上传封面"
           />
         </div>
         <div class="profile">
@@ -34,10 +34,10 @@
           <nav class="navigation">
             <ul class="nav-list">
               <li
-                v-for="tab in tabs"
-                :key="tab.id"
-                :class="{ active: activeTab === tab.id }"
-                @click="activeTab = tab.id"
+                  v-for="tab in tabs"
+                  :key="tab.id"
+                  :class="{ active: activeTab === tab.id }"
+                  @click="activeTab = tab.id"
               >
                 {{ tab.name }}
               </li>
@@ -53,14 +53,14 @@
                 暂无关注用户
               </div>
               <div
-                v-for="item in followList"
-                :key="item.user_id"
-                class="follow-item"
+                  v-for="item in followList"
+                  :key="item.user_id"
+                  class="follow-item"
               >
                 <img
-                  :src="item.avatar || '/default-avatar.png'"
-                  class="follow-avatar"
-                  alt="用户头像"
+                    :src="item.avatar || '/default-avatar.png'"
+                    class="follow-avatar"
+                    alt="用户头像"
                 />
                 <div class="follow-info">
                   <h4 class="follow-name">{{ item.username }}</h4>
@@ -76,17 +76,17 @@
                 暂无发表文章
               </div>
               <div
-                v-for="article in articleList"
-                :key="article.id"
-                class="article-item"
+                  v-for="article in articleList"
+                  :key="article.id"
+                  class="article-item"
               >
                 <div class="article-cover" v-if="article.cover">
                   <img :src="article.cover" alt="文章封面" />
                 </div>
                 <div class="article-content">
                   <router-link
-                    :to="`/island/article/${article.id}`"
-                    class="article-title"
+                      :to="`/island/article/${article.id}`"
+                      class="article-title"
                   >
                     {{ article.title }}
                   </router-link>
@@ -94,15 +94,15 @@
 
                   <div class="article-meta">
                     <el-button @click.stop="showDeleteDialog(article.id)"
-                      >删除</el-button
+                    >删除</el-button
                     >
                     <span class="digg-count">❤️ {{ article.digg_count }}</span>
                     <span class="collect-count"
-                      >⭐ {{ article.collect_count }}</span
+                    >⭐ {{ article.collect_count }}</span
                     >
                     <time class="create-time">{{
-                      formatDate(article.created_at)
-                    }}</time>
+                        formatDate(article.created_at)
+                      }}</time>
                   </div>
                 </div>
               </div>
@@ -113,40 +113,40 @@
                 暂无收藏内容
               </div>
               <div
-                v-for="item in collectList"
-                :key="item.id"
-                class="article-item"
+                  v-for="item in collectList"
+                  :key="item.id"
+                  class="article-item"
               >
                 <div class="article-cover" v-if="item.cover">
                   <img :src="item.cover" alt="文章封面" />
                 </div>
                 <div class="article-content">
                   <router-link
-                    :to="`/island/article/${item.id}`"
-                    class="article-title"
+                      :to="`/island/article/${item.id}`"
+                      class="article-title"
                   >
                     {{ item.title }}
                   </router-link>
                   <p class="article-abstract">{{ item.abstract }}</p>
                   <div class="article-meta">
                     <el-button @click.stop="showUncollectDialog(item.id)"
-                      >取消收藏</el-button
+                    >取消收藏</el-button
                     >
                     <span class="digg-count">❤️ {{ item.digg_count }}</span>
                     <span class="collect-count"
-                      >⭐ {{ item.collect_count }}</span
+                    >⭐ {{ item.collect_count }}</span
                     >
                     <time class="create-time">{{
-                      formatDate(item.created_at)
-                    }}</time>
+                        formatDate(item.created_at)
+                      }}</time>
                   </div>
                 </div>
               </div>
             </template>
             <div
-              v-for="(item, index) in filteredDynamics"
-              :key="index"
-              class="dynamic-item"
+                v-for="(item, index) in filteredDynamics"
+                :key="index"
+                class="dynamic-item"
             >
               <div class="dynamic-header">
                 <span class="dynamic-type">{{ item.type }}</span>
@@ -156,9 +156,9 @@
               <p class="dynamic-content">
                 {{ item.showMore ? item.content : item.content.slice(0, 100) }}
                 <span
-                  v-if="item.content.length > 100"
-                  class="toggle-more"
-                  @click="item.showMore = !item.showMore"
+                    v-if="item.content.length > 100"
+                    class="toggle-more"
+                    @click="item.showMore = !item.showMore"
                 >
                   {{ item.showMore ? "收起" : "展开全文" }}
                 </span>
@@ -246,9 +246,9 @@
             </button>
           </template>
           <button
-            v-else
-            class="btn confirm-btn"
-            @click="showCustomDialog = false"
+              v-else
+              class="btn confirm-btn"
+              @click="showCustomDialog = false"
           >
             确定
           </button>
@@ -287,8 +287,8 @@ const handlePublish = () => {
 const formatDate = (isoString: string) => {
   const date = new Date(isoString);
   return `${date.getFullYear()}-${(date.getMonth() + 1)
-    .toString()
-    .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
+      .toString()
+      .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
 };
 // 类型定义
 interface UserInfo {
@@ -406,7 +406,7 @@ const dynamics = reactive<DynamicItem[]>([
     type: "关注了问题",
     title: "如何评价Vue3的Composition API？",
     content:
-      "Vue3的Composition API为开发者提供了更灵活的逻辑组织方式，相比Options API有以下优势...（此处省略200字）",
+        "Vue3的Composition API为开发者提供了更灵活的逻辑组织方式，相比Options API有以下优势...（此处省略200字）",
     time: "2024-02-21 14:30",
     showMore: false,
   },
@@ -436,7 +436,7 @@ const confirmDelete = async () => {
   try {
     await deleteArticle([deletingArticleId.value]);
     articleList.value = articleList.value.filter(
-      (a) => a.id !== deletingArticleId.value
+        (a) => a.id !== deletingArticleId.value
     );
     dialogTitle.value = "操作成功";
     dialogMessage.value = "文章已删除";
@@ -515,7 +515,7 @@ const handleUncollect = async () => {
   try {
     await collectArticle({ article_id: deletingCollectId.value });
     collectList.value = collectList.value.filter(
-      (a) => a.id !== deletingCollectId.value
+        (a) => a.id !== deletingCollectId.value
     );
 
     dialogTitle.value = "操作成功";
@@ -548,7 +548,7 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
+<style>
 #personalCenter {
   height: 100%;
 }
