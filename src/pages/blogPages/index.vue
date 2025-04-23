@@ -8,6 +8,7 @@
           alt="Home"
           @click="goHome"
         />
+        <p>首页</p>
       </div>
       <div class="world">
         <img
@@ -16,6 +17,7 @@
           alt="world"
           @click="goWorld"
         />
+        <p>航海</p>
       </div>
       <div class="search-box">
         <input
@@ -220,6 +222,15 @@ body {
   z-index: 1000;
   justify-content: space-between;
 }
+.nav-bar .logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.nav-bar .logo p {
+  font-size: 12px;
+  transform: translateY(-1px);
+}
 
 .nav-bar .logo img {
   height: 40px;
@@ -229,6 +240,11 @@ body {
 .nav-bar .logo img:hover {
   transform: scale(1.05);
 }
+.nav-bar .world {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 .nav-bar .world img {
   border-radius: 50%;
   height: 40px;
@@ -237,6 +253,10 @@ body {
 
 .nav-bar .world img:hover {
   transform: scale(1.05);
+}
+.nav-bar .world p {
+  font-size: 12px;
+  transform: translateY(-1px);
 }
 .search-box {
   position: relative;

@@ -185,7 +185,7 @@ onBeforeMount(async () => {
             "arrow"
           )
           .setDepth(100)
-          .setScale(0.4)
+          .setScale(0.3)
           .setOrigin(0.5, 1); // 原点在底部中心
       } else {
         console.log("已经有箭头");
