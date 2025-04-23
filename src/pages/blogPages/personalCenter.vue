@@ -548,7 +548,7 @@ onMounted(() => {
 });
 </script>
 
-<style>
+<style scoped>
 #personalCenter {
   height: 100%;
 }

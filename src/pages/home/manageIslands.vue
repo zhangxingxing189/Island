@@ -43,6 +43,7 @@
           >
             编辑
           </button>
+          <button class="voyage-btn" @click="voyage(island.id)">导航</button>
         </div>
       </div>
     </div>
@@ -171,15 +172,14 @@ import { islandType, Island, putIsland } from "@/api/islandApi";
 import { getIslands, delIsland } from "@/api/islandApi";
 import { message, UploadProps } from "ant-design-vue";
 import { post_image } from "@/api/image";
-
 import { List } from "@/api/islandApi";
-
+import { useGameStore } from "@/stores/gameStore";
 // 响应式数据
 const islands = ref<List[]>([]);
 const loading = ref(true);
 const error = ref("");
 const deletingId = ref<string | null>(null);
-
+const voyage = useGameStore().startVoyage;
 // 初始化加载数据
 const loadIslands = async () => {
   try {
@@ -319,18 +319,15 @@ const submitEdit = async () => {
   right: 0;
   z-index: 9999;
   position: absolute;
-  max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
 
   /* 新增样式 */
-  background: white; /* 白色背景 */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* 可选添加阴影增加层次感 */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* 可选添加阴影增加层次感 */
   max-height: 60vh; /* 最大高度为视口的60% */
   overflow-y: auto; /* 垂直方向超出显示滚动条 */
 
   /* 建议补充 */
-  min-width: 30%; /* 确保容器宽度有效 */
   border-radius: 8px; /* 可选圆角 */
 }
 
@@ -479,5 +476,11 @@ const submitEdit = async () => {
 .button-group button[type="button"] {
   background-color: #6c757d;
   color: white;
+}
+.edit-btn {
+  margin-left: 10px;
+}
+.voyage-btn {
+  margin-left: 30px;
 }
 </style>

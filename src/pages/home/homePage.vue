@@ -28,7 +28,7 @@ import Phaser from "phaser";
 import { Island, IslandType } from "@/api/islandApi";
 import { message, Spin } from "ant-design-vue";
 import router from "@/router";
-import { onMounted, onUnmounted, ref } from "vue";
+import { onBeforeMount, onMounted, onUnmounted, ref } from "vue";
 import { useIslandStore } from "@/stores/getIslands";
 import { useUserStore } from "@/stores/user";
 import {
@@ -39,6 +39,7 @@ import {
 } from "@/pages/home/UIFunction";
 import createIsland from "@/pages/home/createIsland.vue";
 import ManageIslands from "@/pages/home/manageIslands.vue";
+import { useGameStore } from "@/stores/gameStore";
 let module;
 // 响应式状态
 const loading = ref(true);
@@ -85,7 +86,7 @@ function intoIsland(islandId: string, islandName: string) {
     },
   });
 }
-onMounted(async () => {
+onBeforeMount(async () => {
   // console.log("start");
   await preLoad(); //这里start比preload快导致没加载到
   // console.log(islandStore.islandData);
@@ -102,17 +103,17 @@ onMounted(async () => {
       wedPath: userStore.currentUser.avatar
         ? userStore.currentUser.avatar
         : "http://118.31.119.216:8080/uploads/9d021d52cb27c6db74d4fc845cce98ea.png",
-      // ,
+      name: "管理岛屿",
     },
     map: {
       id: "1903751006844358656",
       wedPath:
         "http://118.31.119.216:8080/uploads/1705121ad471817d0ac2002626f7c0ba.png",
+      name: "创建岛屿",
     },
   };
-  const point = ref({ x: 0, y: 0 });
-
-  class Scene extends Phaser.Scene {
+  class myScene extends Phaser.Scene {
+    static key = "MyScene";
     tiles = [0, 1];
     mapHeight = 4; // 每个地图块的高度（以瓦片为单位）
     mapWidth = 4; // 每个地图块的宽度（以瓦片为单位）
@@ -146,9 +147,130 @@ onMounted(async () => {
     screenWidth = window.innerWidth;
     screenHeight = window.innerHeight;
     baseUIScale = 0.2;
-    preload() {
-      // this.load.image("logo", "/images/login.png");
+    navigationArrow: Phaser.GameObjects.Sprite | null = null;
+    navigationText: Phaser.GameObjects.Text | null = null;
+    closeButton: Phaser.GameObjects.Image | null = null;
+    isNavigating = false;
+    targetIsland: { x: number; y: number; name: string };
+    // 导航函数
+    startNavigation(islandId: string) {
+      if (
+        (this.navigationArrow && this.navigationArrow.scene !== undefined) ||
+        (this.navigationText && this.navigationText.scene !== undefined) ||
+        (this.closeButton && this.closeButton.scene !== undefined)
+      ) {
+        this.clearNavigation();
+      }
+      // 1. 查找目标岛屿
+      const target = this.Islands.islandMsg[islandId];
+      if (!target) {
+        message.error("未找到该岛屿");
+        return;
+      }
 
+      // 2. 初始化导航状态
+      this.isNavigating = true;
+      this.targetIsland = {
+        x: target.x,
+        y: target.y,
+        name: target.islandName,
+      };
+
+      if (!this.navigationArrow || this.navigationArrow.scene === undefined) {
+        // 3. 创建箭头
+        this.navigationArrow = this.add
+          .sprite(
+            this.cameras.main.width / 2,
+            this.cameras.main.height / 2,
+            "arrow"
+          )
+          .setDepth(100)
+          .setScale(0.4)
+          .setOrigin(0.5, 1); // 原点在底部中心
+      } else {
+        console.log("已经有箭头");
+        // this.clearNavigation();
+      }
+
+      // 4. 创建导航文本
+      if (!this.navigationText || this.navigationText.scene === undefined) {
+        // console.log(this.targetIsland.name);
+        this.navigationText = this.add
+          .text(
+            this.cameras.main.width / 2,
+            50,
+            `导航至：${this.targetIsland.name}`,
+            {
+              fontSize: "24px",
+              color: "#ffffff",
+              backgroundColor: "rgba(0,0,0,0.7)",
+              padding: { x: 20, y: 10 },
+            }
+          )
+          .setDepth(100)
+          .setScrollFactor(0)
+          .setOrigin(0.5, 0);
+      } else {
+        console.log("已经有文本");
+        // this.clearNavigation();
+      }
+
+      // 5. 创建关闭按钮
+      if (!this.closeButton || this.closeButton.scene === undefined) {
+        this.closeButton = this.add
+          .image(this.cameras.main.width / 2 + 120, 50, "close")
+          .setDepth(100)
+          .setScale(0.5)
+          .setScrollFactor(0)
+          .setInteractive()
+          .on("pointerdown", () => this.clearNavigation());
+      } else {
+        console.log("已经有关闭按钮");
+        // this.clearNavigation();
+      }
+
+      // 每帧更新箭头位置和方向
+      this.events.on("update", this.updateNavigation);
+    }
+
+    private updateNavigation = () => {
+      if (!this.isNavigating) return;
+
+      // 更新箭头位置（玩家脚下）
+      // 在这里，我们不是直接设置箭头到玩家脚下，而是让箭头围绕玩家中心点转动
+      const offsetDistance = 50; // 箭头围绕玩家转动的半径
+      const playerCenterX = this.player.x;
+      const playerCenterY = this.player.y;
+
+      // 计算方向角度
+      const angle = Phaser.Math.Angle.Between(
+        playerCenterX, // 使用玩家中心点的 x 坐标
+        playerCenterY, // 使用玩家中心点的 y 坐标
+        this.targetIsland.x,
+        this.targetIsland.y
+      );
+
+      // 计算箭头围绕玩家中心点的位置
+      const arrowX = playerCenterX + offsetDistance * Math.cos(angle);
+      const arrowY = playerCenterY + offsetDistance * Math.sin(angle);
+
+      this.navigationArrow.setPosition(arrowX, arrowY);
+
+      // 设置箭头旋转（弧度转角度）
+      this.navigationArrow.setRotation(angle + Math.PI / 2);
+    };
+
+    private clearNavigation() {
+      this.isNavigating = false;
+      this.navigationArrow?.destroy();
+      this.navigationText?.destroy();
+      this.closeButton?.destroy();
+      this.events.off("update", this.updateNavigation);
+      console.log("箭头引用状态:", this.navigationArrow.scene); // 预期输出 null
+      console.log("文本引用状态:", this.navigationText.scene); // 预期输出 null
+      console.log("按钮引用状态:", this.closeButton.scene); // 预期输出 null
+    }
+    preload() {
       this.load.image("tiles", resImages["tiles"].wedPath);
       this.load.spritesheet(
         "player",
@@ -203,20 +325,15 @@ onMounted(async () => {
           this.Islands.islandMsg[key].imageUrl
         );
       }
-      // this.IslandsPoint = this.Islands.islandPosition.map((island) => {
-      //   let x, y;
-      //   if (island.y < 0) {
-      //     y = -Math.ceil(-island.y);
-      //   } else {
-      //     y = Math.ceil(island.y);
-      //   }
-      //   if (island.x < 0) {
-      //     x = -Math.ceil(-island.x);
-      //   } else {
-      //     x = Math.ceil(island.x);
-      //   }
-      //   return { id: island.id, x: x, y: y };
-      // });
+      // 添加导航相关资源
+      this.load.image(
+        "arrow",
+        "http://118.31.119.216:8080/uploads/12ba34f5daa1630c09c6854d9feb0b11.png"
+      );
+      this.load.image(
+        "close",
+        "http://118.31.119.216:8080/uploads/65243f43f5090df0c27c38fd374dd698.png"
+      );
     }
     handleIslandCollision(
       player: Phaser.Types.Physics.Arcade.GameObjectWithBody,
@@ -312,22 +429,40 @@ onMounted(async () => {
 
       this.islandGroup = this.physics.add.staticGroup();
       for (const key in this.Islands.islandMsg) {
-        console.log(this.Islands.islandMsg[key].islandName);
+        // console.log(this.Islands.islandMsg[key].islandName);
         let island = this.Islands.islandMsg[key];
         const islandStatic = this.islandGroup.create(
           island.x,
           island.y,
           island.islandName
         ) as Phaser.Physics.Arcade.Image;
+        // 初始化岛屿属性
         islandStatic.setInteractive();
         islandStatic.setData("id", key);
         islandStatic.setData("name", island.islandName);
         islandStatic.setDepth(20);
-        // islandStatic.on("pointerdown", () => {
-        //   intoIsland(key, island.islandName);
-        // });
-        // islandStatic.body?.setSize(island.imageWidth, island.imageHeight, true);
-        // 设置碰撞体（仅下半部分）
+
+        const nameText = this.add.text(
+          islandStatic.x - 50, // 根据文本长度适当调整
+          islandStatic.y - islandStatic.height / 2 - 20, // 固定在岛屿上方
+          island.islandName,
+          {
+            fontSize: "20px",
+            color: "#ffffff",
+            fontFamily: "Arial",
+            stroke: "#000000",
+            strokeThickness: 3,
+          }
+        );
+        nameText.setAlpha(1); // 直接显示
+        nameText.setDepth(100);
+        nameText.setVisible(true);
+        islandStatic.setData("nameText", nameText);
+        // console.log(key);
+        islandStatic.on("pointerdown", () => {
+          console.log("click", key);
+          this.startNavigation(key);
+        });
         islandStatic.body
           .setSize(10, 10, true)
           .setOffset(island.imageHeight / 2, island.imageHeight / 2);
@@ -335,11 +470,6 @@ onMounted(async () => {
         islandStatic.setImmovable(false);
         this.time.delayedCall(0, () => {
           islandStatic.refreshBody();
-          console.log("碰撞体参数", {
-            // size: islandStatic.body!.size,
-            offset: islandStatic.body!.offset,
-            center: islandStatic.body!.center,
-          });
         });
       }
       // this.islandGroup.body.setSize(100, 100, true);
@@ -361,12 +491,17 @@ onMounted(async () => {
       };
       // console.log(this.NowPoint);
       this.updateCameraBounds();
-      console.log(
-        `Camera Bounds: ${this.cameras.main.getBounds().toString()}`,
-        `Player Position: ${this.player.x.toFixed(1)}, ${this.player.y.toFixed(
-          1
-        )}`
-      );
+      // console.log(
+      //   `Camera Bounds: ${this.cameras.main.getBounds().toString()}`,
+      //   `Player Position: ${this.player.x.toFixed(1)}, ${this.player.y.toFixed(
+      //     1
+      //   )}`
+      // );
+      if (gameStore.flag === true) {
+        this.startNavigation(gameStore.currentVoyage);
+        gameStore.flag = false;
+      }
+      console.log(gameStore.flag);
     }
 
     generateMap(offsetX, offsetY) {
@@ -599,11 +734,11 @@ onMounted(async () => {
       this.player.setFlipX(needFlip);
 
       if (this.player.anims.currentAnim?.key !== targetAnim) {
-        console.log("into");
+        // console.log("into");
         if (targetAnim === "stop") {
           this.player.anims.playAfterRepeat("stop"); // 更自然的停止过渡
         } else {
-          console.log("start");
+          // console.log("start");
           this.player.anims.play(targetAnim, true);
         }
       }
@@ -626,7 +761,7 @@ onMounted(async () => {
         "player"
       );
 
-      this.player.setDepth(10);
+      this.player.setDepth(101);
       // this.player.setCollideWorldBounds(true);
       this.player.body?.setSize(32, 48).setOffset(16, 16);
       // 设置角色动画
@@ -717,8 +852,9 @@ onMounted(async () => {
         const uiImage = this.add
           .image(currentX, startY, uiMapKey)
           .setInteractive()
-          .setDepth(1001) // 单独设置更高层级
-          .setScrollFactor(0); // 禁止随相机滚动
+          .setDepth(1001); // 单独设置更高层级
+        // .setScrollFactor(0) // 禁止随相机滚动
+        // .setData("name", uiMap[uiMapKey].name);
 
         // 动态调整尺寸
         const scaleRatio = 50 / uiImage.width;
@@ -732,6 +868,64 @@ onMounted(async () => {
         // 绑定交互事件
         const component = module[uiMapKey];
         uiImage.on("pointerdown", component);
+        // 创建文本对象并隐藏
+        const nameText = this.add.text(
+          currentX,
+          startY + 30,
+          uiMap[uiMapKey].name,
+          {
+            fontSize: "20px",
+            color: "#ffffff",
+            fontFamily: "Arial",
+            stroke: "#000000",
+            strokeThickness: 3,
+          }
+        );
+        nameText.setAlpha(0); // 初始完全透明
+        nameText.setDepth(100); // 确保在顶层
+        nameText.setVisible(false);
+
+        // 存储文本引用到岛屿对象
+        uiImage.setData("text", nameText);
+        uiImage.setData("currentX", currentX);
+        // 鼠标悬停事件
+        uiImage.on("pointerover", () => {
+          const text = uiImage.getData("text") as Phaser.GameObjects.Text;
+
+          // 停止之前的动画
+          this.tweens.killTweensOf(text);
+
+          // 更新文本位置（跟随岛屿中心）
+          text.setPosition(uiImage.getData("currentX"), startY + 30);
+
+          // 显示并渐入
+          text.setVisible(true);
+          this.tweens.add({
+            targets: text,
+            alpha: 1,
+            duration: 300,
+            ease: "Power2",
+          });
+        });
+
+        // 鼠标移出事件
+        uiImage.on("pointerout", () => {
+          const text = uiImage.getData("text") as Phaser.GameObjects.Text;
+
+          // 停止之前的动画
+          this.tweens.killTweensOf(text);
+
+          // 渐出后隐藏
+          this.tweens.add({
+            targets: text,
+            alpha: 0,
+            duration: 200,
+            ease: "Power2",
+            onComplete: () => {
+              text.setVisible(false);
+            },
+          });
+        });
       }
       // this.scale.on("resize", this.updateUIPosition, this);
       // for (let i = 0; i < this.uiList.length; i++) {
@@ -806,7 +1000,7 @@ onMounted(async () => {
     width: window.innerWidth,
     height: window.innerHeight,
     parent: "phaser-example",
-    scene: Scene,
+    scene: [myScene],
     physics: {
       default: "arcade",
       arcade: {
@@ -817,10 +1011,12 @@ onMounted(async () => {
       },
     },
   };
-
   game = new Phaser.Game(config);
+  const scene = game.scene;
+  console.log(scene);
+  // scene("1904173695555866624");
+  gameStore.registerGameInstance(game);
 });
-let game = null;
 onUnmounted(() => {
   if (game) {
     game.destroy(true);
@@ -836,9 +1032,11 @@ document.addEventListener("visibilitychange", () => {
     game.resume();
   }
 });
+let game = null;
+const gameStore = useGameStore();
 </script>
 
-<style>
+<style scoped>
 #phaser-example {
   overflow: hidden;
 }
