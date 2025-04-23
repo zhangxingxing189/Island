@@ -185,8 +185,7 @@ const showHint = ref(false);
     justify-content: space-between;
     align-items: center;
     border-radius: 10px;
-
-    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.42);
     box-shadow: 2px 2px 4px #6c6c6c;
     .left {
       width: 60%;
